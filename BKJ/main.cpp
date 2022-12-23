@@ -1,18 +1,16 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <queue>
 using namespace std;
 
-int N, M, X;
+int N, M, S, D;
 int MAX = 1000000000;
 
-int vecCost[1001];
-int revCost[1001];
+int cost[1001];
+int parent[1001];
 
-vector<pair<int, int>> vec[10001];
-vector<pair<int, int>> rev[10001];
-
-void dijkstra(vector<pair<int, int>> v[], int cost[],  int start)
+void dijkstra(vector<pair<int, int>> v[], int start)
 {
 	cost[start] = 0;
 	priority_queue<pair<int, int>> pq;
@@ -20,52 +18,79 @@ void dijkstra(vector<pair<int, int>> v[], int cost[],  int start)
 
 	while (!pq.empty())
 	{
-		int current = pq.top().second ;
+		int currNode = pq.top().second ;
 		int currDist = -pq.top().first;
 		pq.pop();
 
-		if (cost[current] < currDist) continue;
-		for (int i = 0; i < v[current].size(); i++)
+		if (cost[currNode] < currDist) continue;
+		for (int i = 0; i < v[currNode].size(); i++)
 		{
-			int next = v[current][i].second - 1;
-			int nextDist = currDist + v[current][i].first;
-			if (cost[next] > nextDist)
+			int nextNode = v[currNode][i].second;
+			int nextDist = currDist + v[currNode][i].first;
+			
+
+			if (cost[nextNode] > nextDist)
 			{
-				cost[next] = nextDist;
-				pq.push(make_pair(-cost[next], next));
+				parent[nextNode] = currNode;
+				cost[nextNode] = nextDist;
+				pq.push(make_pair(-cost[nextNode], nextNode));
 ;			}
+
 		}
 	}
 
 }
 
+
+
+void EraseEdge(vector<pair<int, int>> v[], int pos)
+{
+	int pre = parent[pos];
+	while (pre > MAX)
+	{
+		auto it = find_if(v[pre].begin(), v[pre].end(), [pos](pair<int, int> it) {return it.second == pos;});
+
+		if (it == v[pre].end()) return;
+			
+		v[pre].erase(it);
+		int temp = pre;
+		pre = parent[pre];
+		pos = pre;
+	}
+}
+
 int main()
 {
-	cin >> N >> M >> X;
 
-	fill(vecCost, vecCost + N, MAX);
-	fill(revCost, revCost + N, MAX);
-
-	for (int i = 0; i < M; i++)
+	while (true)
 	{
-		int s, d, c;
-		cin >> s >> d >> c;
-		vec[s - 1].push_back(make_pair(c, d));
-		rev[d - 1].push_back(make_pair(c, s));
+		cin >> N >> M;
+		if (N == 0 && M == 0)
+			break;
+
+		vector<pair<int, int>> v[10001];
+
+		fill(parent, parent + 100, MAX);
+		fill(cost, cost + 100, MAX);
+
+		cin >> S >> D;
+
+		for (int i = 0; i < M; i++)
+		{
+			int s, d, c;
+			cin >> s >> d >> c;
+			v[s].push_back(make_pair(c, d));
+		}
+		dijkstra(v, S);
+		EraseEdge(v, D);
+
+		fill(cost, cost + 100, MAX);
+		dijkstra(v, S);
+
+		cout << cost[D] << "\n";
 	}
+	int a = 5;
 
-	dijkstra(vec, vecCost, X - 1);
-	dijkstra(rev, revCost, X - 1);
-
-
-	int max = 0;
-	for (int i = 0; i < N; i++)
-	{
-		if (max < vecCost[i] + revCost[i])
-			max = vecCost[i] + revCost[i];
-	}
-
-	cout << max;
 
 	return 0;
 }
