@@ -14,8 +14,9 @@ int parent[1001];
 
 bool path[1001][1001];
 
+int leastCost = MAX;
 
-void addPath(int parent[])
+void addPath()
 {
 	int current = D;
 	int pre = parent[D];
@@ -51,9 +52,10 @@ void dijkstra(vector<pair<int, int>> v[])
 			if (path[currNode][nextNode])continue;
 			
 
-			if (cost[nextNode] > nextDist)
+			if (cost[nextNode] >= nextDist)
 			{
 				parent[nextNode] = currNode;
+				if (nextNode == D && nextDist == leastCost) addPath();
 				cost[nextNode] = nextDist;
 				pq.push(make_pair(-cost[nextNode], nextNode));
 ;			}
@@ -126,6 +128,13 @@ int main()
 			v[s].push_back(make_pair(c, d));
 		}
 
+		dijkstra(v);
+
+		leastCost = cost[D];
+		fill(cost, cost + N, MAX);
+		dijkstra(v);
+
+		fill(cost, cost + N, MAX);
 		dijkstra(v);
 
 		int result = cost[D] == MAX ? -1 : cost[D];
