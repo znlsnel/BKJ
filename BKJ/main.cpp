@@ -2,34 +2,35 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
-#include <map>
-#include <list>
+
 using namespace std;
+
+vector<pair<int, int>> v[100001];
 
 int N, M, S, D;
 int MAX = 1000000000;
 
 int cost[1001];
-int parent[1001];
 
-bool path[1001][1001];
 
-int leastCost = MAX;
+vector<int> parent[1001];
 
-void addPath()
+bool path[501][5001];
+
+bool  isSecond = false;
+
+
+
+void addPath(int curr)
 {
-	int current = D;
-	int pre = parent[D];
 
-	while (pre != MAX)
+	for (int pre : parent[curr])
 	{
-		path[pre][current] = true;
-
-		int temp = pre;
-		pre = parent[pre];
-		current = temp;
+		path[pre][curr] = true;
+		addPath(pre);
 	}
 }
+
 
 void dijkstra(vector<pair<int, int>> v[])
 {
@@ -44,80 +45,56 @@ void dijkstra(vector<pair<int, int>> v[])
 		pq.pop();
 
 		if (cost[currNode] < currDist) continue;
-		for (int i = 0; i < v[currNode].size(); i++)
+
+
+		for (auto a : v[currNode])
 		{
-			int nextNode = v[currNode][i].second;
-			int nextDist = currDist + v[currNode][i].first;
+			int nextNode = a.second;
+			int nextDist = currDist + a.first;
 
-			if (path[currNode][nextNode])continue;
-			
+			if (isSecond && path[currNode][nextNode]) continue;
 
-			if (cost[nextNode] >= nextDist)
+			if (cost[nextNode] == nextDist)
 			{
-				parent[nextNode] = currNode;
-				if (nextNode == D && nextDist == leastCost) addPath();
+				parent[nextNode].push_back(currNode);
+			}
+
+			else if (cost[nextNode] > nextDist)
+			{
+				parent[nextNode].clear();
+				parent[nextNode].push_back(currNode);
+				
 				cost[nextNode] = nextDist;
 				pq.push(make_pair(-cost[nextNode], nextNode));
-;			}
 
+			}
 		}
 	}
+	if (!isSecond) addPath(D);
 
 }
 
 
-// 굳이 지울필요가 있을까!?  --- 핵심 point
-void EraseEdge(vector<pair<int, int>> v[], int dest)
-{
-	int end = dest;
-	int leastCost = cost[end];
-	int pre = parent[end];
-	int currCost = leastCost;
 
-	while (pre < MAX)
-	{
-		int a = end;
-		auto it = find_if(v[pre].begin(), v[pre].end(), [a](pair<int, int> it) {return it.second == a;});
-
-		if (it == v[pre].end()) return;
-
-		v[pre].erase(it);
-		int temp = pre;
-		pre = parent[pre];
-		end = temp;
-
-		// TODO 
-		// vector의 경우 find_if 랑 erase의 속도가 O(N)이기 때문에 개선이 필요함
-		//  deque의 경우 erase는 괜찮지만 find_if는 안됨
-		
-	}
-
-	
-	fill(cost, cost + N, MAX);
-	dijkstra(v);
-	currCost = cost[dest];
-	
-	if (currCost == leastCost)
-		EraseEdge(v, dest);
-	
-}
 
 int main()
 {
+	vector<int> rv;
 
 	while (true)
 	{
 		cin >> N >> M;
 		if (N == 0 && M == 0)
 			break;
-		
-		vector<pair<int, int>> v[10001];
-		
-		fill(parent, parent + N, MAX);
-		fill(cost, cost + N, MAX);
 
 		for (int i = 0; i < N; i++)
-			fill(path[i], path[i] + N, false);
+			v[i].clear();
+
+		isSecond = false;
+		std::fill(cost, cost + N, MAX);
+
+		for (int i = 0; i < N; i++)
+			std::fill(path[i], path[i] + N, false);
 
 		cin >> S >> D;
 
@@ -128,20 +105,21 @@ int main()
 			v[s].push_back(make_pair(c, d));
 		}
 
+		// 최단 경로 탐색
+		// 최단 경로 지우기
 		dijkstra(v);
 
-		leastCost = cost[D];
-		fill(cost, cost + N, MAX);
-		dijkstra(v);
-
-		fill(cost, cost + N, MAX);
+		// 거의 최단 경로 탐색
+		std::fill(cost, cost + N, MAX);
+		isSecond = true;
 		dijkstra(v);
 
 		int result = cost[D] == MAX ? -1 : cost[D];
-		cout << result << "\n";
+		rv.push_back(result);
 	}
-	
 
+	for (auto a : rv)
+		cout << a << "\n";
 
 	return 0;
 }
