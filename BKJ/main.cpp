@@ -5,29 +5,33 @@
 
 using namespace std;
 
-vector<pair<int, int>> v[100001];
-
 int N, M, S, D;
 int MAX = 1000000000;
+
+
+
+vector<int> parent[501];
+
+bool path[501][501];
+bool  isSecond = false;
 
 int cost[1001];
 
 
-vector<int> parent[1001];
-
-bool path[501][5001];
-
-bool  isSecond = false;
-
-
-
+queue<int> q;
 void addPath(int curr)
 {
+	q.push(curr);
 
-	for (int pre : parent[curr])
+	while (!q.empty())
 	{
-		path[pre][curr] = true;
-		addPath(pre);
+		int child = q.front();
+		q.pop();
+		for (int pre : parent[child])
+		{
+			path[pre][child] = true;
+			q.push(pre);
+		}
 	}
 }
 
@@ -52,7 +56,7 @@ void dijkstra(vector<pair<int, int>> v[])
 			int nextNode = a.second;
 			int nextDist = currDist + a.first;
 
-			if (isSecond && path[currNode][nextNode]) continue;
+			if (path[currNode][nextNode]) continue;
 
 			if (cost[nextNode] == nextDist)
 			{
@@ -76,32 +80,30 @@ void dijkstra(vector<pair<int, int>> v[])
 
 
 
-
 int main()
 {
 	vector<int> rv;
 
 	while (true)
 	{
-		cin >> N >> M;
+		std::cin >> N >> M;
 		if (N == 0 && M == 0)
 			break;
 
-		for (int i = 0; i < N; i++)
-			v[i].clear();
-
+		vector<pair<int, int>> v[10001];
 		isSecond = false;
-		std::fill(cost, cost + N, MAX);
 
 		for (int i = 0; i < N; i++)
 			std::fill(path[i], path[i] + N, false);
 
-		cin >> S >> D;
+		std::fill(cost, cost + N, MAX);
 
+
+		std::cin >> S >> D;
 		for (int i = 0; i < M; i++)
 		{
 			int s, d, c;
-			cin >> s >> d >> c;
+			std::cin >> s >> d >> c;
 			v[s].push_back(make_pair(c, d));
 		}
 
