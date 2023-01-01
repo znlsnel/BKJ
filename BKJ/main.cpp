@@ -1,85 +1,141 @@
-#include <cstdio>
-#include <cstring>
-#include <queue>
+#include <iostream>
 #include <vector>
-#define INF 500000001
-#define pii pair<int,int>
+#include <algorithm>
+#include <queue>
+#define edge pair<int, int>
+#define MAX 500000001
 using namespace std;
 
-int n, m, s, d;
-vector<vector<pii>> g;
-vector<vector<int>> prv;
-bool check[501][501];
+int N, M, S, D;
 
-bool input() {
-	g.clear(); prv.clear();
-	scanf("%d%d", &n, &m);
-	if (!n && !m)return false;
-	memset(check, false, sizeof check);
+vector<vector<edge>> v;
 
-	scanf("%d%d", &s, &d);
-	g = vector<vector<pii>>(n + 1);
+bool path[501][501];
+bool  isSecond = false;
 
-	for (int i = 0, u, v, p; i < m; i++) {
-		scanf("%d%d%d", &u, &v, &p);
-		g[u].push_back(make_pair(p, v));
+
+void addPath(vector<vector<int>> &parent, int curr)
+{
+	queue<int> q;
+	q.push(curr);
+
+	while (!q.empty())
+	{
+		int child = q.front();
+		q.pop();
+		for (int pre : parent[child])
+		{
+			if (path[pre][child]) continue;
+			path[pre][child] = true;
+			q.push(pre);
+		}
+	}
+}
+
+
+
+void addPath2(vector<vector<int>>& parent, int curr)
+{
+	for (int pre : parent[curr])
+	{
+		if (path[pre][curr]) continue;
+		path[pre][curr] = true;
+		addPath2(parent, pre);
+	}
+	
+	
+}
+
+int dijkstra()
+{
+	vector<int> cost(N + 1, MAX);
+	vector<vector<int>> parent(N + 1);
+
+	cost[S] = 0;
+	priority_queue<edge> pq;
+	pq.push(make_pair(0, S));
+
+	while (!pq.empty())
+	{
+		int currNode = pq.top().second;
+		int currDist = -pq.top().first;
+		pq.pop();
+
+		if (cost[currNode] < currDist) continue;
+
+
+		for (auto a : v[currNode])
+		{
+			if (path[currNode][a.second]) continue;
+
+			int nextNode = a.second;
+			int nextDist = cost[currNode] + a.first;
+
+			if (cost[nextNode] == nextDist)
+			{
+				parent[nextNode].push_back(currNode);
+			}
+
+			else if (cost[nextNode] > nextDist)
+			{
+				parent[nextNode].clear();
+				parent[nextNode].push_back(currNode);
+
+				cost[nextNode] = nextDist;
+				pq.push(make_pair(-cost[nextNode], nextNode));
+			}
+		}
+	}
+
+	int result = cost[D];
+
+	if (!isSecond) addPath2(parent, D);
+	if (result == MAX) result = -1;
+
+	return result;
+}
+
+bool input()
+{
+	v.clear();
+	std::cin >> N >> M;
+	if (N == 0 && M == 0) return false;
+
+	isSecond = false;
+	for (int i = 0; i < N; i++)
+		fill(path[i], path[i] + N, false);
+	
+	std::cin >> S >> D;
+	v = vector<vector<edge>>(N + 1);
+
+	for (int i = 0; i < M; i++)
+	{
+		int s, d, c;
+		std::cin >> s >> d >> c;
+		v[s].push_back(make_pair(c, d));
 	}
 	return true;
 }
 
-int dijkstra() {
-	vector<int> dist(n + 1, INF);
-	priority_queue<pii, vector<pii>, greater<>> pq;
-	prv = vector<vector<int>>(n + 1);
+int main()
+{
+	ios_base::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
 
+	while (input())
+	{
 
-	pq.push(make_pair(0, s));
-	dist[s] = 0;
-
-	while (!pq.empty()) {
-		int cur = pq.top().second;
-		int cost = pq.top().first; pq.pop();
-		if (cost > dist[cur])continue;
-
-		for (auto x : g[cur]) {
-			if (check[cur][x.second])continue;
-
-			int next = x.second;
-			int ncost = x.first;
-
-			if (dist[next] == dist[cur] + ncost) {
-				prv[next].push_back(cur);
-			}
-
-			if (dist[next] > dist[cur] + ncost) {
-				prv[next].clear();
-				prv[next].push_back(cur);
-				dist[next] = dist[cur] + ncost;
-				pq.push(make_pair(dist[next], next));
-			}
-		}
-	}
-
-	return dist[d] == INF ? -1 : dist[d];
-}
-
-void erase(int cur) {
-	for (auto x : prv[cur]) {
-		for (int i = 0; i < g[x].size(); i++) {
-			if (g[x][i].second == cur && !check[x][cur]) {
-				check[x][cur] = true;
-				erase(x);
-				break;
-			}
-		}
-	}
-}
-
-int main() {
-	while (input()) {
+		// 최단 경로 탐색
+		// 모든 최단 경로 지우기
 		dijkstra();
-		erase(d);
-		printf("%d\n", dijkstra());
+
+		isSecond = true;
+		// 거의 최단 경로 탐색
+		cout << dijkstra() << '\n';
 	}
+
+
+
 	return 0;
 }
