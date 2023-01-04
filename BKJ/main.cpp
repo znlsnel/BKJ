@@ -1,68 +1,38 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
 using namespace std;
 
-vector<int> makeTable(string str)
+
+vector<int> makeTable(string pattern)
 {
-	vector<int> table(str.size());
-	for (int head = 0, tail = 1; tail < str.size(); tail++)
+	vector<int> table(pattern.size(), 0);
+
+	int head = 0;
+	for (int tail = 1; tail < pattern.size(); tail++)
 	{
-		while (head > 0 && str[head] != str[tail])
+		while (head > 0 && pattern[head] != pattern[tail])
 			head = table[head - 1];
 
-		if (str[head] == str[tail])
-			table[tail] = ++head;
-	}
-	return table;
-}
-
-void KMP(string str, string pattern)
-{
-	vector<int> table = makeTable(pattern);
-	vector<bool> ptrN(str.size());
-	int N = 0;
-
-	int j = 0;
-	for (int i = 0; i < str.size(); i++)
-	{
-		while (j > 0 && pattern[j] != str[i])
-			j = table[j - 1];
-
-		if (pattern[j] == str[i])
+		if (pattern[head] == pattern[tail])
 		{
-			if (j == pattern.size() - 1)
-			{
-				N++;
-				ptrN[i - pattern.size() + 1] = true;
-				j = table[j];
-				// 21 - (7 - 1 ) = 15
-			}
-			else
-				++j;
+			table[tail] = ++head;
 		}
 	}
-	cout << N << '\n';
-	for (int i = 0; i < ptrN.size(); i++)
-	{
-		if (ptrN[i] == true)
-			cout << i  + 1 << '\n';
-	}
 
-	
+	return table;
 }
 
 int main()
 {
-	string str;
+	int size;
 	string pattern;
 
-	getline(cin, str);
-	getline(cin, pattern);
+	cin >> size;
+	cin >> pattern;
 
-	KMP(str, pattern);
-	
-	
+	vector<int> table = makeTable(pattern);
+	cout << size - table[size - 1];
+
 	return 0;
 }
