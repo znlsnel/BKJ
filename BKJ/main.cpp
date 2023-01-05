@@ -1,38 +1,36 @@
 #include <iostream>
 #include <vector>
-#include <string>
+
 using namespace std;
 
+int N, K;
+bool a[10000];
+vector<int> v;
 
-vector<int> makeTable(string pattern)
+void PrimeNumber()
 {
-	vector<int> table(pattern.size(), 0);
+	for (int i = 2; i <= N; i++)
+		a[i] = true;
 
-	int head = 0;
-	for (int tail = 1; tail < pattern.size(); tail++)
+	for (int i = 2; i <= N; i++)
 	{
-		while (head > 0 && pattern[head] != pattern[tail])
-			head = table[head - 1];
-
-		if (pattern[head] == pattern[tail])
+		if (a[i] == false) continue;
+		for (int j = i; j <= N; j += i)
 		{
-			table[tail] = ++head;
+			if (a[j] == false) continue;
+			a[j] = false;
+			v.push_back(j);
 		}
 	}
 
-	return table;
+	if (v.size() >= K) cout << v[K - 1];
+
 }
 
 int main()
 {
-	int size;
-	string pattern;
-
-	cin >> size;
-	cin >> pattern;
-
-	vector<int> table = makeTable(pattern);
-	cout << size - table[size - 1];
-
+	cin >> N >> K;
+	PrimeNumber();
 	return 0;
 }
+
