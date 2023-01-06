@@ -1,36 +1,53 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <queue>
 
 using namespace std;
 
-int N, K;
-bool a[10000];
-vector<int> v;
+vector<int> v[32001];
+int inDegree[32001];
 
-void PrimeNumber()
+int N, M;
+
+void TopologySort()
 {
-	for (int i = 2; i <= N; i++)
-		a[i] = true;
 
-	for (int i = 2; i <= N; i++)
+	queue<int> q;
+
+	for (int i = 1; i <= N; i++)
+		if (inDegree[i] == 0) q.push(i);
+
+	while(!q.empty())
 	{
-		if (a[i] == false) continue;
-		for (int j = i; j <= N; j += i)
+		int a = q.front();
+		q.pop();
+		cout << a << ' ';
+
+		for (int j = 0; j < v[a].size(); j++)
 		{
-			if (a[j] == false) continue;
-			a[j] = false;
-			v.push_back(j);
+			int b = v[a][j];
+			if (--inDegree[b] == 0)
+			{
+				q.push(b);
+			}
 		}
 	}
-
-	if (v.size() >= K) cout << v[K - 1];
 
 }
 
 int main()
 {
-	cin >> N >> K;
-	PrimeNumber();
+	cin >> N >> M;
+	int a, b;
+	
+	for (int i = 0; i < M; i++) 
+	{
+		cin >> a >> b;
+		v[a].push_back(b);
+		inDegree[b]++;
+	}
+	
+	TopologySort();
 	return 0;
 }
-
