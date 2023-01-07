@@ -1,53 +1,61 @@
+//น้มุ1005 ACM Craft                                                        
 #include <iostream>
 #include <vector>
-#include <algorithm>
 #include <queue>
-
 using namespace std;
 
-vector<int> v[32001];
-int inDegree[32001];
+int main() {
+        int T;
+        cin >> T;
 
-int N, M;
+        while (T--) {
+                int N, K;
+                cin >> N >> K;
 
-void TopologySort()
-{
+                int time[1002];
+                for (int i = 1; i <= N; i++) {
+                        cin >> time[i];
+                }
 
-	queue<int> q;
+                vector<int> adj[1002];
+                int inDeg[1002] = { 0, };
+                queue<int> q;
+                int result[1002];
 
-	for (int i = 1; i <= N; i++)
-		if (inDegree[i] == 0) q.push(i);
+                while (K--) {
+                        int X, Y;
+                        cin >> X >> Y;
+                        adj[X].push_back(Y);
+                        inDeg[Y]++;
+                }
 
-	while(!q.empty())
-	{
-		int a = q.front();
-		q.pop();
-		cout << a << ' ';
+                int W;
+                cin >> W;
 
-		for (int j = 0; j < v[a].size(); j++)
-		{
-			int b = v[a][j];
-			if (--inDegree[b] == 0)
-			{
-				q.push(b);
-			}
-		}
-	}
+                for (int i = 1; i <= N; i++) {
+                        if (inDeg[i] == 0) {
+                                q.push(i);
+                        }
+                        result[i] = time[i];
+                }
 
-}
+                while (!q.empty()) {
+                        int cur = q.front();
+                        q.pop();
 
-int main()
-{
-	cin >> N >> M;
-	int a, b;
-	
-	for (int i = 0; i < M; i++) 
-	{
-		cin >> a >> b;
-		v[a].push_back(b);
-		inDegree[b]++;
-	}
-	
-	TopologySort();
-	return 0;
+                        for (int i = 0; i < adj[cur].size(); i++) {
+                                int next = adj[cur][i];
+                                inDeg[next]--;
+                                result[next] = max(result[next], result[cur] + time[next]);
+
+                                if (inDeg[next] == 0) {
+                                        q.push(next);
+                                }
+                        }
+                }
+
+                cout << result[W] << endl;
+        }
+
+        return 0;
 }
