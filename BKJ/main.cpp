@@ -1,100 +1,84 @@
 #include <iostream>
-#include <algorithm>
 #include <vector>
-#include <stack>
-
+#include <algorithm>
 using namespace std;
-const int MAX = 5000;
 
-int n, m, id, CN, cycleN[MAX], seqN[MAX];
-vector<int> v[MAX];
-bool finished[MAX];
-stack<int> S;
-vector<vector<int>> SCC;
+#define MAX 101010
 
-int DFS(int curr) {
-	seqN[curr] = ++id;
-	S.push(curr);
+vector<int> g[MAX];
+vector<int> rev[MAX];
+int chk[MAX];
+vector<int> dfn;
+int scc[MAX];
+vector< vector<int> > comp;
+int n, m;
 
-	int parent = seqN[curr];
-	for (int next : v[curr]) 
-	{
-		if (seqN[next] == 0) 
-			parent = min(parent, DFS(next));
-
-		else if (!finished[next]) 
-			parent = min(parent, seqN[next]);
+void dfs(int v) {
+	chk[v] = 1;
+	for (auto i : g[v]) {
+		if (chk[i]) continue;
+		dfs(i);
 	}
-
-	if (parent == seqN[curr]) {
-		vector<int> scc;
-		while (1) {
-			int t = S.top();
-			S.pop();
-			scc.push_back(t);
-			finished[t] = true;
-			cycleN[t] = CN;
-			if (t == curr) break;
-		}
-
-		sort(scc.begin(), scc.end());
-		SCC.push_back(scc);
-		CN++;
-	}
-
-	return parent;
+	dfn.push_back(v);
 }
 
+void dfs_rev(int v, int color) {
+	scc[v] = color;
+	comp.back().push_back(v);
+	for (auto i : rev[v]) {
+		if (scc[i]) continue;
+		dfs_rev(i, color);
+	}
+}
+
+void getSCC() {
+	fill(chk, chk + MAX, 0);
+	fill(scc, scc + MAX, 0);
+
+	dfn.clear();
+	comp.clear();
+
+	for (int i = 1; i <= n; i++) {
+		if (!chk[i]) dfs(i);
+	}
+	reverse(dfn.begin(), dfn.end());
+	int pv = 0;
+	for (auto i : dfn) {
+		if (scc[i]) continue;
+		comp.push_back(vector<int>());
+		dfs_rev(i, ++pv);
+	}
+}
+
+void init() {
+	for (int i = 0; i < MAX; i++) g[i].clear(), rev[i].clear();
+}
+
+void solve() {
+	init();
+	cin >> n >> m;
+	for (int i = 0; i < m; i++) {
+		int a, b; cin >> a >> b;
+		g[a].push_back(b);
+		rev[b].push_back(a);
+	}
+	getSCC();
+	int ans = 0;
+	for (auto& i : comp) {
+		bool flag = 0;
+		for (auto& j : i) {
+			for (auto& k : rev[j]) {
+				if (scc[j] == scc[k]) continue;
+				flag = 1;
+			}
+		}
+		ans += !flag;
+	}
+	cout << ans << "\n";
+}
 
 int main() {
-	ios_base::sync_with_stdio(false); cout.tie(NULL); cin.tie(NULL);
-
-	while (1) {
-		cin >> n;
-		if (n == 0) break;
-		cin >> m;
-
-		id = 0;
-		SCC.clear();
-		CN = 0;
-		while (!S.empty()) S.pop();
-		for (int i = 0; i < n; ++i)	v[i].clear();
-
-		fill(finished, finished + MAX, false);
-		fill(seqN, seqN + MAX, 0);
-		fill(cycleN, cycleN + MAX, -1);
-
-
-		for (int i = 0; i < m; ++i) {
-			int a, b;
-			cin >> a >> b;
-			v[a - 1].push_back(b - 1);
-		}
-
-		for (int i = 0; i < n; ++i)
-			if (seqN[i] == 0) DFS(i);
-
-		for (int i = 0; i < n; ++i) {
-			for (int j = 0; j < v[i].size(); ++j) 
-			{
-				int currCycle = cycleN[i];
-				int nextNode = cycleN[v[i][j]];
-
-				// 다음 노드가 현재 사이클에 포함되지 않는다면
-				if (currCycle != nextNode) SCC[currCycle].clear();
-			}
-		}
-
-		sort(SCC.begin(), SCC.end());
-
-		for (int i = 0; i < SCC.size(); ++i) {
-			if (!SCC[i].empty()) {
-				for (int j = 0; j < SCC[i].size(); ++j)
-					cout << SCC[i][j] + 1 << ' ';
-			}
-		}
-		cout << '\n';
-
-	}
-	return 0;
+	ios_base::sync_with_stdio(0); cin.tie(0);
+	int t; cin >> t;
+	while (t--) solve();
 }
