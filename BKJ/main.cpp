@@ -1,84 +1,128 @@
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <algorithm>
+
+#define MAX 100001
+
 using namespace std;
 
-#define MAX 101010
+int id, d[MAX]; //구역 번호는 0~n-1번까지
+bool finished[MAX];
+vector<int> a[MAX];
+vector<vector<int>> SCC;
+stack<int> s;
+int cycle[MAX];
+int inDegree[MAX];
 
-vector<int> g[MAX];
-vector<int> rev[MAX];
-int chk[MAX];
-vector<int> dfn;
-int scc[MAX];
-vector< vector<int> > comp;
-int n, m;
+int dfs(int x) 
+{
+	d[x] = id++;
+	s.push(x);
+	int parent = d[x];
 
-void dfs(int v) {
-	chk[v] = 1;
-	for (auto i : g[v]) {
-		if (chk[i]) continue;
-		dfs(i);
+	for (int i = 0; i < a[x].size(); i++) 
+	{
+		int y = a[x][i];
+
+		if (d[y] == -1) 
+			parent = min(parent, dfs(y));
+
+		else if (!finished[y]) 
+			parent = min(parent, d[y]);
 	}
-	dfn.push_back(v);
-}
-
-void dfs_rev(int v, int color) {
-	scc[v] = color;
-	comp.back().push_back(v);
-	for (auto i : rev[v]) {
-		if (scc[i]) continue;
-		dfs_rev(i, color);
-	}
-}
-
-void getSCC() {
-	fill(chk, chk + MAX, 0);
-	fill(scc, scc + MAX, 0);
-
-	dfn.clear();
-	comp.clear();
-
-	for (int i = 1; i <= n; i++) {
-		if (!chk[i]) dfs(i);
-	}
-	reverse(dfn.begin(), dfn.end());
-	int pv = 0;
-	for (auto i : dfn) {
-		if (scc[i]) continue;
-		comp.push_back(vector<int>());
-		dfs_rev(i, ++pv);
-	}
-}
-
-void init() {
-	for (int i = 0; i < MAX; i++) g[i].clear(), rev[i].clear();
-}
-
-void solve() {
-	init();
-	cin >> n >> m;
-	for (int i = 0; i < m; i++) {
-		int a, b; cin >> a >> b;
-		g[a].push_back(b);
-		rev[b].push_back(a);
-	}
-	getSCC();
-	int ans = 0;
-	for (auto& i : comp) {
-		bool flag = 0;
-		for (auto& j : i) {
-			for (auto& k : rev[j]) {
-				if (scc[j] == scc[k]) continue;
-				flag = 1;
-			}
+	if (parent == d[x]) 
+	{
+		vector<int>scc;
+		while (1) 
+		{
+			int t = s.top();
+			s.pop();
+			scc.push_back(t);
+			cycle[t] = SCC.size();
+			finished[t] = true;
+			if (t == x) break;
 		}
-		ans += !flag;
+		sort(scc.begin(), scc.end());
+		SCC.push_back(scc);
 	}
-	cout << ans << "\n";
+	return parent;
 }
 
 int main() {
-	ios_base::sync_with_stdio(0); cin.tie(0);
-	int t; cin >> t;
-	while (t--) solve();
+	int t;
+	cin >> t;
+
+	while (t--) 
+	{
+		int n, m;
+		cin >> n >> m;
+
+		//Init
+		SCC.clear();
+		fill(d, d + MAX, -1);
+		fill(inDegree, inDegree + MAX, 0);
+		fill(finished, finished + MAX, false);
+		fill(cycle, cycle + MAX, -1);
+
+		for (int i = 0; i < n; i++) 
+		{
+			a[i].clear();
+		}
+
+		for (int i = 0; i < m; i++) 
+		{
+			int x, y;
+			cin >> x >> y;
+			a[x].push_back(y);
+		}
+
+		for (int i = 0; i < n; i++) 
+		{
+			if (d[i] == -1) dfs(i);
+		}
+
+		for (int i = 0; i < n; i++) 
+		{
+			for (int j = 0; j < a[i].size(); j++) 
+			{
+				int y = a[i][j];
+				if (cycle[i] != cycle[y]) 
+				{
+					++inDegree[cycle[y]];
+				}
+
+			}
+		}
+
+		int count = 0;
+		int num = -1;
+		for (int i = 0; i < SCC.size(); i++) 
+		{
+			if (inDegree[i] == 0) 
+			{
+				num = i;
+				count++;
+			}
+		}
+
+		if (count == 1) 
+		{
+			for (int i = 0; i < SCC[num].size(); i++) 
+			{
+				printf("%d\n", SCC[num][i]);
+			}
+		}
+
+		else 
+		{
+			printf("Confused\n");
+		}
+		printf("\n");
+	}
+	/*cout<<"InDegree : "<<endl;
+	  for(int i=0; i<SCC.size(); i++){
+	    cout<<inDegree[i]<<' ';
+	  }
+	  cout<<"\nEND"<<endl;*/
 }
