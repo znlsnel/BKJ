@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -11,20 +12,25 @@ int main()
 	int N, M, temp;
 	cin >> N >> M;
 
-	int Aarr[100001] = {};
-	
+	vector<vector<int>> v(N + 1, vector<int>(N + 1, 0));
+
 	for (int i = 1; i <= N; i++)
 	{
-		cin >> temp;
-		Aarr[i] = temp + Aarr[i - 1];
+		for (int j = 1; j <= N; j++)
+		{
+			cin >> temp;
+			v[i][j] = v[i][j - 1] + v[i - 1][j] - v[i - 1][j - 1] + temp;
+		}
 	}
 	
 
 	for (int i = 1; i <= M; i++)
 	{
-		int a, b, result;
-		cin >> a >> b;
-		cout << Aarr[b] - Aarr[a - 1] << "\n";
+		int aX, aY, bX, bY;
+		cin >> aX >> aY >> bX >> bY;
+
+		cout << v[bX][bY] - v[aX - 1][bY] - v[bX][aY - 1] + v[aX - 1][aY - 1] << "\n";
+		
 	}
 
 
