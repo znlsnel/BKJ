@@ -1,4 +1,6 @@
 #include<iostream>
+#include <vector>
+#include <algorithm>
 using namespace std;
 
 
@@ -9,29 +11,35 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	int N;
-	cin >> N;
-	int count = 1;
-	int start = 1;
-	int end = 1;
-	int sum = 1;
+	int N, M;
+	cin >> N >> M;
+	vector<int> v(N, 0);
 
-	while (end != N)
+	for (int i = 0; i < N; i++)
+		cin >> v[i];
+
+	sort(v.begin(), v.end());
+	
+	int i = 0;
+	int j = N - 1;
+	int sum;
+	int count = 0;
+
+	while (i < j)
 	{
-		if (sum == N)
-			count++;
+		sum = v[i] + v[j];
 
-		if (sum > N)
-		{
-			sum -= start;
-			start++;
-		}
+		if (sum < M) 
+			i++;
+
+		else if (sum > M) 
+			j--;
+
 		else
 		{
-			end++;
-			sum += end;
+			count++;
+			i++;
 		}
 	}
-	cout << count << "\n";
-
+	cout << count;
 }
