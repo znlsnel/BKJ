@@ -1,31 +1,37 @@
 #include<iostream>
-#include<algorithm>
-#include<vector>
-#include<cmath>
 using namespace std;
 
-int N, M, x;
-long cnt[1001];
-long sum, ans;
+
 
 int main()
 {
 	ios_base::sync_with_stdio(0);
-	cin.tie(0);
+	cin.tie(NULL);
+	cout.tie(NULL);
 
-	cin >> N >> M;
+	int N;
+	cin >> N;
+	int count = 1;
+	int start = 1;
+	int end = 1;
+	int sum = 1;
 
-	for (int i = 0; i < N; i++)
+	while (end != N)
 	{
-		cin >> x;
-		sum += x;
-		cnt[sum % M]++;
-	}
+		if (sum == N)
+			count++;
 
-	for (int i = 0; i <= 1000; i++)
-	{
-		ans += cnt[i] * (cnt[i] - 1) / 2;
+		if (sum > N)
+		{
+			sum -= start;
+			start++;
+		}
+		else
+		{
+			end++;
+			sum += end;
+		}
 	}
+	cout << count << "\n";
 
-	cout << cnt[0] + ans;
 }
