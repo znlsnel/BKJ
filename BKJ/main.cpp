@@ -1,5 +1,5 @@
 #include<iostream>
-#include <queue>
+#include <deque>
 using namespace std;
 
 
@@ -9,38 +9,26 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	priority_queue<pair<int, int>> q;
 
 	int N, L;
 	cin >> N >> L;
+	deque<pair<int, int>> q;
 
 	for (int i = 0; i < N; i++)
 	{
-		int result = 0;
-		int a;
-		cin >> a;
+		int now;
+		cin >> now;
+		
+		// 정렬대신 도태된 노드들 삭제
+		while (!q.empty() && q.back().first > now)
+			q.pop_back();
 
-		q.push(make_pair(-a, i));
-		pair<int, int> p = q.top();
+		q.push_back(make_pair(now, i));
 
-		while (true)
-		{
-			int value = -p.first;
-			int index = p.second;
+		if (q.front().second <= i - L)
+			q.pop_front();
 
-			if (index > i - L)
-			{
-				result = value;
-				break;
-			}
-			else
-			{
-				q.pop();
-				p = q.top();
-			}
-		}
-
-		cout << result << " ";
+		cout << q.front().first << " ";
 	}
 	
 
