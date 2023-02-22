@@ -9,29 +9,44 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	vector<int> v;
-	string str;
-	cin >> str;
-	
-	for (int i = 0; i < str.size(); i++)
-		v.push_back(str[i] - '0');
+	int N;
+	cin >> N;
 
-	for (int i = 0; i < v.size() - 1; i++)
-	{
-		int max = i;
-		for (int j = i + 1; j < v.size(); j++)
-		{
-			if (v[max] < v[j]) max = j;
-		}
-		if (max == i) continue;
+	vector<int> v(N);
+	vector<int> total(N);
 
-		int temp = v[max];
-		v[max] = v[i];
-		v[i] = temp;
-		
-	}
+	for (int i = 0; i < N; i++)
+		cin >> v[i];
 
 	for (int i = 0; i < v.size(); i++)
-		cout << v[i];
+	{
+		int min = i;
+		for (int j = i + 1; j < v.size(); j++)
+		{
+			if (v[min] > v[j]) min = j;
+		}
+
+		int temp = v[min];
+		v[min] = v[i];
+		v[i] = temp;
+		
+		if (i == 0)
+			total[i] = v[i];
+		else 
+			total[i] = total[i - 1] + v[i];
+	}
+
+	// 3 1 4 3 2
+	// 3 4 8 11 13 
+	int result = 0;
+
+	for (int i = 0; i < v.size(); i++)
+	{
+		result = result + total[i];
+	}
+
+	
+
+	cout << result;
 	return 0;
 }
