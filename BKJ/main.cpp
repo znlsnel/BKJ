@@ -1,25 +1,75 @@
 #include <iostream>
-#include <algorithm>
-
+#include <vector>
 using namespace std;
-long long int arr[5000000];
 
-int main() {
-	// 입출력 속도를 놓여주기 위함
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
+vector<int> MergeVector(vector<int> left, vector<int> right)
+{
+	vector<int> result;
 
-	// N은 입력받을 수의 갯수, K는 정렬했을때 몇 번째 수인지
-	int N, K;
-	cin >> N >> K;
+	auto itL = left.begin();
+	auto itR = right.begin();
 
-	for (int i = 0; i < N; i++) {
-		cin >> arr[i];
+	while (itL != left.end() && itR != right.end())
+	{
+		if (*itL < *itR)
+			result.push_back(*itL++);
+		else
+			result.push_back(*itR++);
 	}
 
-	sort(arr, arr + N);
+	if (itL == left.end() && itR == right.end()) return result;
 
-	cout << arr[K - 1];
+	if (itL == left.end())
+	{
+		for (; itR != right.end(); itR++)
+			result.push_back(*itR);
+	}
+
+	else if (itR == right.end())
+	{
+		for (; itL != left.end(); itL++)
+			result.push_back(*itL);
+	}
+
+	return result;
+
+}
+
+vector<int> MergeSort(vector<int> v)
+{
+	if (v.size() <= 1) return v;
+	auto mid = v.begin();
+
+	vector<int> left;
+	vector<int> right;
+
+	for (int i = 0; i < v.size() / 2; i++)
+		mid++;
+
+	left.insert(left.end(), v.begin(), mid);
+	left = MergeSort(left);
+	
+	right.insert(right.end(), mid, v.end());
+	right = MergeSort(right);
+
+	return MergeVector(left, right);
+}
+
+int main()
+{
+	
+	int N;
+	cin >> N;
+	vector<int> v(N);
+
+
+	for (int i = 0; i < N; i++)
+		cin >> v[i];
+
+	v = MergeSort(v);
+	
+	for (size_t i = 0; i < v.size(); i++)
+		cout << v[i] << "\n";
 
 	return 0;
 }
