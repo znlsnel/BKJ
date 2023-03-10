@@ -1,75 +1,73 @@
 #include <iostream>
 #include <vector>
+
 using namespace std;
 
-vector<int> MergeVector(vector<int> left, vector<int> right)
-{
-	vector<int> result;
-
-	auto itL = left.begin();
-	auto itR = right.begin();
-
-	while (itL != left.end() && itR != right.end())
-	{
-		if (*itL < *itR)
-			result.push_back(*itL++);
-		else
-			result.push_back(*itR++);
-	}
-
-	if (itL == left.end() && itR == right.end()) return result;
-
-	if (itL == left.end())
-	{
-		for (; itR != right.end(); itR++)
-			result.push_back(*itR);
-	}
-
-	else if (itR == right.end())
-	{
-		for (; itL != left.end(); itL++)
-			result.push_back(*itL);
-	}
-
-	return result;
-
-}
-
-vector<int> MergeSort(vector<int> v)
-{
-	if (v.size() <= 1) return v;
-	auto mid = v.begin();
-
-	vector<int> left;
-	vector<int> right;
-
-	for (int i = 0; i < v.size() / 2; i++)
-		mid++;
-
-	left.insert(left.end(), v.begin(), mid);
-	left = MergeSort(left);
-	
-	right.insert(right.end(), mid, v.end());
-	right = MergeSort(right);
-
-	return MergeVector(left, right);
-}
+void merge_sort(int s, int e);
+static vector<int> A;
+static vector<int> tmp;
+static long result;
 
 int main()
 {
-	
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
+
 	int N;
 	cin >> N;
-	vector<int> v(N);
+	A = vector<int>(N + 1, 0);
+	tmp = vector<int>(N + 1, 0);
 
+	for (int i = 1; i <= N; i++)
+		cin >> A[i];
 
-	for (int i = 0; i < N; i++)
-		cin >> v[i];
+	result = 0;
+	merge_sort(1, N);
+	cout << result << "\n";
+}
 
-	v = MergeSort(v);
-	
-	for (size_t i = 0; i < v.size(); i++)
-		cout << v[i] << "\n";
+void merge_sort(int start, int end)
+{
+	if (end - start < 1) return;
 
-	return 0;
+	int mid = start + (end - start) / 2;
+	merge_sort(start, mid);
+	merge_sort(mid + 1, end);
+
+	for (int i = start; i <= end; i++)
+		tmp[i] = A[i];
+
+	int k = start;
+	int index1 = start;
+	int index2 = mid + 1;
+
+	while (index1 <= mid && index2 <= end)
+	{
+		if (tmp[index1] > tmp[index2])
+		{
+			A[k] = tmp[index2];
+			result += index2 - k;
+			k++;
+			index2++;
+		}
+		else
+		{
+			A[k] = tmp[index1];
+			k++;
+			index1++;
+		}
+	}
+	while (index1 <= mid)
+	{
+		A[k] = tmp[index1];
+		k++;
+		index1++;
+	}
+	while (index2 <= end)
+	{
+		A[k] = tmp[index2];
+		k++;
+		index2++;
+	}
 }
