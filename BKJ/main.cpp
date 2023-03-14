@@ -4,11 +4,11 @@
 using namespace std;
 
 vector<vector<int>> vec;
-vector<bool> isvisit;
+vector<bool> visited;
 
 int result = 0;
 
-void Connection(int n);
+void bfs(int n);
 
 // 11724
 int main()
@@ -17,7 +17,7 @@ int main()
 	int V, E;
 	cin >> V >> E;
 	vec.resize(V + 1);
-	isvisit.resize(V + 1);
+	visited.resize(V + 1);
 
 	for (int i = 1; i <= E; i++)
 	{
@@ -29,9 +29,9 @@ int main()
 
 	for (int i = 1; i <= V; i++)
 	{
-		if (isvisit[i] == false)
+		if (visited[i] == false)
 		{
-			Connection(i);
+			bfs(i);
 			result++;
 		}
 	}
@@ -40,9 +40,9 @@ int main()
 	return 0;
 }
 
-void Connection(int n)
+void bfs(int n)
 {
-	isvisit[n] = true;
+	visited[n] = true;
 
 	queue<int> q;
 	q.push(n);
@@ -55,9 +55,9 @@ void Connection(int n)
 		for (int i = 0; i < vec[k].size(); i++)
 		{
 			int node = vec[k][i];
-			if (isvisit[node]) continue;
+			if (visited[node]) continue;
 			
-			isvisit[node] = true;
+			visited[node] = true;
 			q.push(node);
 		}
 	}
