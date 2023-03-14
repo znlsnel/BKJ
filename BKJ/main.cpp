@@ -1,73 +1,65 @@
 #include <iostream>
 #include <vector>
-
+#include <queue>
 using namespace std;
 
-void merge_sort(int s, int e);
-static vector<int> A;
-static vector<int> tmp;
-static long result;
+vector<vector<int>> vec;
+vector<bool> isvisit;
 
+int result = 0;
+
+void Connection(int n);
+
+// 11724
 int main()
 {
-	ios::sync_with_stdio(false);
-	cin.tie(NULL);
-	cout.tie(NULL);
+	
+	int V, E;
+	cin >> V >> E;
+	vec.resize(V + 1);
+	isvisit.resize(V + 1);
 
-	int N;
-	cin >> N;
-	A = vector<int>(N + 1, 0);
-	tmp = vector<int>(N + 1, 0);
+	for (int i = 1; i <= E; i++)
+	{
+		int u, v;
+		cin >> u >> v;
+		vec[u].push_back(v);
+		vec[v].push_back(u);
+	}
 
-	for (int i = 1; i <= N; i++)
-		cin >> A[i];
+	for (int i = 1; i <= V; i++)
+	{
+		if (isvisit[i] == false)
+		{
+			Connection(i);
+			result++;
+		}
+	}
 
-	result = 0;
-	merge_sort(1, N);
-	cout << result << "\n";
+	cout << result;
+	return 0;
 }
 
-void merge_sort(int start, int end)
+void Connection(int n)
 {
-	if (end - start < 1) return;
+	isvisit[n] = true;
 
-	int mid = start + (end - start) / 2;
-	merge_sort(start, mid);
-	merge_sort(mid + 1, end);
+	queue<int> q;
+	q.push(n);
 
-	for (int i = start; i <= end; i++)
-		tmp[i] = A[i];
-
-	int k = start;
-	int index1 = start;
-	int index2 = mid + 1;
-
-	while (index1 <= mid && index2 <= end)
+	while (!q.empty())
 	{
-		if (tmp[index1] > tmp[index2])
+		int k = q.front();
+		q.pop();
+
+		for (int i = 0; i < vec[k].size(); i++)
 		{
-			A[k] = tmp[index2];
-			result += index2 - k;
-			k++;
-			index2++;
-		}
-		else
-		{
-			A[k] = tmp[index1];
-			k++;
-			index1++;
+			int node = vec[k][i];
+			if (isvisit[node]) continue;
+			
+			isvisit[node] = true;
+			q.push(node);
 		}
 	}
-	while (index1 <= mid)
-	{
-		A[k] = tmp[index1];
-		k++;
-		index1++;
-	}
-	while (index2 <= end)
-	{
-		A[k] = tmp[index2];
-		k++;
-		index2++;
-	}
+
 }
