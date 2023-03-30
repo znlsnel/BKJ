@@ -1,65 +1,47 @@
 #include <iostream>
 #include <vector>
-#include <queue>
+#include <algorithm>
 using namespace std;
 
-vector<vector<int>> vec;
-vector<bool> visited;
-
-int result = 0;
-
-void bfs(int n);
-
-// 11724
-int main()
+bool Is_Prime(int n)
 {
-	
-	int V, E;
-	cin >> V >> E;
-	vec.resize(V + 1);
-	visited.resize(V + 1);
+	if (n < 2) return false;
 
-	for (int i = 1; i <= E; i++)
+	for (int i = 2; i * i <= n; i++)
 	{
-		int u, v;
-		cin >> u >> v;
-		vec[u].push_back(v);
-		vec[v].push_back(u);
+		if (n % i == 0) return false;
 	}
 
-	for (int i = 1; i <= V; i++)
-	{
-		if (visited[i] == false)
-		{
-			bfs(i);
-			result++;
-		}
-	}
-
-	cout << result;
-	return 0;
+	return true;
 }
 
-void bfs(int n)
+void Generate_numbers(int N, int digits, int current, vector<int>& result)
 {
-	visited[n] = true;
-
-	queue<int> q;
-	q.push(n);
-
-	while (!q.empty())
+	if (N == digits)
 	{
-		int k = q.front();
-		q.pop();
-
-		for (int i = 0; i < vec[k].size(); i++)
-		{
-			int node = vec[k][i];
-			if (visited[node]) continue;
-			
-			visited[node] = true;
-			q.push(node);
-		}
+		result.push_back(current);
+		return;
 	}
 
+	for (int i = 1; i <= 9; i++)
+	{
+		int next = current * 10 + i;
+		if (Is_Prime(next))
+			Generate_numbers(N, digits + 1, next, result);
+	}
+}
+
+int main()
+{
+	vector<int> result;
+	int N;
+	cin >> N;
+	
+	Generate_numbers(N, 0, 0, result);
+	sort(result.begin(), result.end());
+
+	for (int i : result)
+		cout << i << "\n";
+	
+	return 0;
 }
