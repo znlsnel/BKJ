@@ -1,47 +1,62 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
 using namespace std;
 
-bool Is_Prime(int n)
+const int MAXN = 2005;
+
+int N, M;
+vector<int> G[MAXN];
+bool vis[MAXN];
+
+bool dfs(int v, int depth) 
 {
-	if (n < 2) return false;
+        if (depth == 4) 
+        {
+                return true;
+        }
 
-	for (int i = 2; i * i <= n; i++)
-	{
-		if (n % i == 0) return false;
-	}
+        vis[v] = true;
+        bool found = false;
+        for (int u : G[v]) 
+        {
+                if (!vis[u]) 
+                {
+                        found = dfs(u, depth + 1);
+                        if (found) 
+                                break;
 
-	return true;
+                }
+        }
+        vis[v] = false;
+        return found;
 }
 
-void Generate_numbers(int N, int digits, int current, vector<int>& result)
+int main() 
 {
-	if (N == digits)
-	{
-		result.push_back(current);
-		return;
-	}
+        cin >> N >> M;
+        for (int i = 0; i < M; i++) 
+        {
+                int a, b;
+                cin >> a >> b;
+                G[a].push_back(b);
+                G[b].push_back(a);
+        }
 
-	for (int i = 1; i <= 9; i++)
-	{
-		int next = current * 10 + i;
-		if (Is_Prime(next))
-			Generate_numbers(N, digits + 1, next, result);
-	}
-}
+        bool path_exists = false;
 
-int main()
-{
-	vector<int> result;
-	int N;
-	cin >> N;
-	
-	Generate_numbers(N, 0, 0, result);
-	sort(result.begin(), result.end());
+        for (int i = 0; i < N; i++) 
+        {
+                fill(vis, vis + N, false);
 
-	for (int i : result)
-		cout << i << "\n";
-	
-	return 0;
+                if (dfs(i, 0))
+                {
+                        path_exists = true;
+                        break;
+                }
+        }
+
+        std::cout << path_exists ? 1 : 0;
+        
+
+        return 0;
 }
