@@ -1,62 +1,94 @@
 #include <iostream>
 #include <vector>
+#include <queue>
+
 using namespace std;
 
-const int MAXN = 2005;
+vector<vector<int>>  _map;
 
-int N, M;
-vector<int> G[MAXN];
-bool vis[MAXN];
-
-bool dfs(int v, int depth) 
+int _destX, _destY;
+struct POS
 {
-        if (depth == 4) 
-        {
-                return true;
-        }
+	POS() {
+		x = -1; y = -1; isinRange = true; distance = 0;
+	}
+	POS(int posX, int posY, int dst = 0) {
+		x = posX;
+		y = posY;
+		distance = dst; 
+		if (x > _destX || y > _destY || x < 0 || y < 0) {
+			isinRange = false; 
+		}
+		else
+			isinRange = true;
+	}   
+	  
+	bool operator !=(POS other) {
+		return this->x != other.x || this->y != other.y;		 
+	}
+	  
+	bool isinRange;
+	int x;
+	int y;
 
-        vis[v] = true;
-        bool found = false;
-        for (int u : G[v]) 
-        {
-                if (!vis[u]) 
-                {
-                        found = dfs(u, depth + 1);
-                        if (found) 
-                                break;
-
-                }
-        }
-        vis[v] = false;
-        return found;
+	int distance;
+};
+vector<vector<bool>>  _visit;
+ 
+int _count = 20;
+int _minDistance = 100;
+void DFS(POS cur)
+{
+	if (cur.x == _destX && cur.y == _destY)
+	{ 
+		if (_minDistance > cur.distance) {
+			_minDistance = cur.distance; 
+		} 
+	}
+	  
+	POS downPos = POS(cur.x, cur.y + 1, cur.distance + 1);
+	POS upPos = POS(cur.x, cur.y - 1, cur.distance + 1);
+	POS leftPos = POS(cur.x - 1, cur.y, cur.distance + 1);
+	POS rightPos = POS(cur.x + 1, cur.y, cur.distance + 1);
+	  
+	auto checkCanMove = [&](POS nextPos)
+	{
+		bool canMove = nextPos.isinRange && _map[nextPos.y][nextPos.x] && _visit[nextPos.y][nextPos.x] == false;
+		if (canMove) 
+		{ 
+			_visit[nextPos.y][nextPos.x] = true;   
+			DFS(nextPos);
+			_visit[nextPos.y][nextPos.x] = false;
+		}  
+	};
+	  
+	checkCanMove(upPos); 
+	checkCanMove(downPos); 
+	checkCanMove(leftPos);
+	checkCanMove(rightPos); 
 }
 
-int main() 
+int main()
 {
-        cin >> N >> M;
-        for (int i = 0; i < M; i++) 
-        {
-                int a, b;
-                cin >> a >> b;
-                G[a].push_back(b);
-                G[b].push_back(a);
-        }
+	cin >> _destY;
+	cin >> _destX;
+	_map.resize(_destY, vector<int>(_destX, 0));
+	_visit.resize(_destY, vector<bool>(_destX, false));
+	std::string line;
 
-        bool path_exists = false;
+	for (int i = 0; i < _destY; ++i) {
+		// 한 줄씩 문자열로 입력 받음
+		std::cin >> line; 
+		for (int j = 0; j < _destX; ++j) {
+			// 문자열의 각 문자를 정수로 변환하여 저장
+			_map[i][j] = line[j] - '0';
+		}
+	} 
 
-        for (int i = 0; i < N; i++) 
-        {
-                fill(vis, vis + N, false);
-
-                if (dfs(i, 0))
-                {
-                        path_exists = true;
-                        break;
-                }
-        }
-
-        std::cout << path_exists ? 1 : 0;
-        
-
-        return 0;
+	_destX--;
+	_destY--;
+	_visit[0][0] = true;
+	DFS(POS(0, 0));
+	
+	cout << _minDistance + 1; 
 }
