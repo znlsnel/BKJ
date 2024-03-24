@@ -4,77 +4,49 @@
 #include <queue>
 
 using namespace std;
-
-typedef pair<int, int> edge;
-static vector<vector<edge>> _tree;
-static vector<int> _distance;
-static vector<bool> _visited;
-
-void BFS(int node);
+static vector<int> numList;
 
 int main()
 {
-	int N;
-	cin >> N;
-
-	_tree.resize(N + 1);
-	_distance.resize(N + 1, 0);
-	_visited.resize(N + 1, false);
-
-	for (int i = 0; i < N; i++)
-	{
-		int E;
-		cin >> E;
-		while (true)
-		{
-			int V, S;
-			cin >> V;
-
-			if (V == -1) 
-				break;
-
-			cin >> S; 
-			_tree[E].push_back(edge(V, S));
-		}
-	}
-	int farthestPoint = 1;
-	BFS(1);
-	for (int i = 2; i < N + 1; i++)
-	{
-		if (_distance[farthestPoint] < _distance[i])
-			farthestPoint = i;
-	}
-	fill(_distance.begin(), _distance.end(), 0);
-	fill(_visited.begin(), _visited.end(), false);
-
-	BFS(farthestPoint);
-
-	sort(_distance.begin(), _distance.end());
-	cout << _distance[N] << "\n";
-}
- 
- 
-void BFS(int node)
-{
-	queue<int> q;
-	q.push(node);
-	_visited[node] = true;
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	cout.tie(NULL);
 	 
-	while (q.size())
-	{
-		int curNode = q.front();
-		q.pop();
+	int N, M;
+	cin >> N;
+	numList.resize(N);
+	for (int i = 0; i < N; i++)
+		cin >> numList[i];
 
-		for (edge e : _tree[curNode])
+	sort(numList.begin(), numList.end());
+
+	cin >> M;
+	for (int i = 0; i < M; i++)
+	{
+		int find = 0;
+		int target;
+		cin >> target;
+
+		int start = 0;
+		int end = numList.size() - 1;
+
+		while (start <= end)
 		{
-			if (_visited[e.first] == false)
-			{
-				_visited[e.first] = true;
-				_distance[e.first] = _distance[curNode] + e.second;
-				q.push(e.first);
+			int midi = (start + end) / 2;
+			int midV = numList[midi];
+
+			if (midV > target)
+				end = midi - 1;
+			else if (midV < target)
+				start = midi + 1; 
+			else {
+				find = 1;
+				break;
 			}
 		}
+		cout << find << "\n"; 
 	}
 
 
 }
+ 
