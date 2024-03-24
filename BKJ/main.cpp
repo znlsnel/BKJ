@@ -1,58 +1,80 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <queue>
 
 using namespace std;
 
-struct POS {
-        int y, x;
-};
+typedef pair<int, int> edge;
+static vector<vector<edge>> _tree;
+static vector<int> _distance;
+static vector<bool> _visited;
 
-int main() {
-        int N, M;
-        cin >> N >> M;
-        vector<vector<int>> maze(N, vector<int>(M));
-        vector<vector<bool>> visited(N, vector<bool>(M, false));
-        string line;
+void BFS(int node);
 
-        for (int i = 0; i < N; ++i) {
-                cin >> line;
-                for (int j = 0; j < M; ++j) {
-                        maze[i][j] = line[j] - '0';
-                }
-        }
+int main()
+{
+	int N;
+	cin >> N;
 
-        queue<POS> q;
-        q.push({ 0, 0 });  // 시작 위치
-        visited[0][0] = true;
-        int steps = 1;  // 시작 위치도 포함하기 때문에 1부터 시작
+	_tree.resize(N + 1);
+	_distance.resize(N + 1, 0);
+	_visited.resize(N + 1, false);
 
-        // 방향 이동: 상, 하, 좌, 우
-        int dx[4] = { 1, -1, 0, 0 };
-        int dy[4] = { 0, 0, 1, -1 };
+	for (int i = 0; i < N; i++)
+	{
+		int E;
+		cin >> E;
+		while (true)
+		{
+			int V, S;
+			cin >> V;
 
-        while (!q.empty()) {
-                int size = q.size();
-                for (int i = 0; i < size; ++i) {
-                        POS cur = q.front();
-                        q.pop();
+			if (V == -1) 
+				break;
 
-                        if (cur.y == N - 1 && cur.x == M - 1) {  // 도착 지점에 도달
-                                cout << steps;
-                                return 0;
-                        }
+			cin >> S; 
+			_tree[E].push_back(edge(V, S));
+		}
+	}
+	int farthestPoint = 1;
+	BFS(1);
+	for (int i = 2; i < N + 1; i++)
+	{
+		if (_distance[farthestPoint] < _distance[i])
+			farthestPoint = i;
+	}
+	fill(_distance.begin(), _distance.end(), 0);
+	fill(_visited.begin(), _visited.end(), false);
 
-                        for (int j = 0; j < 4; ++j) {
-                                int nx = cur.x + dx[j];
-                                int ny = cur.y + dy[j];
+	BFS(farthestPoint);
 
-                                // 범위 체크 및 방문 체크
-                                if (nx >= 0 && nx < M && ny >= 0 && ny < N && maze[ny][nx] == 1 && !visited[ny][nx]) {
-                                        visited[ny][nx] = true;
-                                        q.push({ ny, nx });
-                                }
-                        }
-                }
-                ++steps;  // 다음 거리로 이동
-        }
+	sort(_distance.begin(), _distance.end());
+	cout << _distance[N] << "\n";
+}
+ 
+ 
+void BFS(int node)
+{
+	queue<int> q;
+	q.push(node);
+	_visited[node] = true;
+	 
+	while (q.size())
+	{
+		int curNode = q.front();
+		q.pop();
+
+		for (edge e : _tree[curNode])
+		{
+			if (_visited[e.first] == false)
+			{
+				_visited[e.first] = true;
+				_distance[e.first] = _distance[curNode] + e.second;
+				q.push(e.first);
+			}
+		}
+	}
+
+
 }
