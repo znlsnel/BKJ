@@ -11,44 +11,31 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 	 
-	int N, M;
+	long N, K;
 	cin >> N;
-	cin >> M;
-	vector<int> lessons(N);
-	
-	int start = 0;
-	int end = 0;
+	cin >> K;
+	long start = 1;
+	long end = K; 
+	long ans = 0;
 
-	for (int i = 0; i < N; i++)
-	{
-		cin >> lessons[i];
-		if (start < lessons[i])
-			start = lessons[i];
-		end += lessons[i];
-	}
-	 
 	while (start <= end)
 	{
-		int middie = (start + end) / 2;
-		int sum = 0;
-		int count = 0;
+		long mid = (start + end) / 2;
+		int cnt = 0;
 
-		for (int i = 0; i < N; i++)
+		for (int i = 1; i <= N; i++)
+			cnt += min(mid / i, N);
+
+		if (cnt < K)
+			start = mid + 1;
+		else 
 		{
-			if (sum + lessons[i] > middie)
-			{
-				count++;
-				sum = 0;
-			}
-			sum += lessons[i];
+			ans = mid;
+			end = mid - 1;
 		}
-		if (sum != 0)
-			count++;
-		if (count > M)
-			start = middie + 1;
-		else
-			end = middie - 1;
-	 }
-	cout << start << "\n"; 
+
+	}
+	cout << ans << "\n"; 
+
 }
  
