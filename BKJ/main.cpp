@@ -4,7 +4,6 @@
 #include <queue>
 
 using namespace std;
-static vector<int> numList;
 
 int main()
 {
@@ -14,39 +13,42 @@ int main()
 	 
 	int N, M;
 	cin >> N;
-	numList.resize(N);
-	for (int i = 0; i < N; i++)
-		cin >> numList[i];
-
-	sort(numList.begin(), numList.end());
-
 	cin >> M;
-	for (int i = 0; i < M; i++)
+	vector<int> lessons(N);
+	
+	int start = 0;
+	int end = 0;
+
+	for (int i = 0; i < N; i++)
 	{
-		int find = 0;
-		int target;
-		cin >> target;
-
-		int start = 0;
-		int end = numList.size() - 1;
-
-		while (start <= end)
-		{
-			int midi = (start + end) / 2;
-			int midV = numList[midi];
-
-			if (midV > target)
-				end = midi - 1;
-			else if (midV < target)
-				start = midi + 1; 
-			else {
-				find = 1;
-				break;
-			}
-		}
-		cout << find << "\n"; 
+		cin >> lessons[i];
+		if (start < lessons[i])
+			start = lessons[i];
+		end += lessons[i];
 	}
+	 
+	while (start <= end)
+	{
+		int middie = (start + end) / 2;
+		int sum = 0;
+		int count = 0;
 
-
+		for (int i = 0; i < N; i++)
+		{
+			if (sum + lessons[i] > middie)
+			{
+				count++;
+				sum = 0;
+			}
+			sum += lessons[i];
+		}
+		if (sum != 0)
+			count++;
+		if (count > M)
+			start = middie + 1;
+		else
+			end = middie - 1;
+	 }
+	cout << start << "\n"; 
 }
  
