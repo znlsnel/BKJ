@@ -14,25 +14,30 @@ int main()
 
 	long N, K;
 	cin >> N;
-	cin >> K;
-	vector<int> coins(N);
-	
+	priority_queue<int, vector<int>, greater<int>> pq;
+	int data;
+
 	for (int i = 0; i < N; i++)
 	{
-		cin >> coins[i];
-	}
-	 
-	int ans = 0;
-	for (int i = N - 1; i >= 0; i--)
-	{
-		if (K  >= coins[i]) 
-		{
-			int count = K  / coins[i];
-			ans += count;
-			K -= count * coins[i];  
-		}
+		cin >> data;
+		pq.push(data);
 	}
 
-	cout << ans << "\n";
+	int data1 = 0;
+	int data2 = 0;
+	int sum = 0;
+
+	while (pq.size() > 1) 
+	{
+		data1 = pq.top();
+		pq.pop();
+		data2 = pq.top();
+		pq.pop();
+		sum += data1 + data2;
+		pq.push(data1 + data2);
+	}
+
+	cout << sum << "\n";
+
 }
  
