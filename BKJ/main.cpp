@@ -3,9 +3,10 @@
 #include <algorithm>
 #include <queue>
 #include <cmath>
-
+#include <string>
 using namespace std;
 
+bool isPalindrome(int target);
 int main()
 {
 	ios::sync_with_stdio(false);
@@ -13,8 +14,8 @@ int main()
 	cout.tie(NULL); 
 	 
 
-		long Min, Max;
-		cin >> Min >> Max;
+		long N;
+		cin >> N;
 		long A[10000001];
 
 		for (int i = 2; i < 10000001; i++)
@@ -29,20 +30,36 @@ int main()
 				A[j] = 0;
 		} 
 		 
-		int count = 0;
-		for (int i = 2; i < 10000001; i++)
-		{
-			if (A[i] == 0) continue; 
-
-			long temp = A[i];
-			while ((double)A[i] <= (double)Max / (double)temp)
+		int i = N;
+		while (true)
+		{ 
+			int id = i++;
+			if (A[id] == 0)  continue;
+			 
+			if (isPalindrome(A[id]))
 			{
-				if (double(A[i] >= double(Min) / double(temp)))
-					count++;
-				temp = temp * A[i];  
+				cout << id;
+				return 0;
 			}
-		} 
 
-		cout << count << "\n";
+		}
 	
+}
+
+bool isPalindrome(int target)
+{
+	if (target == 101)
+		target = 101;
+	string str = to_string(target);
+	int s = 0;
+	int e = str.size() - 1;
+
+	while (s < e)
+	{
+		if (str[s] != str[e])
+			return false;
+		s++;
+		e--;
+	}
+	return true; 
 }
