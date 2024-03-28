@@ -7,7 +7,7 @@
 using namespace std;
 
 
-int gcd(int a, int b);
+long gcd(long a, long b);
 int main()
 {
 	ios::sync_with_stdio(false);
@@ -15,23 +15,27 @@ int main()
 	cout.tie(NULL); 
 	 
 	// 2 3 5 6 7 8 10
-	long n;
-	cin >> n;
-
-	while (n--) {
-		int a, b;
-		cin >> a >> b;
-		int result = gcd(a, b);
-		cout << a * b / result << "\n";
+	long n, m;
+	cin >> n >> m;
+	if (m > n) {
+		long temp = m;
+		m = n;
+		n = temp; 
 	}
+		long result = gcd(n, m);
+		
+		while (result--)
+			cout << 1;
 	
+		cout << "\n";
+
 }
- 
-int gcd(int a, int b)
+  
+long gcd(long a, long b)
 {
-	while (b != 0)
-	{
-		int k = a % b;
+	while (b != 0) 
+	{ 
+		long k = a % b;
 		a = b;
 		b = k; 
 	}
