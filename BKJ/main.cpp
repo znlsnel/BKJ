@@ -7,6 +7,7 @@
 using namespace std;
 
 
+int gcd(int a, int b);
 int main()
 {
 	ios::sync_with_stdio(false);
@@ -16,19 +17,23 @@ int main()
 	// 2 3 5 6 7 8 10
 	long n;
 	cin >> n;
-	long result = n;
 
-	for (long p = 2; p <= sqrt(n); p++)
-	{
-		if (n % p == 0) {
-			result -= result / p;
-			while (n % p == 0)
-				n /= p;
-		}
+	while (n--) {
+		int a, b;
+		cin >> a >> b;
+		int result = gcd(a, b);
+		cout << a * b / result << "\n";
 	}
-
-	if (n > 1)
-		result -= result / n;
-
-	cout << result << "\n"; 
+	
+}
+ 
+int gcd(int a, int b)
+{
+	while (b != 0)
+	{
+		int k = a % b;
+		a = b;
+		b = k; 
+	}
+	return a;
 }
