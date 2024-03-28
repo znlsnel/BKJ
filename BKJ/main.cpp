@@ -6,60 +6,36 @@
 #include <string>
 using namespace std;
 
-bool isPalindrome(int target);
+
 int main()
 {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL); 
 	 
-
-		long N;
-		cin >> N;
-		long A[10000001];
-
-		for (int i = 2; i < 10000001; i++)
-			A[i] = i;
+	// 2 3 5 6 7 8 10
+		long Min, Max;
+		cin >> Min >> Max;
+		// 2 - 10
+		vector<bool> Check(Max - Min + 1);
 		 
-		for (int i = 2; i <= sqrt(10000001); i++)
+		for (long i = 2; i * i <= Max; i++)
 		{
-			if (A[i] == 0)
-				continue;
+			long pow = i * i; // 4
+			long start_index = Min / pow; // 0
 
-			for (int j = i + i; j < 10000001; j += i)
-				A[j] = 0;
-		} 
-		 
-		int i = N;
-		while (true)
-		{ 
-			int id = i++;
-			if (A[id] == 0)  continue;
-			 
-			if (isPalindrome(A[id]))
-			{
-				cout << id;
-				return 0;
-			}
+			if (Min % pow != 0)
+				start_index++;
 
+			for (long j = start_index; pow * j <= Max; j++)
+				Check[int(j * pow - Min)] = true;
 		}
-	
-}
 
-bool isPalindrome(int target)
-{
-	if (target == 101)
-		target = 101;
-	string str = to_string(target);
-	int s = 0;
-	int e = str.size() - 1;
-
-	while (s < e)
-	{
-		if (str[s] != str[e])
-			return false;
-		s++;
-		e--;
-	}
-	return true; 
+		int count = 0;
+		for (int i = 0; i <= Max - Min; i++)
+		{
+			if (!Check[i])
+				count++;
+		}
+		cout << count << "\n"; 
 }
