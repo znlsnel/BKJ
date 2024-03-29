@@ -7,11 +7,10 @@
 #include <tuple>
 using namespace std;
 
-vector < bool> visited;
-vector<int> result;
 vector<vector<int>> nodes;
-
-int goalDist;
+vector<bool> visited;
+vector<int> result;
+ 
 void BFS(int node);
 
 int main()
@@ -20,51 +19,51 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL); 
 	  
-	long nodeCount, edgeCount, startVtx;
-	cin >> nodeCount >> edgeCount >> goalDist >> startVtx;
+	long nodeCount, edgeCount;
+	cin >> nodeCount >> edgeCount;
 
 	nodes.resize(nodeCount + 1);
 	visited.resize(nodeCount + 1);  
-
+	result.resize(nodeCount + 1);
 	for (int i = 0; i < edgeCount; i++) {
 		int e, v;
 		cin >> e >> v;
 		nodes[e].push_back(v);  
 	}
-	  
-	BFS(startVtx);
 	 
-	sort(result.begin(), result.end());
-	for (int node : result)
-		cout << node << "\n";
+	for (int i = 0; i <= nodeCount; i++) {
+		fill(visited.begin(), visited.end(), false);
+		BFS(i); 
+	} 
 
-	if (result.size() == 0)
-		cout << -1 << "\n";
-} 
+	int maxVal = 0;
+	for (int i = 0; i <= nodeCount; i++)
+		maxVal = max(maxVal, result[i]);
+
+	for (int i = 1; i <= nodeCount; i++) {
+		if (result[i] == maxVal)
+			cout << i << " "; 
+	}
+	
+}  
    
 void BFS(int node)
 {
-	queue<pair<int, int>> q;
-	q.push(make_pair(node, 0));
-	
+	queue<int> q;
+	q.push(node);
+	visited[node] = true;
+
 	while (q.size())
 	{
-		int curNode = q.front().first;
-		int curDist = q.front().second; 
+		int curNode = q.front();
 		q.pop();
-
-		visited[curNode] = true; 
-
-		if (curDist == goalDist) {
-			result.push_back(curNode);
-			continue;
-		}
 
 		for (int node : nodes[curNode])
 		{
 			if (visited[node] == false) {
-				q.push(make_pair(node, curDist + 1)); 
 				visited[node] = true; 
+				result[node]++;
+				q.push(node);  
 			}
 		}
 	}
