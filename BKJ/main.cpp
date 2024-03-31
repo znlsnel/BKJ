@@ -7,69 +7,60 @@
 #include <tuple>
 using namespace std;
 
-void DFS(int node);
-vector<vector<int>> A;
-vector<int> check;
-vector<bool> visited;
-bool IsEven;
+void BFS();
+static int Sender[] = { 0, 0, 1, 1, 2, 2 };
+static int Receiver[] = { 1, 2, 0, 2, 0, 1 }; 
+static bool visited[201][201];
+static bool answer[201];
+static int now[3]; 
  
-
-
 int main()
-{
+{ 
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL); 
 	  
-	int N;
-	cin >> N;
+	cin >> now[0] >> now[1] >> now[2];
+	BFS();
 
-	for (int t = 0; t < N; t++)
-	{
-		int V, E;
-		cin >> V >> E;
-		A.resize(V + 1);
-		visited.resize(V + 1);
-		check.resize(V + 1);
-		IsEven = true;
-
-		for (int i = 0; i < E; i++) { 
-			int S, S2; 
-			cin >> S >> S2; 
-			A[S].push_back(S2);
-			A[S2].push_back(S);
-		}  
-		for (int i = 1; i <= V; i++)
-		{
-			if (IsEven)
-				DFS(i);
-			else
-				break;
-		}
-		if (IsEven)
-			cout << "YES" << "\n";
-		else
-			cout << "NO" << "\n";
-		 
-		for (int i = 0; i <= V; i++) {
-			A[i].clear();
-			visited[i] = false;
-			check[i] = 0;
-		} 
-	}
+	for (int i = 0; i < 201; i++)
+		if (answer[i])
+			cout << i << " ";
 }  
- // 1 -2 /   / 2 - 3/  / 3 - 4 / / 4 - 2
- // 0  1        1    0     0    1       1    1
-void DFS(int node)
-{
-	visited[node] = true;
 
-	for (int i : A[node]){
-		if (!visited[i]) {
-			check[i] = (check[node] + 1) % 2;
-			DFS(i);
+
+void BFS()
+{ 
+	queue<pair<int, int>> queue;
+	queue.push(make_pair(0, 0));
+	visited[0][0] = true;
+	answer[now[2]] = true;
+
+	while (!queue.empty()) {
+		pair<int, int> p = queue.front();
+		queue.pop();
+		int A = p.first;
+		int B = p.second;
+		int C = now[2] - A - B;
+
+		for (int k = 0; k < 6; k++)
+		{
+			int next[] = { A, B, C };
+			next[Receiver[k]] += next[Sender[k]];
+			next[Sender[k]] = 0;
+			 
+			if (next[Receiver[k]] > now[Receiver[k]])
+			{
+				next[Sender[k]] = next[Receiver[k]] - now[Receiver[k]]; 
+				next[Receiver[k]] = now[Receiver[k]]; 
+			}
+			 
+			if (!visited[next[0]][next[1]]) {
+				visited[next[0]][next[1]] = true;
+				queue.push(make_pair(next[0], next[1]));
+				if (next[0] == 0)
+					answer[next[2]] = true; 
+			}
 		}
-		else if (check[node] == check[i]) // 사이클 발생
-			IsEven = false;
-	} 
+	}
 }
