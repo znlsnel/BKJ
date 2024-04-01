@@ -7,60 +7,63 @@
 #include <tuple>
 using namespace std;
 
-void BFS();
-static int Sender[] = { 0, 0, 1, 1, 2, 2 };
-static int Receiver[] = { 1, 2, 0, 2, 0, 1 }; 
-static bool visited[201][201];
-static bool answer[201];
-static int now[3]; 
- 
+static vector<int> parent;
+void unionFunc(int a, int b);
+int find(int a);
+bool checkSame(int a, int b);
+
 int main()
 { 
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL); 
 	  
-	cin >> now[0] >> now[1] >> now[2];
-	BFS();
+	int N, M;
+	cin >> N >> M;
+	parent.resize(N + 1);
 
-	for (int i = 0; i < 201; i++)
-		if (answer[i])
-			cout << i << " ";
-}  
+	for (int i = 0; i <= N; i++)
+		parent[i] = i;
 
-
-void BFS()
-{ 
-	queue<pair<int, int>> queue;
-	queue.push(make_pair(0, 0));
-	visited[0][0] = true;
-	answer[now[2]] = true;
-
-	while (!queue.empty()) {
-		pair<int, int> p = queue.front();
-		queue.pop();
-		int A = p.first;
-		int B = p.second;
-		int C = now[2] - A - B;
-
-		for (int k = 0; k < 6; k++)
+	for (int i = 0; i < M; i++)
+	{
+		int question, a, b;
+		cin >> question >> a >> b;
+		
+		if (question == 0)
+			unionFunc(a, b);
+		else
 		{
-			int next[] = { A, B, C };
-			next[Receiver[k]] += next[Sender[k]];
-			next[Sender[k]] = 0;
-			 
-			if (next[Receiver[k]] > now[Receiver[k]])
-			{
-				next[Sender[k]] = next[Receiver[k]] - now[Receiver[k]]; 
-				next[Receiver[k]] = now[Receiver[k]]; 
-			}
-			 
-			if (!visited[next[0]][next[1]]) {
-				visited[next[0]][next[1]] = true;
-				queue.push(make_pair(next[0], next[1]));
-				if (next[0] == 0)
-					answer[next[2]] = true; 
-			}
+			string result = checkSame(a, b) ? "YES" : "NO";
+			cout << result << "\n";
 		}
 	}
+}  
+
+void unionFunc(int a, int b)
+{
+	int A = find(a);
+	int B = find(b);
+	
+	if (A > B)
+		parent[A] = B;
+
+	else
+		parent[B] = A;
 }
+ 
+int find(int a) 
+{
+	if (parent[a] != a)
+		parent[a] = find(parent[a]); // 경로 압축
+	return parent[a];
+}
+
+bool checkSame(int a, int b)
+{
+	int A = find(a);
+	int B = find(b); 
+
+	return A == B; 
+}
+
