@@ -17,28 +17,41 @@ int main()
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL); 
-	  
+
 	int N, M;
 	cin >> N >> M;
 	parent.resize(N + 1);
+	 
+	int dosi[201][201];
+	for (int i = 1; i <= N; i++) 
+		for (int j = 1; j <= N; j++)
+			cin >> dosi[i][j];
+	 
+	int route[1001];
+	for (int i = 1; i <= M; i++)
+		cin >> route[i]; 
 
 	for (int i = 0; i <= N; i++)
 		parent[i] = i;
 
-	for (int i = 0; i < M; i++)
+	for (int i = 1; i <= N; i++)
 	{
-		int question, a, b;
-		cin >> question >> a >> b;
-		
-		if (question == 0)
-			unionFunc(a, b);
-		else
-		{
-			string result = checkSame(a, b) ? "YES" : "NO";
-			cout << result << "\n";
+		for (int j = 1; j <= N; j++) {
+			if (dosi[i][j] == 1)
+				unionFunc(i, j); 
 		}
 	}
-}  
+
+	int index = find(route[1]);
+	
+	for (int i = 2; i <= M; i++)
+		if (index != find(route[i])) {
+			cout << "NO" << "\n";
+			return 0; 
+		}  
+
+	cout << "YES" << "\n";
+}   
 
 void unionFunc(int a, int b)
 {
@@ -50,7 +63,7 @@ void unionFunc(int a, int b)
 
 	else
 		parent[B] = A;
-}
+} 
  
 int find(int a) 
 {
