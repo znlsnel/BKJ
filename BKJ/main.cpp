@@ -8,6 +8,10 @@
 using namespace std;
 
 static vector<int> parent;
+static vector<int> trueP;
+static vector<vector<int>> party;
+static int result;
+
 void unionFunc(int a, int b);
 int find(int a);
 bool checkSame(int a, int b);
@@ -18,39 +22,55 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL); 
 
-	int N, M;
-	cin >> N >> M;
+	int N, M, T;
+	cin >> N >> M >> T;
+	trueP.resize(T);
+	party.resize(M);
 	parent.resize(N + 1);
-	 
-	int dosi[201][201];
-	for (int i = 1; i <= N; i++) 
-		for (int j = 1; j <= N; j++)
-			cin >> dosi[i][j];
-	 
-	int route[1001];
-	for (int i = 1; i <= M; i++)
-		cin >> route[i]; 
-
+	  
 	for (int i = 0; i <= N; i++)
 		parent[i] = i;
 
-	for (int i = 1; i <= N; i++)
+	for (int i = 0; i < T; i++)
+		cin >> trueP[i];
+
+	for (int i = 0; i < M; i++)
 	{
-		for (int j = 1; j <= N; j++) {
-			if (dosi[i][j] == 1)
-				unionFunc(i, j); 
+		int party_size;
+		cin >> party_size;
+
+		for (int j = 0; j < party_size; j++)
+		{
+			int temp;
+			cin >> temp;
+			party[i].push_back(temp);
 		}
 	}
 
-	int index = find(route[1]);
-	
-	for (int i = 2; i <= M; i++)
-		if (index != find(route[i])) {
-			cout << "NO" << "\n";
-			return 0; 
-		}  
+	for (int i = 0; i < M; i++)
+	{
+		int firstPeople = party[i][0];
+		for (int j = 1; j < party[i].size(); j++)
+			unionFunc(firstPeople, party[i][j]); 
+	}
 
-	cout << "YES" << "\n";
+	for (int i = 0; i < M; i++)
+	{
+		bool isPossible = true;
+		int cur = party[i][0];
+		for (int j = 0; j < T; j++)
+		{
+			if (find(cur) == find(trueP[j]))
+			{
+				isPossible = false;
+				break;
+			}
+		}
+		if (isPossible)
+			result++;
+	}
+	cout << result << "\n";
+	
 }   
 
 void unionFunc(int a, int b)
