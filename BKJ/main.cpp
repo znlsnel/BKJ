@@ -5,22 +5,35 @@
 
 using namespace std;
 
-vector<int> v[32001];
-int inDegree[32001];
-
-int N, M;
+vector<vector<int>> v;
+vector<int> inDegree;
+vector<int> costs;
+int N;
 
 void TopologySort();
 
 int main()
 {
-	cin >> N >> M;
-	int a, b;
-	for (int i = 0; i < M; i++)
+	cin >> N;
+
+	v.resize(N + 1);
+	inDegree.resize(N + 1);
+	costs.resize(N + 1);
+
+	int parent;
+	for (int i = 1; i <= N; i++)
 	{
-		cin >> a >> b;
-		v[a].push_back(b);
-		inDegree[b]++;
+		cin >> costs[i];
+
+		while (true)
+		{
+			cin >> parent;
+			if (parent == -1)
+				break;
+
+			v[parent].push_back(i);
+			inDegree[i]++;
+		}
 	}
 	TopologySort();
 	return 0;
@@ -28,26 +41,29 @@ int main()
 
 void TopologySort()
 {
-	queue<int> q; 
-	for (int i = 1; i <= N; i++) 
+	queue<int> q;
+	for (int i = 1; i <= N; i++)
 	{
 		if (inDegree[i] == 0)
 			q.push(i);
-	} 
+	}
 
+	vector<int> addTimes(N + 1);
 	while (q.size())
 	{
 		int n = q.front();
-		q.pop(); 
+		q.pop();
 
-		cout << n << " ";
-
-		for (int i = 0; i < v[n].size(); i++)  
+		for (int id : v[n])
 		{
-			int id = v[n][i];
+			addTimes[id] = max(addTimes[id], costs[n] + addTimes[n]);
 			if (--inDegree[id] == 0)
-				q.push(id) ;
+				q.push(id);
 		}
 	}
+
+	for (int i = 1; i <= N; i++)
+		cout << addTimes[i] + costs[i] << "\n";
+
 
 }
