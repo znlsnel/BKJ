@@ -4,66 +4,61 @@
 #include <queue>
 
 using namespace std;
+typedef pair<int, int> edge;
 
-vector<vector<int>> v;
-vector<int> inDegree;
-vector<int> costs;
-int N;
-
-void TopologySort();
+vector<vector<edge>> edges; 
+priority_queue<edge, vector<edge>, greater<edge>> q;
+vector<int> mdistance;
+vector<int> parent;
+vector<bool> visited;
 
 int main()
 {
-	cin >> N;
+	int V, E, S;
+	cin >> V >> E >> S;
+	edges.resize(V + 1);
+	parent.resize(V + 1); 
+	visited.resize(V + 1, false);
+	mdistance.resize(V + 1, 100000000);
+	    
+	for (int i = 0; i < E; i++) {
+		int u, v, w;
+		cin >> u >> v >> w;
 
-	v.resize(N + 1);
-	inDegree.resize(N + 1);
-	costs.resize(N + 1);
+		edges[u].push_back(make_pair(v, w));
+	}
+	 
+	q.push(make_pair(0, S));
+	mdistance[S] = 0; 
 
-	int parent;
-	for (int i = 1; i <= N; i++)
+	while (q.size())
 	{
-		cin >> costs[i];
+		edge current = q.top();
+		q.pop();
+		int curNode = current.second;
 
-		while (true)
-		{
-			cin >> parent;
-			if (parent == -1)
-				break;
-
-			v[parent].push_back(i);
-			inDegree[i]++;
+		if (visited[curNode])
+			continue;
+		 
+		visited[curNode] = true;
+		  
+		for (edge e : edges[curNode]) {
+			int nextDist = e.second + mdistance[curNode]; 
+			if (nextDist < mdistance[e.first]) {
+				mdistance[e.first] = nextDist;
+				q.push(make_pair(mdistance[e.first], e.first));
+			}
 		}
 	}
-	TopologySort();
+	
+	for (int i = 1; i <= V; i++)
+	{
+		if (visited[i])
+			cout << mdistance[i] << "\n";
+		else
+			cout << "INF" << "\n"; 
+	}
+
 	return 0;
 }
 
-void TopologySort()
-{
-	queue<int> q;
-	for (int i = 1; i <= N; i++)
-	{
-		if (inDegree[i] == 0)
-			q.push(i);
-	}
-
-	vector<int> addTimes(N + 1);
-	while (q.size())
-	{
-		int n = q.front();
-		q.pop();
-
-		for (int id : v[n])
-		{
-			addTimes[id] = max(addTimes[id], costs[n] + addTimes[n]);
-			if (--inDegree[id] == 0)
-				q.push(id);
-		}
-	}
-
-	for (int i = 1; i <= N; i++)
-		cout << addTimes[i] + costs[i] << "\n";
-
-
-}
