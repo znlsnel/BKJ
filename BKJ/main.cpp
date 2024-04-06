@@ -13,7 +13,7 @@ vector<int> parent;
 vector<bool> visited;
 
 int main()
-{
+{ // sss
 	int V, E, S;
 	cin >> V >> E >> S;
 	edges.resize(V + 1);
