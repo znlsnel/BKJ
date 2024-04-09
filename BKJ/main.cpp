@@ -2,14 +2,16 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
+#include <tuple>
 
 using namespace std;
-typedef pair<int, int> edge;
+typedef tuple<int, int, int> edge;
 
-int N, M, K;
-static int W[1001][1001];
-vector<int> mdistance;
-priority_queue<int> distQueue[1001];
+long MAXLONG = 20000000000;
+
+int N, M;
+static vector<long> mdistance;
+static vector<edge> edges;
 
 int main()
 {
@@ -17,51 +19,59 @@ int main()
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL);
-
-	cin >> N >> M >> K;
+	
+	cin >> N >> M;
+	mdistance.resize(N + 1);
+	std::fill(mdistance.begin(), mdistance.end(), MAXLONG);
 
 	for (int i = 0; i < M; i++) {
-		int u, v, w;
-		cin >> u >> v >> w;
-
-		W[u][v] = w; 
+		int start, end, time;
+		cin >> start >> end >> time;
+		edges.push_back(make_tuple(start, end, time)); 
 	} 
+	mdistance[1] = 0;
 
-
-	priority_queue<edge, vector<edge>, greater<edge>> pq;
-	pq.push(make_pair(0, 1));
-	distQueue[1].push(0);
-
-	while (pq.size())
+	for (int i = 1; i < N; i++)
 	{
-		edge current = pq.top();
-		pq.pop();
-
-		for (int adjNode = 1; adjNode <= N; adjNode++)
+		for (int j = 0; j < M; j++)
 		{
-			if (W[current.second][adjNode] != 0) 
+			edge medge = edges[j];
+			int start = get<0>(medge);
+			int end = get<1>(medge);
+			int time = get<2>(medge);
+
+			if (mdistance[start] != MAXLONG && mdistance[end] > mdistance[start] + time)
+				mdistance[end] = mdistance[start] + time;
+		}
+	}
+
+	bool mCycle = false;
+	for (int i = 0; i < M; i++)
+	{
+		edge medge = edges[i];
+		int start = get<0>(medge);
+		int end = get<1>(medge);
+		int time = get<2>(medge);
+
+		if (mdistance[start] != MAXLONG && mdistance[end] > mdistance[start] + time)
+			mCycle = true;
+	}
+
+	if (!mCycle)
+	{
+		for (int i = 2; i <= N; i++)
+		{
+			if (mdistance[i] == MAXLONG)
 			{
-				if (distQueue[adjNode].size() < K)
-				{
-					distQueue[adjNode].push(current.first + W[current.second][adjNode]);
-					pq.push(make_pair(current.first + W[current.second][adjNode], adjNode));
-				}
-				else if (distQueue[adjNode].top() > current.first + W[current.second][adjNode])
-				{
-					distQueue[adjNode].pop();
-					distQueue[adjNode].push(current.first + W[current.second][adjNode]);
-					pq.push(make_pair(current.first + W[current.second][adjNode], adjNode));
-				}
+				cout << -1 << "\n";
+			}
+			else {
+				cout << mdistance[i] << "\n";
 			}
 		}
 	}
-	for (int i = 1; i <= N; i++) {
-		if (distQueue[i].size() == K)
-			cout << distQueue[i].top() << "\n";
-		else
-			cout << -1 << "\n";
-	}
-
+	else
+		cout << -1 << "\n";
 
 	return 0;
 }
