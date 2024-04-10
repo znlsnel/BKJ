@@ -1,2 +1,4 @@
 ﻿  main.cpp
+D:\PROJECTS\Git\BKJ\BKJ\main.cpp(10,14): warning C4305: '초기화 중': '__int64'에서 'long'(으)로 잘립니다.
+D:\PROJECTS\Git\BKJ\BKJ\main.cpp(10,16): warning C4309: '초기화 중': 상수 값이 잘립니다.
   BKJ.vcxproj -> D:\PROJECTS\Git\BKJ\x64\Debug\BKJ.exe

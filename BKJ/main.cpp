@@ -8,9 +8,10 @@ using namespace std;
 typedef tuple<int, int, int> edge;
 
 long MAXLONG = 20000000000;
+long MINLONG = -2147483647;
 
-int N, M;
-static vector<long> mdistance;
+int N, M, sCity, eCity;
+static vector<long> mdistance, cityMoney;
 static vector<edge> edges;
 
 int main()
@@ -20,59 +21,52 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 	
-	cin >> N >> M;
-	mdistance.resize(N + 1);
-	std::fill(mdistance.begin(), mdistance.end(), MAXLONG);
+	cin >> N >> sCity >> eCity >> M;
+	mdistance.resize(N);
+	cityMoney.resize(N);
+	fill(mdistance.begin(), mdistance.end(), MINLONG);
 
-	for (int i = 0; i < M; i++) {
-		int start, end, time;
-		cin >> start >> end >> time;
-		edges.push_back(make_tuple(start, end, time)); 
-	} 
-	mdistance[1] = 0;
-
-	for (int i = 1; i < N; i++)
-	{
-		for (int j = 0; j < M; j++)
-		{
-			edge medge = edges[j];
-			int start = get<0>(medge);
-			int end = get<1>(medge);
-			int time = get<2>(medge);
-
-			if (mdistance[start] != MAXLONG && mdistance[end] > mdistance[start] + time)
-				mdistance[end] = mdistance[start] + time;
-		}
-	}
-
-	bool mCycle = false;
 	for (int i = 0; i < M; i++)
 	{
-		edge medge = edges[i];
-		int start = get<0>(medge);
-		int end = get<1>(medge);
-		int time = get<2>(medge);
-
-		if (mdistance[start] != MAXLONG && mdistance[end] > mdistance[start] + time)
-			mCycle = true;
+		int start, end, price;
+		cin >> start >> end >> price;
+		edges.push_back(make_tuple(start, end, price));
 	}
-
-	if (!mCycle)
+	for (int i = 0; i < N; i++)
 	{
-		for (int i = 2; i <= N; i++)
-		{
-			if (mdistance[i] == MAXLONG)
-			{
-				cout << -1 << "\n";
+		cin >> cityMoney[i];
+	}
+	mdistance[sCity] = cityMoney[sCity];
+
+	for (int i = 0; i <= N + 50; i++)
+	{
+		for (int j = 0; j < M; j++) {
+			int start = get<0>(edges[j]);
+			int end = get<1>(edges[j]);
+			int price = get<2>(edges[j]);
+
+			if (mdistance[start] == MINLONG) 
+				continue;
+
+			else if (mdistance[start] == MAXLONG) {
+				mdistance[end] = MAXLONG;
 			}
-			else {
-				cout << mdistance[i] << "\n";
+
+			else if (mdistance[end] < mdistance[start] + cityMoney[end] - price) {
+				mdistance[end] = mdistance[start] + cityMoney[end] - price;
+				if (i >= N - 1)
+					mdistance[end] = MAXLONG;
 			}
 		}
+		
 	}
+	if (mdistance[eCity] == MINLONG) 
+		cout << "gg\n";
+	else if (mdistance[eCity] == MAXLONG)
+		cout << "Gee\n";
 	else
-		cout << -1 << "\n";
-
+		cout << mdistance[eCity] << "\n";
+	 
 	return 0;
 }
 
