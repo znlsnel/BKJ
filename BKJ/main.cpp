@@ -5,10 +5,10 @@
 #include <tuple>
 
 using namespace std;
-typedef tuple<int, int, int> edge;
-long MAXLONG = 20000000000;
+typedef pair<int, int> edge;
+long MAXLONG = 2000000000;
 
-void myFunction();
+void myFunction(int size);
 int main()
 {
 
@@ -16,69 +16,68 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 	
-	int TC;
-	cin >> TC;
-	while (TC--)
-		myFunction();
+	while (true)
+	{
+		int size;
+		cin >> size;
+		if (size)
+			myFunction(size);
+		else
+			break;
+	}
 
 	return 0;
 }
 
-void myFunction()
+static int TestCount = 0;
+void myFunction(int size)
 {
-	int N, M, W;
-	cin >> N >> M >> W;
-	 
-	vector<edge> edges; 
-	vector<int> mdistance(N + 1, MAXLONG);
-	 
-	for (int i = 0; i < M; i++)
-	{
-		int s, e, t;
-		cin >> s >> e >> t;
-		edges.push_back(make_tuple(s, e, t));
-		edges.push_back(make_tuple(e, s, t));
-	}
-	for (int i = 0; i < W; i++)
-	{
-		int s, e, t; 
-		cin >> s >> e >> t; 
-		edges.push_back(make_tuple(s, e, -t));
+	TestCount++;
 
-	}
+	vector<vector<int>> map(size);
+	vector<int> resultCosts(size * size, MAXLONG);
+	vector<bool> visited(size * size, false); 
 
-	mdistance[1] = 0;
-
-	for (int i = 1; i < N; i++)
-	{
-		for (size_t j = 0; j < edges.size(); j++)
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++)
 		{
-			int start = get<0>(edges[j]); 
-			int end = get<1>(edges[j]);
-			int cost = get<2>(edges[j]);
+			int cost;
+			cin >> cost;
+			map[i].push_back(cost);
+		}
+	}
 
-			if (mdistance[start] != MAXLONG &&  mdistance[end] > mdistance[start] + cost)
-			{
-				mdistance[end] = mdistance[start] + cost; 
+	int dx[4] = {0, 1, 0, -1};
+	int dy[4] = {1, 0, -1, 0}; 
+
+	resultCosts[0] = map[0][0];
+	priority_queue<edge, vector<edge>, greater<edge>> pq;
+	// cost, start;
+	pq.push(make_pair(resultCosts[0], 0));
+	  
+	while (pq.size())
+	{
+		int startID = pq.top().second;
+		int curCost = pq.top().first;
+		pq.pop();
+		 
+		for (int i = 0; i < 4; i++)
+		{
+			int nextX = dx[i] + (startID % size);
+			int nextY = dy[i] + (startID / size);
+			if (nextX >= size || nextX < 0 || nextY >= size || nextY < 0) 
+				continue; 
+			 
+			int nextID = nextY * size + nextX;
+			int nextCost = map[nextY][nextX]; 
+			 
+			if (resultCosts[nextID] > nextCost + curCost) {
+				resultCosts[nextID] = nextCost + curCost;
+				pq.push(make_pair(resultCosts[nextID], nextID));
 			}
 		}
 	}
-	  
-	bool mCycle = false;
-	for (size_t i = 0; i < edges.size(); i++)
-	{
-		int start = get<0>(edges[i]);
-		int end = get<1>(edges[i]);
-		int cost = get<2>(edges[i]); 
-
-		if (mdistance[start] != MAXLONG && mdistance[end] > mdistance[start] + cost)
-		{
-			mCycle = true;
-			break;
-		}
-	}
-	if (mCycle)
-		cout << "YES" << "\n";
-	else
-		cout << "NO" << "\n";
+	 
+	cout << "Problem " << TestCount << ": " << resultCosts[size * size - 1] << "\n";
 }
+
