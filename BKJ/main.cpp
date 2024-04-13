@@ -5,79 +5,60 @@
 #include <tuple>
 
 using namespace std;
-typedef pair<int, int> edge;
-long MAXLONG = 2000000000;
 
-void myFunction(int size);
+static int N, M;
+static long mdistance[101][101];
+
+
 int main()
 {
-
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL);
+
+	cin >> N >> M;
+
+	for (int i = 1; i <= N; i++)
+	{
+		for (int j = 1; j <= N; j++)
+		{
+			if (i == j)
+				mdistance[i][j] = 0;
+			else
+				mdistance[i][j] = 10000001;
+
+		}
+	}
 	
-	while (true)
+	for (int i = 0; i < M; i++)
 	{
-		int size;
-		cin >> size;
-		if (size)
-			myFunction(size);
-		else
-			break;
+		int s, e, v;
+		cin >> s >> e >> v;
+		if (mdistance[s][e] > v)
+			mdistance[s][e] = v;
 	}
 
-	return 0;
-}
-
-static int TestCount = 0;
-void myFunction(int size)
-{
-	TestCount++;
-
-	vector<vector<int>> map(size);
-	vector<int> resultCosts(size * size, MAXLONG);
-	vector<bool> visited(size * size, false); 
-
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < size; j++)
+	for (int k = 1; k <= N; k++)
+	{
+		for (int i = 1; i <= N; i++)
 		{
-			int cost;
-			cin >> cost;
-			map[i].push_back(cost);
+			for (int j = 1; j <= N; j++)
+				if (mdistance[i][j] > mdistance[i][k] + mdistance[k][j])
+					mdistance[i][j] = mdistance[i][k] + mdistance[k][j];
 		}
 	}
 
-	int dx[4] = {0, 1, 0, -1};
-	int dy[4] = {1, 0, -1, 0}; 
-
-	resultCosts[0] = map[0][0];
-	priority_queue<edge, vector<edge>, greater<edge>> pq;
-	// cost, start;
-	pq.push(make_pair(resultCosts[0], 0));
-	  
-	while (pq.size())
+	for (int i = 1; i <= N; i++)
 	{
-		int startID = pq.top().second;
-		int curCost = pq.top().first;
-		pq.pop();
-		 
-		for (int i = 0; i < 4; i++)
+		for (int j = 1; j <= N; j++)
 		{
-			int nextX = dx[i] + (startID % size);
-			int nextY = dy[i] + (startID / size);
-			if (nextX >= size || nextX < 0 || nextY >= size || nextY < 0) 
-				continue; 
-			 
-			int nextID = nextY * size + nextX;
-			int nextCost = map[nextY][nextX]; 
-			 
-			if (resultCosts[nextID] > nextCost + curCost) {
-				resultCosts[nextID] = nextCost + curCost;
-				pq.push(make_pair(resultCosts[nextID], nextID));
+			if (mdistance[i][j] == 10000001) {
+				cout << "0 ";
 			}
+			else
+				cout << mdistance[i][j] << " ";
 		}
+		cout << "\n";
 	}
-	 
-	cout << "Problem " << TestCount << ": " << resultCosts[size * size - 1] << "\n";
 }
 
