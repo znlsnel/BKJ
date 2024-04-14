@@ -6,7 +6,7 @@
 
 using namespace std;
 
-static int N, M;
+static int N;
 static long mdistance[101][101];
 
 
@@ -16,49 +16,37 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	cin >> N >> M;
+	cin >> N;
 
-	for (int i = 1; i <= N; i++)
+	for (int i = 0; i < N; i++)
 	{
-		for (int j = 1; j <= N; j++)
-		{
-			if (i == j)
-				mdistance[i][j] = 0;
-			else
-				mdistance[i][j] = 10000001;
-
-		}
-	}
-	
-	for (int i = 0; i < M; i++)
-	{
-		int s, e, v;
-		cin >> s >> e >> v;
-		if (mdistance[s][e] > v)
-			mdistance[s][e] = v;
+		for (int j = 0; j < N; j++)
+			cin >> mdistance[i][j];
 	}
 
-	for (int k = 1; k <= N; k++)
+	for (int k = 0; k < N; k++)
 	{
-		for (int i = 1; i <= N; i++)
+		for (int i = 0; i < N; i++)
 		{
-			for (int j = 1; j <= N; j++)
-				if (mdistance[i][j] > mdistance[i][k] + mdistance[k][j])
-					mdistance[i][j] = mdistance[i][k] + mdistance[k][j];
-		}
-	}
-
-	for (int i = 1; i <= N; i++)
-	{
-		for (int j = 1; j <= N; j++)
-		{
-			if (mdistance[i][j] == 10000001) {
-				cout << "0 ";
+			for (int j = 0; j < N; j++)
+			{
+				if (mdistance[i][k] == 1 && mdistance[k][j] == 1)
+					mdistance[i][j] = 1;
 			}
+		}
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < N; j++)
+		{
+			if (mdistance[i][j] == 1) 
+				cout << "1 "; 
 			else
-				cout << mdistance[i][j] << " ";
+				cout << "0 ";
 		}
 		cout << "\n";
 	}
+
 }
 
