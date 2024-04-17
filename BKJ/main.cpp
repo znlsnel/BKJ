@@ -7,90 +7,47 @@
 using namespace std;
 
 
-static vector<int> parent; 
-
-void Union(int a, int b);
-int find(int a); 
-
-typedef struct Edge {
-	int s, e, v;
-	bool operator > (const Edge& temp) const {
-		return v > temp.v;
-	}
-} Edge;
-
-
-static priority_queue<Edge, vector<Edge>, greater<Edge>> pq;
-
+void dfs(int node);
+static vector<int> parent;
+static vector<bool> visited; 
+static vector<vector<int>> tree;
 int main()
 {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	int N, sum = 0;
+	int N;
 	cin >> N;
-	parent.resize(N);
-	for (int i = 0; i < N; i++)
-		parent[i] = i;
-	priority_queue<Edge, vector<Edge>, greater<Edge>> pq;
+	parent.resize(N + 1, 0);
+	visited.resize(N + 1, false);
+	tree.resize(N + 1);
 
-	for (int i = 0; i < N; i++)
-		for (int j = 0; j < N; j++)
-		{
-			char tempc = cin.get();
-			if (tempc == '\n')
-				tempc = cin.get();
-
-			int cost = 0;
-			if (tempc >= 'a' && tempc <= 'z')
-				cost = tempc -  'a' + 1;
-
-			else if (tempc >= 'A' && tempc <= 'Z')
-				cost = tempc - 'A' + 27;
-
-			sum += cost;
-			if (i != j && cost > 0)
-				pq.push(Edge{ i, j, cost });
-		}
-
-
-	int useEdge = 0;
-	int result = 0;
-	while (pq.size())
+	for (int i = 0; i < N- 1; i++)
 	{
-		Edge now = pq.top();
-		pq.pop();
-
-		if (find(now.s) != find(now.e))
-		{
-			Union(now.s, now.e);
-			result += now.v;
-			useEdge++;
-		}
+		int a, b;
+		cin >> a >> b;
+		tree[a].push_back(b);
+		tree[b].push_back(a);
 	}
 
-	if (useEdge == N - 1)
-		cout << sum - result << "\n";
-	else
-		cout << -1 << "\n";
+	parent[1] = 1;
+	dfs(1);
 
+	for (int i = 2; i <= N; i++)
+		cout << parent[i] << "\n";
 }
 
-void Union(int a, int b)
+void dfs(int node)
 {
-	a = find(a);
-	b = find(b);
 
-	if (a != b)
-		parent[b] = a;
-}
+	for (int n : tree[node])
+	{
+		if (parent[n] != 0) continue;
 
-int find(int a)
-{
-	if (a == parent[a])
-		return a;
-	 
-	return parent[a] = find(parent[a]);
+		parent[n] = node;
+		dfs(n);
+
+	}
 }
 
