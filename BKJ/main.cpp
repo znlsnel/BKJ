@@ -8,9 +8,9 @@ using namespace std;
 
 
 void dfs(int node);
-static vector<int> parent;
-static vector<bool> visited; 
 static vector<vector<int>> tree;
+static int M;
+int result = 0;
 int main()
 {
 	ios::sync_with_stdio(false);
@@ -19,35 +19,39 @@ int main()
 
 	int N;
 	cin >> N;
-	parent.resize(N + 1, 0);
-	visited.resize(N + 1, false);
 	tree.resize(N + 1);
+	int root = 0;
 
-	for (int i = 0; i < N- 1; i++)
+	for (int i = 0; i < N; i++)
 	{
-		int a, b;
-		cin >> a >> b;
-		tree[a].push_back(b);
-		tree[b].push_back(a);
+		int node;
+		cin >> node;
+		if (node != -1 )
+			tree[node].push_back(i); 
+		else
+			root = i;
+
 	}
+	cin >> M;
+	if (M != root)
+		dfs(root);
 
-	parent[1] = 1;
-	dfs(1);
-
-	for (int i = 2; i <= N; i++)
-		cout << parent[i] << "\n";
-}
-
+	cout << result;
+} 
+ 
 void dfs(int node)
 {
-
+	int count = 0;
 	for (int n : tree[node])
 	{
-		if (parent[n] != 0) continue;
+		if (n == M ) 
+			continue;
 
-		parent[n] = node;
+		count++;
 		dfs(n);
 
 	}
+	if (count == 0) 
+		result++;
 }
 
