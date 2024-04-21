@@ -7,78 +7,106 @@
 using namespace std;
 
 
-static int N, M;
+static int N;
 
 class Node
 {
 public:
-	Node* childs[26];
-	bool isLeaf;
-	Node() : isLeaf(false)
-	{
-		fill(childs, childs + 26, nullptr);
-	}
-	~Node() {
-		for (auto& child : childs)
-			delete child;
-	}
+	bool isRoot = false;
+	Node* left;
+	Node* right; 
+	char c = ' ';
 
-	void insert(const char* key)
+	void Preorder(vector<char>* result = new vector<char>())
 	{
-		if (*key == 0)
-			isLeaf = true;
-		else
-		{
-			int next_index = *key - 'a';
-			if (childs[next_index] == nullptr)
-				childs[next_index] = new Node();
+		// root
+		result->push_back(c);
 
-			childs[next_index]->insert(key + 1);
+		if (left) 
+			left->Preorder(result); 
+		
+		if (right)
+			right->Preorder(result);
+
+		if (isRoot) {
+			for (char a : *result)
+				cout << a;
+			cout << "\n";
 		}
-
 	}
 
-	Node* find(const char* key)
+	void Inorder(vector<char>* result = new vector<char>())
 	{
-		if (*key == 0)
-			return this;
 
-		int next_index = *key - 'a';
+		if (left)
+			left->Inorder(result);
 
-		if (childs[next_index] == nullptr)
-			return nullptr;
-		return childs[next_index]->find(key + 1);
+		result->push_back(c);
+
+		if (right)
+			right->Inorder(result);
+
+		if (isRoot) {
+			for (char a : *result)
+				cout << a;
+			cout << "\n";
+		}
 	}
+
+	void Postorder(vector<char>* result = new vector<char>())
+	{
+		if (left)
+			left->Postorder(result);
+
+		if (right)
+			right->Postorder(result);
+
+		result->push_back(c); 
+
+		if (isRoot) {
+			for (char a : *result)
+				cout << a;
+			cout << "\n";
+		}
+	} 
+
+
 };
 
+vector<Node> tree;
 int main()
 {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	cin >> N >> M;
-	Node* root = new Node();
+	cin >> N;
+	tree.resize(N);
 
-	while (N--)
+	for (int i = 0; i < N; i++)
 	{
-		char text[501];
-		cin >> text;
-		root->insert(text);
-	}
+		char root, left, right;
+		cin >> root >> left >> right;
+		int rootIndex = root - 'A';
+		int leftIndex = left != '.' ? left - 'A' : -1;
+		int rightIndex = right != '.' ? right - 'A' : -1;
+		tree[rootIndex].c = root;
 
-	int count = 0;
+		if (leftIndex > 0) {
+			tree[rootIndex].left = &tree[leftIndex];
+			tree[rootIndex].left->c = left;
+		}
+		if (rightIndex > 0)
+		{
+			tree[rootIndex].right = &tree[rightIndex]; 
+			tree[rootIndex].right->c = right;
+		}
+	} 
+	tree[0].isRoot = true;
 
-	while (M--)
-	{
-		char text[501];
-		cin >> text;
-		Node* result = root->find(text);
-
-		if (result && result->isLeaf)
-			count++;
-	}
-	cout << count << "\n";
+	tree[0].Preorder();
+	tree[0].Inorder();
+	tree[0].Postorder();
 
 } 
  
