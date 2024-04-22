@@ -3,110 +3,104 @@
 #include <algorithm>
 #include <queue>
 #include <tuple>
+#include <cmath>
 
 using namespace std;
 
+static vector<long> tree;
+long getSum(int s, int e);
+void changeVal(int index, long val);
+void setTree(int i);
 
-static int N;
-
-class Node
-{
-public:
-	bool isRoot = false;
-	Node* left;
-	Node* right; 
-	char c = ' ';
-
-	void Preorder(vector<char>* result = new vector<char>())
-	{
-		// root
-		result->push_back(c);
-
-		if (left) 
-			left->Preorder(result); 
-		
-		if (right)
-			right->Preorder(result);
-
-		if (isRoot) {
-			for (char a : *result)
-				cout << a;
-			cout << "\n";
-		}
-	}
-
-	void Inorder(vector<char>* result = new vector<char>())
-	{
-
-		if (left)
-			left->Inorder(result);
-
-		result->push_back(c);
-
-		if (right)
-			right->Inorder(result);
-
-		if (isRoot) {
-			for (char a : *result)
-				cout << a;
-			cout << "\n";
-		}
-	}
-
-	void Postorder(vector<char>* result = new vector<char>())
-	{
-		if (left)
-			left->Postorder(result);
-
-		if (right)
-			right->Postorder(result);
-
-		result->push_back(c); 
-
-		if (isRoot) {
-			for (char a : *result)
-				cout << a;
-			cout << "\n";
-		}
-	} 
-
-
-};
-
-vector<Node> tree;
 int main()
 {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	cin >> N;
-	tree.resize(N);
+	int N, M, K;
+	cin >> N >> M >> K;
+	int treeHeight = 0;
+	int Length = N;
 
-	for (int i = 0; i < N; i++)
+	while (Length != 0) {
+		Length /= 2;
+		treeHeight++;
+	}
+
+	int treeSize = int(pow(2, treeHeight + 1));
+	//int treeSize = 2;
+	//for (int i = 1; i < treeHeight + 1; i++)  
+	//	treeSize *= 2;
+
+	int startNodeIndex = treeSize / 2 - 1;
+
+	tree.resize(treeSize + 1);
+
+	for (int i = startNodeIndex + 1; i <= startNodeIndex + N; i++)
 	{
-		char root, left, right;
-		cin >> root >> left >> right;
-		int rootIndex = root - 'A';
-		int leftIndex = left != '.' ? left - 'A' : -1;
-		int rightIndex = right != '.' ? right - 'A' : -1;
-		tree[rootIndex].c = root;
+		cin >> tree[i];
+	}
+	setTree(treeSize - 1);
 
-		if (leftIndex > 0) {
-			tree[rootIndex].left = &tree[leftIndex];
-			tree[rootIndex].left->c = left;
+	for (int i = 0; i < M + K; i++)
+	{
+		long a, s, e;
+		cin >> a >> s >> e;
+
+		if (a == 1) {
+			changeVal(startNodeIndex + s, e);
 		}
-		if (rightIndex > 0)
+		else if (a == 2){
+			cout << getSum(startNodeIndex + s, startNodeIndex + e) << "\n";
+		}
+
+
+	}
+}
+
+long getSum(int s, int e)
+{
+	long result = 0;
+
+	while (s <= e)
+	{
+		if (s % 2 == 1) 
 		{
-			tree[rootIndex].right = &tree[rightIndex]; 
-			tree[rootIndex].right->c = right;
+			result += tree[s];
+			s++;
 		}
-	} 
-	tree[0].isRoot = true;
+		if (e % 2 == 0)
+		{
+			result += tree[e];
+			e--;
+		}
 
-	tree[0].Preorder();
-	tree[0].Inorder();
-	tree[0].Postorder();
+		s /= 2;
+		e /= 2; 
+	}
 
-} 
- 
+	return result;
+
+}
+
+void changeVal(int s, long value)
+{
+	long diff = value - tree[s];
+	 
+	while (s > 0)
+	{
+		tree[s ] += diff;
+		s /= 2;
+	}
+}
+
+
+void setTree(int i)
+{
+	while (i != 1)
+	{
+		tree[i / 2] += tree[i];
+		i--;
+	}
+}
