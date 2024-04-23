@@ -7,10 +7,9 @@
 
 using namespace std;
 
-static vector<long> tree;
-long getSum(int s, int e);
-void changeVal(int index, long val);
-void setTree(int i);
+vector<int> tree;
+void SetTree(int i);
+int GetMin(int s, int e);
 
 int main()
 {
@@ -18,89 +17,64 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	int N, M, K;
-	cin >> N >> M >> K;
+	int N, M;
+	cin >> N >> M;
+
 	int treeHeight = 0;
 	int Length = N;
 
-	while (Length != 0) {
+	while (Length > 0)
+	{
 		Length /= 2;
 		treeHeight++;
 	}
 
-	int treeSize = int(pow(2, treeHeight + 1));
-	//int treeSize = 2;
-	//for (int i = 1; i < treeHeight + 1; i++)  
-	//	treeSize *= 2;
+	int treeSize = int(pow(2, treeHeight + 2));
+	int startNodeId = treeSize / 2 - 1;
+	tree.resize(treeSize);
 
-	int startNodeIndex = treeSize / 2 - 1;
-
-	tree.resize(treeSize + 1);
-
-	for (int i = startNodeIndex + 1; i <= startNodeIndex + N; i++)
+	for (int i = startNodeId + 1; i <= startNodeId + N; i++)
 	{
 		cin >> tree[i];
 	}
-	setTree(treeSize - 1);
+	SetTree(treeSize - 1);
 
-	for (int i = 0; i < M + K; i++)
+	for (int i = 0; i < M; i++)
 	{
-		long a, s, e;
-		cin >> a >> s >> e;
-
-		if (a == 1) {
-			changeVal(startNodeIndex + s, e);
-		}
-		else if (a == 2){
-			cout << getSum(startNodeIndex + s, startNodeIndex + e) << "\n";
-		}
-
-
+		int s, e;
+		cin >> s >> e;
+		cout << GetMin(s + startNodeId, e + startNodeId) << "\n";
 	}
+	
 }
 
-long getSum(int s, int e)
+int GetMin(int s, int e)
 {
-	long result = 0;
+	int result = 0;
 
 	while (s <= e)
 	{
-		if (s % 2 == 1) 
-		{
-			result += tree[s];
+		if (s % 2 == 1) {
+			result = result == 0 ? tree[s] : min(result, tree[s]);
 			s++;
 		}
-		if (e % 2 == 0)
-		{
-			result += tree[e];
+		if (e % 2 == 0) {
+			result = result == 0 ? tree[e] : min(result, tree[e]); 
 			e--;
 		}
-
+		 
 		s /= 2;
-		e /= 2; 
+		e /= 2;
 	}
 
 	return result;
-
 }
 
-void changeVal(int s, long value)
+void SetTree(int i)
 {
-	long diff = value - tree[s];
-	 
-	while (s > 0)
+	while (i > 0)
 	{
-		tree[s ] += diff;
-		s /= 2;
-	}
-}
-
-
-void setTree(int i)
-{
-	while (i != 1)
-	{
-		tree[i / 2] += tree[i];
+		tree[i / 2] = tree[i / 2] == 0 ? tree[i] : min(tree[i / 2], tree[i]);
 		i--;
 	}
 }
