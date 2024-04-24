@@ -7,9 +7,11 @@
 
 using namespace std;
 
-vector<int> tree;
+vector<long> tree;
+static int MOD = 1000000007;
 void SetTree(int i);
-int GetMin(int s, int e);
+long GetMul(int s, int e);
+void ChangeValue(int index, long value);
 
 int main()
 {
@@ -17,8 +19,8 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	int N, M;
-	cin >> N >> M;
+	int N, M, K;
+	cin >> N >> M >> K;
 
 	int treeHeight = 0;
 	int Length = N;
@@ -28,10 +30,11 @@ int main()
 		Length /= 2;
 		treeHeight++;
 	}
-
-	int treeSize = int(pow(2, treeHeight + 2));
+	 
+	int treeSize = int(pow(2, treeHeight + 1));
 	int startNodeId = treeSize / 2 - 1;
-	tree.resize(treeSize);
+	tree.resize(treeSize + 1);  
+	fill(tree.begin(), tree.end(), 1);
 
 	for (int i = startNodeId + 1; i <= startNodeId + N; i++)
 	{
@@ -39,42 +42,58 @@ int main()
 	}
 	SetTree(treeSize - 1);
 
-	for (int i = 0; i < M; i++)
+	for (int i = 0; i < M + K; i++)
 	{
-		int s, e;
-		cin >> s >> e;
-		cout << GetMin(s + startNodeId, e + startNodeId) << "\n";
+		long a, b, c;
+		cin >> a >> b >> c;
+		if (a == 1) {
+			ChangeValue(b + startNodeId, c); 
+		}
+		else if (a == 2)
+			cout << GetMul(b + startNodeId, c + startNodeId) << "\n";
+
 	}
-	
+	 
+}
+  
+void ChangeValue(int index, long value)
+{
+	tree[index] = value;
+	 
+	while (index > 1) { 
+		index =  index / 2;
+		tree[index] = tree[index * 2] % MOD * tree[index * 2 + 1] % MOD; 
+	}
 }
 
-int GetMin(int s, int e)
+long GetMul(int s, int e)
 {
-	int result = 0;
-
+	long result = 1;
+	 
 	while (s <= e)
 	{
 		if (s % 2 == 1) {
-			result = result == 0 ? tree[s] : min(result, tree[s]);
+			result = result * tree[s] % MOD;
 			s++;
 		}
-		if (e % 2 == 0) {
-			result = result == 0 ? tree[e] : min(result, tree[e]); 
+		if (e % 2 == 0) {   
+			result = result *  tree[e] % MOD;
 			e--;
 		}
 		 
-		s /= 2;
-		e /= 2;
+		s /= 2; 
+		e /= 2; 
 	}
 
-	return result;
+	return result; 
 }
 
-void SetTree(int i)
-{
-	while (i > 0)
+void SetTree(int index)
+{ 
+	while (index != 1)
 	{
-		tree[i / 2] = tree[i / 2] == 0 ? tree[i] : min(tree[i / 2], tree[i]);
-		i--;
+		tree[index / 2] = tree[index / 2] * tree[index] % MOD;
+	
+		index--; 
 	}
 }
