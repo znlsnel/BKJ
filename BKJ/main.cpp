@@ -7,11 +7,12 @@
 
 using namespace std;
 
-vector<long> tree;
-static int MOD = 1000000007;
-void SetTree(int i);
-long GetMul(int s, int e);
-void ChangeValue(int index, long value);
+vector<vector<int>> tree;
+vector<int> depth;
+vector<int> parent;
+vector<bool> visited;
+int executeLCA(int a, int b);
+void BFS(int i);
 
 int main()
 {
@@ -19,81 +20,83 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	int N, M, K;
-	cin >> N >> M >> K;
+	int N;
+	cin >> N; 
 
-	int treeHeight = 0;
-	int Length = N;
+	tree.resize(N + 1);
+	depth.resize(N + 1);
+	parent.resize(N + 1);
+	visited.resize(N + 1);
 
-	while (Length > 0)
+
+	for (int i = 0; i < N - 1; i++)
 	{
-		Length /= 2;
-		treeHeight++;
+		int a, b;
+		cin >> a >> b;
+		tree[a].push_back(b);
+		tree[b].push_back(a);
 	}
+	parent[1] = 0; 
+	BFS(1);
 	 
-	int treeSize = int(pow(2, treeHeight + 1));
-	int startNodeId = treeSize / 2 - 1;
-	tree.resize(treeSize + 1);  
-	fill(tree.begin(), tree.end(), 1);
+	int M;
+	cin >> M;
 
-	for (int i = startNodeId + 1; i <= startNodeId + N; i++)
+	vector<int> result;
+	for (int i = 0; i < M; i++)
 	{
-		cin >> tree[i];
+		int a, b;
+		cin >> a >> b;
+		result.push_back(executeLCA(a, b));
 	}
-	SetTree(treeSize - 1);
 
-	for (int i = 0; i < M + K; i++)
-	{
-		long a, b, c;
-		cin >> a >> b >> c;
-		if (a == 1) {
-			ChangeValue(b + startNodeId, c); 
-		}
-		else if (a == 2)
-			cout << GetMul(b + startNodeId, c + startNodeId) << "\n";
-
-	}
+	for (int i : result)
+		cout << i << "\n";
 	 
+}
+
+int executeLCA(int a, int b)
+{
+	if (depth[a] < depth[b])
+	{
+		int temp = a;
+		a = b;
+		b = temp;
+	}
+	while (depth[a] != depth[b])
+		a = parent[a];
+	
+	while (a != b) {
+		a = parent[a];
+		b = parent[b];
+	}
+	return a;
 }
   
-void ChangeValue(int index, long value)
-{
-	tree[index] = value;
-	 
-	while (index > 1) { 
-		index =  index / 2;
-		tree[index] = tree[index * 2] % MOD * tree[index * 2 + 1] % MOD; 
-	}
-}
-
-long GetMul(int s, int e)
-{
-	long result = 1;
-	 
-	while (s <= e)
-	{
-		if (s % 2 == 1) {
-			result = result * tree[s] % MOD;
-			s++;
-		}
-		if (e % 2 == 0) {   
-			result = result *  tree[e] % MOD;
-			e--;
-		}
-		 
-		s /= 2; 
-		e /= 2; 
-	}
-
-	return result; 
-}
-
-void SetTree(int index)
+void BFS(int i)
 { 
-	while (index != 1)
+	// index, level
+	queue<pair<int, int>> q;
+	q.push(make_pair(i, 0));
+
+	 
+	while (q.size())
 	{
-		tree[index / 2] = tree[index / 2] * tree[index] % MOD;
-	
-		index--; 
+		int index = q.front().first;
+		int level = q.front().second;
+		
+		visited[index] = true;
+		depth[index] = level;
+		q.pop();
+
+		 
+		for (int i : tree[index]) {
+			
+			if (visited[i] == true) 
+				continue;
+
+			parent[i] = index;
+			q.push(make_pair(i, level + 1)); 
+		}
 	}
 }
