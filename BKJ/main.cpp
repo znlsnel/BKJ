@@ -9,31 +9,42 @@ using namespace std;
 
 static int N, K;
 static int D[1001][1001]; 
+
+void result()
+{
+	int k, n;
+	cin >> k >> n;
+
+	for (int i = 1; i <= n; i++) {
+		D[0][i] = i; 
+	}
+	for (int i = 1; i <= k; i++) {
+		D[i][1] = 1;
+	}
+	
+	for (int i = 1; i <= k; i++) 
+	{
+		for (int j = 2; j <= n; j++) 
+		{
+			D[i][j] = D[i][j - 1] + D[i - 1][j];
+		}
+	}
+
+	cout << D[k][n] << "\n";
+}
 int main()
 {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	cout.tie(NULL);
 
-	int N, K;
-	cin >> N >> K; 
+	int N;
+	cin >> N;
 
-	for (int i = 0; i <= N; i++) {
-		D[i][1] = i;
-		D[i][0] = 1;
-		D[i][i] = 1;
-	}
-	for (int i = 2; i <= N; i++) {
-		for (int j = 1; j < i; j++) {
-			D[i][j] = D[i - 1][j] + D[i - 1][j - 1];
-			D[i][j] = D[i][j] % 10007;
-		}
+	for (int i = 0; i < N; i++) {
+		result();
 	}
 
-	cout << D[N][K] << "\n";
+
 }
 
-// 15 / 6 * (5 - 3)^2
-// 15 / 6 * 4
-// 15 / 24
-// 5/ 8
