@@ -8,25 +8,31 @@
 using namespace std;
 
 static int N;
-static long mod = 1000000000; 
-static long D[1000001];
+static vector<int> D;
+
+int fibo(int n)
+{
+	if (D[n] != -1) {
+		return D[n];
+	}
+
+	return D[n] = fibo(n - 2) + fibo(n - 1); 
+}
+
 int main() 
 {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL); 
 	cout.tie(NULL);
 
-	// N개의 a, M개의 z
-		cin >> N; 
-
-
-		D[1] = 0;
-		D[2] = 1;
+	cin >> N; 
+	D.resize(N + 1, -1);
+	 
+	D[0] = 0; 
+	D[1] = 1;
 	  
-		for (int i = 3; i <= N; i++) {
-			D[i] = (i - 1) * (D[i - 1] + D[i - 2]) % mod;   
-		}
-		cout << D[N] << "\n";
-
 	
-}
+	fibo(N);
+	cout << D[N] << "\n"; 
+} 
+ 
