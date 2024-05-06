@@ -8,51 +8,36 @@
 using namespace std;
 
 static int N;
-static vector<long> D;
-  
+static long long D[101][10];
 
-// ⌈⌉
-// ⌊⌋ , [ㅁㅁ]
-
-// ⌈⌉ 
-// ⌊⌋  1개
-// 
-// ⌈⌉⌈⌉  // [ㅡㅡ] 
-// ⌊⌋⌊⌋  // [ㅡㅡ]  2개
-
-// ⌈⌉⌈⌉⌈⌉   // ⌈⌉ [ㅡㅡ]     // [ㅡㅡ]⌈⌉
- //⌊⌋⌊⌋⌊⌋   // ⌊⌋ [ㅡㅡ]     // [ㅡㅡ]⌊⌋  3개
-
-// ⌈⌉⌈⌉⌈⌉⌈⌉ // ⌈⌉⌈⌉[ㅡㅡ] //⌈⌉ [ㅡㅡ]⌈⌉ // [ㅡㅡ]⌈⌉⌈⌉ // [ㅡㅡ][ㅡㅡ]
-// ⌊⌋⌊⌋⌊⌋⌊⌋ // ⌊⌋⌊⌋[ㅡㅡ] //⌊⌋ [ㅡㅡ]⌊⌋ // [ㅡㅡ]⌊⌋⌊⌋ // [ㅡㅡ][ㅡㅡ]  // 5개 
-
-// 4의 경우의 수 = 3의 경우의 수 + 2의 경우의 수
-// 3의 경우의 수 = 2의 경우의 수 + 1의 경우의 수
-
-long Function(int id)
-{
-	if (D[id] > 0)
-		return D[id];	
-	 
-	return D[id] = (Function(id - 1) + Function(id - 2) ) % 10007;  
-}
+// 1일 때 = 9
+// 2의 경우의 수 = 1의 경우의 수 * 2 - 1
+// 3의 경우의 수 = 2의 경우의 수 * 2 - 1
 
 int main()
 {
 	ios::sync_with_stdio(false);
-	cin.tie(NULL); 
+	cin.tie(NULL);
 	cout.tie(NULL);
 
-	cin >> N; 
+	cin >> N;
 
-	D.resize(N + 1); 
-	D[1] = 1;
-	D[2] = 2; 
+	for (int i = 1; i < 10; i++)
+		D[1][i] = 1;
 
-	for (int i = 3; i <= N; i++) {
-		D[i] = (D[i - 1] + D[i - 2]) % 10007;
+	for (int i = 2; i <= N; i++) {
+		D[i][0] = D[i - 1][1];
+		D[i][9] = D[i - 1][8];
+
+		for (int j = 1; j <= 8; j++) {
+			D[i][j] = (D[i - 1][j - 1] + D[i - 1][j + 1]) % 1000000000;
+		}
 	}
-	 
-	cout << D[N];  
+
+	long sum = 0;
+	for (int i = 0; i < 10; i++) {
+		sum = (sum + D[N][i]) % 1000000000;
+	}
+
+	cout << sum;
 }
- 
