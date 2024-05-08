@@ -8,11 +8,10 @@
 using namespace std;
  
 static int N;
-static vector<int> A, L, R;
-
-// 1일 때 = 9
-// 2의 경우의 수 = 1의 경우의 수 * 2 - 1
-// 3의 경우의 수 = 2의 경우의 수 * 2 - 1
+static int DP[1001][1001];
+static string A, B;
+static vector<char> Path;
+void GetText(int r, int c);
 
 int main()
 {
@@ -20,32 +19,44 @@ int main()
 	cin.tie(NULL);
 	cout.tie(NULL);
 	 
-	cin >> N;
-	A.resize(N);
-
-	for (int i = 0; i < N; i++) {
-		cin >> A[i];
+	cin >> A >> B;
+	for (int i = 1; i <= A.size(); i++)
+	{
+		for (int j = 1; j <= B.size(); j++)
+		{
+			if (A[i - 1] == B[j - 1]) {
+				DP[i][j] = DP[i - 1][j - 1] + 1;
+			}
+			else {
+				DP[i][j] = max(DP[i - 1][j], DP[i][j - 1]);
+			}
+		}
+	} 
+	cout << DP[A.size()][B.size()] << "\n";
+	GetText(A.size(), B.size());
+	 
+	for (int i = Path.size() - 1; i >= 0; i--) {
+		cout << Path[i]; 
+	}
+	cout << "\n";
+}
+  
+void GetText(int r, int c)
+{
+	if (r == 0 || c == 0) {
+		return;
 	}
 
-	L.resize(N);
-	L[0] = A[0];
-	int result = L[0];
-
-	for (int i = 1; i < N; i++) {
-		L[i] = max(A[i], L[i - 1] + A[i]);
-		result = max(result, L[i]);
+	if (A[r - 1] == B[c - 1]) {
+		Path.push_back(A[r - 1]); 
+		GetText(r - 1, c - 1);
 	}
-	
-	R.resize(N);
-	R[N - 1] = A[N - 1];
-	for (int i = N - 2; i >= 0; i--) {
-		R[i] = max(A[i], R[i + 1] + A[i]);
+	else {
+		if (DP[r - 1][c] > DP[r][c - 1])
+			GetText(r - 1, c);
+		else
+			GetText(r, c - 1);
 	}
 
-	for (int i = 1; i < N - 1; i++) {
-		int temp = L[i - 1] + R[i + 1];
-		result = max(result, temp);
-	}
 
-	cout << result;
 }
