@@ -7,56 +7,37 @@
 
 using namespace std;
  
-static int N;
-static int DP[1001][1001];
-static string A, B;
-static vector<char> Path;
-void GetText(int r, int c);
+static int D[1001][1001];
+static int A, B;
+
+
 
 int main()
 {
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
-	cout.tie(NULL);
+	std::cout.tie(NULL);
 	 
 	cin >> A >> B;
-	for (int i = 1; i <= A.size(); i++)
+	int result = 0;
+
+	for (int i = 1; i <= A; i++)
 	{
-		for (int j = 1; j <= B.size(); j++)
+		string t;
+		cin >> t;
+
+		for (int j = 1; j <= B; j++) 
 		{
-			if (A[i - 1] == B[j - 1]) {
-				DP[i][j] = DP[i - 1][j - 1] + 1;
+			D[i][j] = int(t[j -1] - '0'); 
+
+			if (D[i][j] == 1) {
+				D[i][j] = min(D[i - 1][j], min(D[i][j - 1], D[i - 1][j - 1])) + 1;  
 			}
-			else {
-				DP[i][j] = max(DP[i - 1][j], DP[i][j - 1]);
-			}
+			result = max(result, D[i][j]);    
 		}
 	} 
-	cout << DP[A.size()][B.size()] << "\n";
-	GetText(A.size(), B.size());
-	 
-	for (int i = Path.size() - 1; i >= 0; i--) {
-		cout << Path[i]; 
-	}
-	cout << "\n";
-}
-  
-void GetText(int r, int c)
-{
-	if (r == 0 || c == 0) {
-		return;
-	}
+	   
+	cout << result * result; 
+} 
 
-	if (A[r - 1] == B[c - 1]) {
-		Path.push_back(A[r - 1]); 
-		GetText(r - 1, c - 1);
-	}
-	else {
-		if (DP[r - 1][c] > DP[r][c - 1])
-			GetText(r - 1, c);
-		else
-			GetText(r, c - 1);
-	}
-
-
-}
+ 
