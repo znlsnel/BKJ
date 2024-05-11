@@ -6,10 +6,10 @@
 #include <cmath>
 
 using namespace std;
- 
-static int D[1001][1001];
-static int A, B;
 
+static long D[101][101][101];
+static int N, L, R;
+static int mod = 1000000007;
 
 
 int main()
@@ -17,27 +17,23 @@ int main()
 	ios::sync_with_stdio(false);
 	cin.tie(NULL);
 	std::cout.tie(NULL);
-	 
-	cin >> A >> B;
-	int result = 0;
 
-	for (int i = 1; i <= A; i++)
+	cin >> N >> L >> R;
+
+	D[1][1][1] = 1;
+
+	for (int i = 2; i <= N; i++)
 	{
-		string t;
-		cin >> t;
-
-		for (int j = 1; j <= B; j++) 
+		for (int j = 1; j <= L; j++)
 		{
-			D[i][j] = int(t[j -1] - '0'); 
-
-			if (D[i][j] == 1) {
-				D[i][j] = min(D[i - 1][j], min(D[i][j - 1], D[i - 1][j - 1])) + 1;  
+			for (int k = 1; k <= R; k++)
+			{
+				D[i][j][k] = D[i - 1][j - 1][k] + D[i - 1][j][k - 1] + D[i - 1][j][k] * (i - 2);
+				D[i][j][k] %= mod;
 			}
-			result = max(result, D[i][j]);    
 		}
-	} 
-	   
-	cout << result * result; 
-} 
+	}
 
- 
+	cout << D[N][L][R];
+}
+
