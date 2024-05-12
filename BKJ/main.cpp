@@ -7,33 +7,67 @@
 
 using namespace std;
 
-static long D[101][101][101];
-static int N, L, R;
-static int mod = 1000000007;
-
+static long dp[100001][5][5];
+int mp[5][5] =
+{
+        {0, 2, 2, 2, 2},
+        {2, 1, 3, 4, 3},
+        {2, 3, 1, 3, 4},
+        {2, 4, 3, 1, 3},
+        {2, 3, 4, 3, 1},
+};
 
 int main()
 {
-	ios::sync_with_stdio(false);
-	cin.tie(NULL);
-	std::cout.tie(NULL);
+        ios::sync_with_stdio(false);
+        cin.tie(NULL);
+        std::cout.tie(NULL);
 
-	cin >> N >> L >> R;
 
-	D[1][1][1] = 1;
+        for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 5; j++) {
+                        for (int k = 0; k < 100001; k++) {
+                                dp[k][i][j] = 1000000;
+                        }
+                }
+        }
 
-	for (int i = 2; i <= N; i++)
-	{
-		for (int j = 1; j <= L; j++)
-		{
-			for (int k = 1; k <= R; k++)
-			{
-				D[i][j][k] = D[i - 1][j - 1][k] + D[i - 1][j][k - 1] + D[i - 1][j][k] * (i - 2);
-				D[i][j][k] %= mod;
-			}
-		}
-	}
+        dp[0][0][0] = 0;
+        vector<int> moves;
+        int n;
+        while (true) {
+                cin >> n;
+                if (n == 0) break;
+                moves.push_back(n);
+        }
 
-	cout << D[N][L][R];
+        int s = 1;
+        for (int n : moves) {
+                for (int i = 0; i < 5; i++) {
+                        for (int j = 0; j < 5; j++) {
+
+                                if (n == 0)
+                                        break;
+
+                                if (n != j) // 왼발
+                                        dp[s][n][j] = min(dp[s][n][j], dp[s - 1][i][j] + mp[i][n]);
+
+                                if (n != i) // 오른발
+                                        dp[s][i][n] = min(dp[s][i][n], dp[s - 1][i][j] + mp[j][n]);
+                        }
+                }
+                s++;
+        }
+
+        long minVal = 1000000;
+        for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 5; j++) {
+                        minVal = min(minVal, dp[s - 1][i][j]);
+                }
+        }
+
+        cout << minVal << "\n";
 }
+
+
 
