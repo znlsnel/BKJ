@@ -7,15 +7,10 @@
 
 using namespace std;
 
-static long dp[100001][5][5];
-int mp[5][5] =
-{
-        {0, 2, 2, 2, 2},
-        {2, 1, 3, 4, 3},
-        {2, 3, 1, 3, 4},
-        {2, 4, 3, 1, 3},
-        {2, 3, 4, 3, 1},
-};
+static int N;
+static vector<pair<int, int>> M;
+static long D[502][502];
+int execute(int s, int e);
 
 int main()
 {
@@ -23,51 +18,46 @@ int main()
         cin.tie(NULL);
         std::cout.tie(NULL);
 
-
-        for (int i = 0; i < 5; i++) {
-                for (int j = 0; j < 5; j++) {
-                        for (int k = 0; k < 100001; k++) {
-                                dp[k][i][j] = 1000000;
-                        }
-                }
+        cin >> N;
+        M.resize(N + 1);
+        
+        for (int i = 0; i < N + 1; i++)
+        {
+                for (int j = 0; j < N + 1; j++)
+                        D[i][j] = -1;
         }
 
-        dp[0][0][0] = 0;
-        vector<int> moves;
-        int n;
-        while (true) {
-                cin >> n;
-                if (n == 0) break;
-                moves.push_back(n);
+        for (int i = 1; i <= N; i++)
+        {
+                int y, x;
+                cin >> y >> x;
+                M[i] = make_pair(y, x);
         }
-
-        int s = 1;
-        for (int n : moves) {
-                for (int i = 0; i < 5; i++) {
-                        for (int j = 0; j < 5; j++) {
-
-                                if (n == 0)
-                                        break;
-
-                                if (n != j) // 왼발
-                                        dp[s][n][j] = min(dp[s][n][j], dp[s - 1][i][j] + mp[i][n]);
-
-                                if (n != i) // 오른발
-                                        dp[s][i][n] = min(dp[s][i][n], dp[s - 1][i][j] + mp[j][n]);
-                        }
-                }
-                s++;
-        }
-
-        long minVal = 1000000;
-        for (int i = 0; i < 5; i++) {
-                for (int j = 0; j < 5; j++) {
-                        minVal = min(minVal, dp[s - 1][i][j]);
-                }
-        }
-
-        cout << minVal << "\n";
+        cout << execute(1, N) << "\n"; 
 }
 
+int execute(int s, int e)
+{
+        int result = 1000000000;
 
+        if (D[s][e] != -1)
+                return D[s][e]; 
 
+        if (s == e)
+                return 0;
+
+        if (s + 1 == e)
+        {
+                return M[s].first * M[s].second * M[e].second;  
+        }
+        
+        for (int i = s; i < e; i++)
+        {
+                result = min(
+                        result, 
+                        M[s].first * M[i].second * M[e].second + execute(s, i) + execute(i + 1, e));  
+        }
+        
+        return D[s][e] = result;
+}
+ 
