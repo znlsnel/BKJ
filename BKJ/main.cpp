@@ -7,10 +7,11 @@
 
 using namespace std;
 
+static int INF = 1000000 * 16 + 1;
 static int N;
-static vector<pair<int, int>> M;
-static long D[502][502];
-int execute(int s, int e);
+static int W[16][16];
+static int D[16][(1 << 16)];
+int tsp(int c, int v); 
 
 int main()
 {
@@ -19,45 +20,38 @@ int main()
         std::cout.tie(NULL);
 
         cin >> N;
-        M.resize(N + 1);
-        
-        for (int i = 0; i < N + 1; i++)
-        {
-                for (int j = 0; j < N + 1; j++)
-                        D[i][j] = -1;
-        }
 
-        for (int i = 1; i <= N; i++)
+        for (int i = 0; i < N; i++)
         {
-                int y, x;
-                cin >> y >> x;
-                M[i] = make_pair(y, x);
+                for (int j = 0; j < N; j++)
+                { 
+                        cin >> W[i][j];
+                }
         }
-        cout << execute(1, N) << "\n"; 
-}
-
-int execute(int s, int e)
+        // 0번 도시에서 0001 -> 0번 도시 방문 
+        cout << tsp(0, 1) << "\n"; 
+}   
+     
+int tsp(int c, int v)
 {
-        int result = 1000000000;
-
-        if (D[s][e] != -1)
-                return D[s][e]; 
-
-        if (s == e)
-                return 0;
-
-        if (s + 1 == e)
+        if (v == (1 << N) - 1)
         {
-                return M[s].first * M[s].second * M[e].second;  
+                return W[c][0] == 0 ? INF : W[c][0];
+        } 
+
+        if (D[c][v] != 0) {
+                return D[c][v];
         }
-        
-        for (int i = s; i < e; i++)
+
+        int min_val = INF;
+        for (int i = 0; i < N; i++)
         {
-                result = min(
-                        result, 
-                        M[s].first * M[i].second * M[e].second + execute(s, i) + execute(i + 1, e));  
-        }
-        
-        return D[s][e] = result;
+                // 방문한 노드x && 자기자신으로 가는게 아니어야함
+                if ((v & (1 << i)) == 0 && W[c][i] != 0) {
+                        min_val = min(min_val, tsp(i, (v | (1 << i))) + W[c][i]); 
+                }
+        } 
+        D[c][v] = min_val;
+        return D[c][v]; 
+       
 }
- 
