@@ -7,11 +7,13 @@
 
 using namespace std;
 
-static int INF = 1000000 * 16 + 1;
-static int N;
-static int W[16][16];
-static int D[16][(1 << 16)];
-int tsp(int c, int v); 
+static int N, maxLength;
+static int A[1000001];
+static int B[1000001];
+static int D[1000001];
+
+int binarySearch(int left, int right, int cur);
+
 
 int main()
 {
@@ -21,37 +23,55 @@ int main()
 
         cin >> N;
 
-        for (int i = 0; i < N; i++)
+        for (int i = 1; i <= N; i++)
+                cin >> A[i];
+
+        B[++maxLength] = A[1];
+        D[1] = 1;
+
+        for (int i = 2; i <= N; i++)
         {
-                for (int j = 0; j < N; j++)
-                { 
-                        cin >> W[i][j];
+                if (B[maxLength] < A[i])
+                {
+                        B[++maxLength] = A[i];
+                        D[i] = maxLength;
+                }
+                else
+                {
+                        int index = binarySearch(1, maxLength, A[i]);
+                        B[index] = A[i];
+                        D[i] = index;
                 }
         }
-        // 0번 도시에서 0001 -> 0번 도시 방문 
-        cout << tsp(0, 1) << "\n"; 
-}   
-     
-int tsp(int c, int v)
+
+        cout << maxLength << "\n";
+
+        vector<int> result(maxLength);
+        for (int i = N; i > 0; i--)
+        {
+                if (D[i] == maxLength)
+                {
+                        --maxLength;
+                        result[maxLength] = A[i];
+                }
+        }
+        for (int i : result)
+                cout << i << " ";
+
+}
+
+int binarySearch(int left, int right, int cur)
 {
-        if (v == (1 << N) - 1)
-        {
-                return W[c][0] == 0 ? INF : W[c][0];
-        } 
+        int mid;
 
-        if (D[c][v] != 0) {
-                return D[c][v];
+        while (left < right)
+        {
+                mid = (left + right) / 2;
+                if (B[mid] < cur)
+                        left = mid + 1;
+                else
+                        right = mid;
         }
 
-        int min_val = INF;
-        for (int i = 0; i < N; i++)
-        {
-                // 방문한 노드x && 자기자신으로 가는게 아니어야함
-                if ((v & (1 << i)) == 0 && W[c][i] != 0) {
-                        min_val = min(min_val, tsp(i, (v | (1 << i))) + W[c][i]); 
-                }
-        } 
-        D[c][v] = min_val;
-        return D[c][v]; 
-       
+        return left;
 }
