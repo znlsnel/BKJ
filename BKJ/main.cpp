@@ -1,77 +1,35 @@
 ﻿#include <iostream>
+#include <string>
 #include <vector>
-#include <algorithm>
-#include <queue>
-#include <tuple>
 #include <cmath>
 
 using namespace std;
 
-static int N, maxLength;
-static int A[1000001];
-static int B[1000001];
-static int D[1000001];
 
-int binarySearch(int left, int right, int cur);
+static int D[30];
 
-
+// CCW  = A(x, y), B(x, y), C(x, y) -> 
+// (A.x*B.y + B.x*C.y + C.x*A.y) - (A.x*C.y + B.x*A.y + C.x*B.y)  
 int main()
 {
         ios::sync_with_stdio(false);
         cin.tie(NULL);
         std::cout.tie(NULL);
 
-        cin >> N;
-
-        for (int i = 1; i <= N; i++)
-                cin >> A[i];
-
-        B[++maxLength] = A[1];
-        D[1] = 1;
-
-        for (int i = 2; i <= N; i++)
+        int v[3][2];
+        int n = 3;
+        for (int i = 0; i < 3; i++)
         {
-                if (B[maxLength] < A[i])
-                {
-                        B[++maxLength] = A[i];
-                        D[i] = maxLength;
-                }
-                else
-                {
-                        int index = binarySearch(1, maxLength, A[i]);
-                        B[index] = A[i];
-                        D[i] = index;
-                }
+                int a, b;
+                cin >> a >> b;
+                v[i][0] = a;
+                v[i][1] = b;
         }
-
-        cout << maxLength << "\n";
-
-        vector<int> result(maxLength);
-        for (int i = N; i > 0; i--)
-        {
-                if (D[i] == maxLength)
-                {
-                        --maxLength;
-                        result[maxLength] = A[i];
-                }
-        }
-        for (int i : result)
-                cout << i << " ";
-
-}
-
-int binarySearch(int left, int right, int cur)
-{
-        int mid;
-
-        while (left < right)
-        {
-                mid = (left + right) / 2;
-                if (B[mid] < cur)
-                        left = mid + 1;
-                else
-                        right = mid;
-        }
-
-        return left;
+         
+         
+        int result = (v[0][0]*v[1][1] + v[1][0]*v[2][1] + v[2][0]*v[0][1])
+                -  (v[0][0]*v[2][1] + v[1][0] * v[0][1] + v[2][0] * v[1][1]); 
+        
+        result = result > 0 ? 1 : result < 0 ? -1 : 0;
+        cout << result << "\n";
 }
