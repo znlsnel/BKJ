@@ -1,2 +1,4 @@
 ﻿  main.cpp
-  BKJ.vcxproj -> D:\PROJECTS\Git\BKJ\x64\Debug\BKJ.exe
+D:\PROJECTS\Git\BKJ\BKJ\main.cpp(103,23): error C2039: 'clamp': 'std'의 멤버가 아닙니다.
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\include\vector(26,1): message : 'std' 선언을 참조하십시오.
+D:\PROJECTS\Git\BKJ\BKJ\main.cpp(103,23): error C3861: 'clamp': 식별자를 찾을 수 없습니다.
