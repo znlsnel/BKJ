@@ -5,8 +5,64 @@
 using namespace std;
 
 static int N;
-static long x[10001], y[10001];
 
+struct priorityQueue
+{
+        // left = cur * 2 + 1;
+        // right = cur * 2  + 2;
+        // parent = (cur - 1) / 2;
+
+        void push(int i)
+        {
+                arr[size] = i;
+                siftUP(size);
+                size++;
+        }
+
+        void siftUP(int i)
+        {
+                int parent = (i - 1) / 2;
+
+                if (arr[parent] > arr[i]) {
+                        std::swap<int>(arr[parent], arr[i]);
+                        siftUP(parent); 
+                } 
+                
+        }
+
+        void siftDown(int i)
+        {
+                int left = i * 2 + 1;
+                int right = left + 1;
+
+                if (left >= arr.size() || left >= size) 
+                        return;
+
+                if ((right < arr.size() || right >= size) && arr[left] > arr[right]) {
+                        left = right; 
+                }
+
+                if (arr[left] < arr[i]) {
+                        std::swap<int>(arr[left], arr[i]);
+                        siftDown(left); 
+                } 
+        }
+
+        int top()
+        {
+                return size ? arr[0] : -1;
+        }
+
+        void pop()
+        {
+                arr[0] = arr[--size];
+                siftDown(0); 
+        }
+
+
+        int size = 0;
+        vector<int> arr;
+};
 
 int main()
 {
@@ -15,22 +71,22 @@ int main()
         std::cout.tie(NULL);
 
         cin >> N;
-        for (int i = 0; i < N; i++)
-        {
-                cin >> x[i];
-                cin >> y[i];
+        int a;
+         
+        priorityQueue q;
+        q.arr.resize(N);
+
+        for (int i = 0; i < N; i++) {
+                cin >> a;
+                q.push(a); 
         }
-        x[N] = x[0];
-        y[N] = y[0];
-        double result = 0;
 
         for (int i = 0; i < N; i++)
         {
-                result += (x[i] * y[i + 1]) - (x[i + 1] * y[i]);
+                cout << q.top() << "\n";
+                q.pop();
         }
-        cout << fixed;
-        cout.precision(1);
-        cout << abs(result) / 2.0;
+
          
 } 
 
