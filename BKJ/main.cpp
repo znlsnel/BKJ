@@ -1,92 +1,87 @@
 ﻿#include <iostream>
 #include <vector>
+#include <random>
 #include <algorithm> 
 
 using namespace std;
 
-static int N;
 
-struct priorityQueue
+static int N, Count;
+ 
+struct Pos
 {
-        // left = cur * 2 + 1;
-        // right = cur * 2  + 2;
-        // parent = (cur - 1) / 2;
+        int x;
+        int y;
 
-        void push(int i)
-        {
-                arr[size] = i;
-                siftUP(size);
-                size++;
+        void operator+=(Pos other) {
+                x += other.x;
+                y += other.y; 
         }
 
-        void siftUP(int i)
-        {
-                int parent = (i - 1) / 2;
+        Pos operator -(Pos other) {
+                Pos result;
+                result.x = x - other.x;
+                result.y = y - other.y;
 
-                if (arr[parent] > arr[i]) {
-                        std::swap<int>(arr[parent], arr[i]);
-                        siftUP(parent); 
-                } 
+                return result;
+        }
+};
+
+bool Check(vector<int>& v, Pos pos)
+{  
+        for (int i = 0; i < v.size(); i++)
+        {
+                Pos prev = Pos{ i, v[i] };
+                Pos cur = pos;
+                
+                Pos dir = prev - cur;
+
+                // (상 하 좌 우) 방향
+                if (dir.x * dir.y == 0)
+                        return false;
+
+                // 대각 방향
+                if (abs(dir.x) - abs(dir.y) == 0)
+                        return false;
                 
         }
+        return true;
+}
 
-        void siftDown(int i)
+void result(vector<int> v)
+{
+        //cout << v.size() << "\n";
+        if (v.size() == N) {
+                Count++; 
+                return;
+        }
+          
+        for (int j = 0; j < N; j++)
         {
-                int left = i * 2 + 1;
-                int right = left + 1;
+                if (Check(v, Pos{ int(v.size()), j})) 
+                {
+                        vector<int> nextV = v;
+                        nextV.push_back(j); 
 
-                if (left >= arr.size() || left >= size) 
-                        return;
-
-                if ((right < arr.size() || right >= size) && arr[left] > arr[right]) {
-                        left = right; 
+                        result(nextV);  
                 }
-
-                if (arr[left] < arr[i]) {
-                        std::swap<int>(arr[left], arr[i]);
-                        siftDown(left); 
-                } 
         }
-
-        int top()
-        {
-                return size ? arr[0] : -1;
-        }
-
-        void pop()
-        {
-                arr[0] = arr[--size];
-                siftDown(0); 
-        }
-
-
-        int size = 0;
-        vector<int> arr;
-};
+}
 
 int main()
 {
         ios::sync_with_stdio(false);
         cin.tie(NULL);
         std::cout.tie(NULL);
-
+         
         cin >> N;
-        int a;
-         
-        priorityQueue q;
-        q.arr.resize(N);
-
-        for (int i = 0; i < N; i++) {
-                cin >> a;
-                q.push(a); 
-        }
-
         for (int i = 0; i < N; i++)
-        {
-                cout << q.top() << "\n";
-                q.pop();
-        }
-
-         
+        { 
+                vector<int> v;
+                v.push_back(i);
+                result(v);  
+        } 
+       
+        cout << Count;
 } 
 
