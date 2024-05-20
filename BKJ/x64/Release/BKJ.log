@@ -1,7 +1,7 @@
 ﻿  main.cpp
   코드를 생성하고 있습니다.
-  2 of 96 functions ( 2.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+  157 of 163 functions (96.3%) were compiled, the rest were copied from previous compilation.
+    152 functions were new in current compilation
+    3 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   BKJ.vcxproj -> D:\PROJECTS\Git\BKJ\x64\Release\BKJ.exe

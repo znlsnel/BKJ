@@ -6,66 +6,30 @@
 using namespace std;
 
 
-static int N, Count;
- 
-struct Pos
+static int N, M, Count = 1000000000;
+static vector<string> v;
+void answer(int x, int y)
 {
-        int x;
-        int y;
+        int count = 0;
+        int count1 = 0;
 
-        void operator+=(Pos other) {
-                x += other.x;
-                y += other.y; 
-        }
+        char startColor = v[y][x];
+        char otherColor = startColor == 'W' ? 'B' : 'W';
 
-        Pos operator -(Pos other) {
-                Pos result;
-                result.x = x - other.x;
-                result.y = y - other.y;
-
-                return result;
-        }
-};
-
-bool Check(vector<int>& v, Pos pos)
-{  
-        for (int i = 0; i < v.size(); i++)
+        for (int i = y; i < y + 8; i++)
         {
-                Pos prev = Pos{ i, v[i] };
-                Pos cur = pos;
-                
-                Pos dir = prev - cur;
-
-                // (상 하 좌 우) 방향
-                if (dir.x * dir.y == 0)
-                        return false;
-
-                // 대각 방향
-                if (abs(dir.x) - abs(dir.y) == 0)
-                        return false;
-                
-        }
-        return true;
-}
-
-void result(vector<int> v)
-{
-        //cout << v.size() << "\n";
-        if (v.size() == N) {
-                Count++; 
-                return;
-        }
-          
-        for (int j = 0; j < N; j++)
-        {
-                if (Check(v, Pos{ int(v.size()), j})) 
+                char curColor = (i - y)% 2 == 0 ? startColor : otherColor;
+                for (int j = x; j < x + 8; j++)
                 {
-                        vector<int> nextV = v;
-                        nextV.push_back(j); 
+                        if (v[i][j] != curColor)
+                                count++;
+                        else
+                                count1++;
 
-                        result(nextV);  
+                        curColor = curColor == 'W' ? 'B' : 'W'; 
                 }
         }
+        Count = min(Count, min(count, count1)); 
 }
 
 int main()
@@ -74,14 +38,20 @@ int main()
         cin.tie(NULL);
         std::cout.tie(NULL);
          
-        cin >> N;
+        cin >> N >> M;
+        v.resize(N);
         for (int i = 0; i < N; i++)
+                cin >> v[i];
+
+        // 10 * 20 
+        for (int i = 0; i <= N - 8; i++)
         { 
-                vector<int> v;
-                v.push_back(i);
-                result(v);  
+                for (int j = 0; j <= M - 8; j++)
+                {
+                        answer(j, i);
+                } 
         } 
-       
-        cout << Count;
+        cout << Count << "\n";
+
 } 
 
