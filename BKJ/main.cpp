@@ -4,54 +4,114 @@
 #include <algorithm> 
 
 using namespace std;
+static int N, M, K, Count;
+static int v[51][51];
+static bool visited[51][51];
 
-
-static int N, M, Count = 1000000000;
-static vector<string> v;
-void answer(int x, int y)
+struct Pos
 {
-        int count = 0;
-        int count1 = 0;
+        int i;
+        int j;
 
-        char startColor = v[y][x];
-        char otherColor = startColor == 'W' ? 'B' : 'W';
-
-        for (int i = y; i < y + 8; i++)
+        void operator+=(Pos other)
         {
-                char curColor = (i - y)% 2 == 0 ? startColor : otherColor;
-                for (int j = x; j < x + 8; j++)
-                {
-                        if (v[i][j] != curColor)
-                                count++;
-                        else
-                                count1++;
-
-                        curColor = curColor == 'W' ? 'B' : 'W'; 
-                }
+                this->i += other.i;
+                this->j += other.j;
         }
-        Count = min(Count, min(count, count1)); 
+
+        void operator-=(Pos other)
+        {
+                this->i -= other.i;
+                this->j -= other.j;
+        } 
+
+        Pos operator+(Pos other)
+        {
+                Pos result;
+                result.i = this->i + other.i;
+                result.j = this->j + other.j;
+                return result;
+        }
+
+        Pos operator-(Pos other)
+        {
+                Pos result;
+                result.i = this->i - other.i;
+                result.j = this->j - other.j;
+                return result;
+        }
+};
+
+Pos dir[4] = {
+        {0, -1},
+        {0, 1},
+        {1, 0},
+        {-1, 0}
+};
+
+bool DFS(Pos pos)
+{
+        if (visited[pos.i][pos.j] || v[pos.i][pos.j] == 0)
+                return false;
+
+        visited[pos.i][pos.j] = true;
+
+        for (int i = 0; i < 4; i++)
+        {
+                Pos next = pos + dir[i];
+                if (next.i < 0 || next.i > N || next.j < 0 || next.j > M)
+                        continue;
+
+                if (v[next.i][next.j] == 0 || visited[next.i][next.j])
+                        continue;
+                 
+                DFS(next); 
+        }
+        return true;
 }
 
-int main()
+
+void answer()
+{
+        cin >> N >> M >> K;
+        
+        Count = 0;
+        for (int i = 0; i < N; i++)
+        { 
+                std::fill(&v[i][0], &v[i][M], 0);
+                std::fill(&visited[i][0], &visited[i][M], false);
+        }  
+
+        for (int i = 0; i < K; i++)
+        {
+                int a, b;
+                cin >> a >> b;
+
+                v[a][b] = 1; 
+        }
+         
+
+        for (int i = 0; i < N; i++) {
+                for (int j = 0; j < M; j++) {
+                        if (DFS(Pos{i, j})) 
+                                Count++; 
+                }
+        }
+        cout << Count << "\n";
+} 
+ 
+int main() 
 {
         ios::sync_with_stdio(false);
         cin.tie(NULL);
         std::cout.tie(NULL);
-         
-        cin >> N >> M;
-        v.resize(N);
-        for (int i = 0; i < N; i++)
-                cin >> v[i];
 
-        // 10 * 20 
-        for (int i = 0; i <= N - 8; i++)
-        { 
-                for (int j = 0; j <= M - 8; j++)
-                {
-                        answer(j, i);
-                } 
-        } 
-        cout << Count << "\n";
+        int T;
+        cin >> T;
+
+        while (T--)
+                answer();
+        
 
 } 
 
