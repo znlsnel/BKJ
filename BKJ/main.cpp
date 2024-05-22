@@ -1,117 +1,103 @@
-﻿#include <iostream>
-#include <vector>
-#include <random>
-#include <algorithm> 
-
+﻿#include <vector>
+#include <iostream>
+#include <queue>
 using namespace std;
-static int N, M, K, Count;
-static int v[51][51];
-static bool visited[51][51];
 
-struct Pos
+static int _newNode, _donutCount, _barCount, _eightCount;
+static vector<vector<int>> v;
+static vector<pair<int, int>> degree; // in, out
+static vector<bool> visited;
+
+void BFS(int start)
 {
-        int i;
-        int j;
+        int edgeCount = 0;
+        int nodeCount = 1;
 
-        void operator+=(Pos other)
+        queue<int> q;
+        q.push(start);
+
+        while (q.size())
         {
-                this->i += other.i;
-                this->j += other.j;
-        }
+                int cur = q.front();
+                q.pop();
 
-        void operator-=(Pos other)
-        {
-                this->i -= other.i;
-                this->j -= other.j;
-        } 
+                visited[cur] = true;
 
-        Pos operator+(Pos other)
-        {
-                Pos result;
-                result.i = this->i + other.i;
-                result.j = this->j + other.j;
-                return result;
-        }
+                for (int next : v[cur])
+                {
+                        edgeCount++;
 
-        Pos operator-(Pos other)
-        {
-                Pos result;
-                result.i = this->i - other.i;
-                result.j = this->j - other.j;
-                return result;
-        }
-};
-
-Pos dir[4] = {
-        {0, -1},
-        {0, 1},
-        {1, 0},
-        {-1, 0}
-};
-
-bool DFS(Pos pos)
-{
-        if (visited[pos.i][pos.j] || v[pos.i][pos.j] == 0)
-                return false;
-
-        visited[pos.i][pos.j] = true;
-
-        for (int i = 0; i < 4; i++)
-        {
-                Pos next = pos + dir[i];
-                if (next.i < 0 || next.i > N || next.j < 0 || next.j > M)
-                        continue;
-
-                if (v[next.i][next.j] == 0 || visited[next.i][next.j])
-                        continue;
-                 
-                DFS(next); 
-        }
-        return true;
-}
-
-
-void answer()
-{
-        cin >> N >> M >> K;
-        
-        Count = 0;
-        for (int i = 0; i < N; i++)
-        { 
-                std::fill(&v[i][0], &v[i][M], 0);
-                std::fill(&visited[i][0], &visited[i][M], false);
-        }  
-
-        for (int i = 0; i < K; i++)
-        {
-                int a, b;
-                cin >> a >> b;
-
-                v[a][b] = 1; 
-        }
-         
-
-        for (int i = 0; i < N; i++) {
-                for (int j = 0; j < M; j++) {
-                        if (DFS(Pos{i, j})) 
-                                Count++; 
+                        if (visited[next] == false) {
+                                nodeCount++;
+                                q.push(next);
+                        }
                 }
         }
-        cout << Count << "\n";
-} 
- 
+
+        if (edgeCount == nodeCount - 1) {
+                //  cout << "########## BAR COUNT UP ! ! ! ##########" << "\n"  ;
+                _barCount++;
+        }
+
+        else if (edgeCount == nodeCount + 1) {
+
+                //cout << "########## EIGHT COUNT UP ! ! ! ##########" << "\n"  ;
+                _eightCount++;
+
+        }
+        else if (edgeCount == nodeCount)
+        {
+                //cout << "########## DONUT COUNT UP ! ! ! ##########" << "\n"  ;
+                _donutCount++;
+        }
+        cout << "\n";
+
+
+}
+
+// 도넛 - 자기 자신을 순회
+// 바 - 엣지 수 == 노드 수 - 1
+// 8 - 엣지수 == 노드 수 + 1 && 도넛이 아닐때
+// 1. 새롭게 추가된 노드를 찾기
+// 2. New Node 를 제외한 모든 노드 DFS (방문 했으면 안하기)
+// 3. 마지막 New Node DFS
+
+vector<int> solution(vector<vector<int>> edges)
+{
+        int size = 0;
+        for (auto edge : edges)
+                for (auto i : edge)
+                        size = max(size, i);
+
+        v.resize(size + 1);
+        degree.resize(size + 1);
+        visited.resize(size + 1);
+
+        for (auto edge : edges)
+        {
+                v[edge[0]].push_back(edge[1]);
+                degree[edge[0]].second++;
+                degree[edge[1]].first++;
+        }
+
+        for (int i = 0; i < degree.size(); i++)
+        {
+                if (degree[i].first == 0 && degree[i].second >= 2)
+                        _newNode = i;
+        }
+
+        for (int i : v[_newNode])
+                BFS(i);
+
+
+        return { _newNode, _donutCount, _barCount, _eightCount };
+}
 int main() 
 {
         ios::sync_with_stdio(false);
         cin.tie(NULL);
         std::cout.tie(NULL);
 
-        int T;
-        cin >> T;
-
-        while (T--)
-                answer();
-        
 
 } 
 
