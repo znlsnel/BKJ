@@ -1,117 +1,93 @@
 ﻿#include <string>
-#include <iostream>
-#include <algorithm>
 #include <vector>
-#include <set>
+#include <iostream>
+#include <map>
 
 using namespace std;
 
-vector<vector<int>> _diceSet;
-vector<vector<int>> _diceCombi;
-vector<vector<int>> diceCombis;
+int solution(vector<string> friends, vector<string> gifts) {
+        map<string, int> m;
 
-void GenerateDiceSets(vector<int>v, vector<bool> visited, int size)
-{
-        if (v.size() == size / 2)
+        for (int i = 0; i < friends.size(); i++)
+                m.insert(make_pair(friends[i], i));
+
+        vector<vector<int>> v(friends.size(), vector<int>(friends.size()));
+
+
+        for (string s : gifts)
         {
-                _diceSet.push_back(v);
-                return;
-        }
+                string from;
+                string to;
 
-        for (int i = 0; i < size; i++)
-        {
-                if (visited[i])
-                        continue;
-
-                visited[i] = true;
-
-                vector<bool> newB = visited;
-                vector<int> newV = v;
-                newV.push_back(i);
-
-                GenerateDiceSets(newV, newB, size);
-        }
-}
-
-void GenerateDiceCombis(vector<int>v, int size, int start = 0)
-{
-        if (v.size() == size / 2)
-        {
-                _diceCombi.push_back(v);
-                return;
-        }
-
-        for (int i = start; i < 6; i++)
-        {
-                vector<int> newV = v;
-                newV.push_back(i);
-
-                GenerateDiceCombis(newV, size, start);
-        }
-}
-
-int compare(int a, int b)
-{
-        int result = 0;
-
-        for (int cur : diceCombis[a])
-        {
-                int start = 0;
-                int end = diceCombis[b].size() - 1;
-                while (start <= end)
+                bool findSpace = false;
+                for (auto c : s)
                 {
-                        int mid = (start + end) / 2;
-
-                        if (diceCombis[b][mid] >= cur) {
-                                end = mid - 1;
-                        }
-
-                        else {
-                                start = mid + 1;
-                        }
-                }
-                result += start;
-        }
-
-        return result;
-}
-
-vector<int> solution(vector<vector<int>> dice) {
-
-        GenerateDiceSets(vector<int>(), vector<bool>(dice.size()), dice.size());
-        GenerateDiceCombis(vector<int>(), dice.size());
-
-        for (auto diceSet : _diceSet)
-        {
-                vector<int> numbers;
-                for (auto c : _diceCombi)
-                {
-                        int temp = 0;
-                        for (int i = 0; i < c.size(); i++)
+                        if (c == ' ')
                         {
-                                int a = diceSet[i];
-                                temp += dice[a][c[i]];
+                                findSpace = true;
+                                continue;
                         }
-                        numbers.push_back(temp);
+
+                        if (findSpace)
+                                to.push_back(c);
+
+                        else
+                                from.push_back(c);
                 }
-                sort(numbers.begin(), numbers.end());
-                diceCombis.push_back(numbers);
+                auto a = m.find(from);
+                auto b = m.find(to);
+
+                int fromID = (*a).second;
+                int toID = (*b).second;
+                v[fromID][toID]++;
         }
 
-
-        int maxId = 0;
-        vector<int> v(_diceSet.size());
-        for (int i = 0; i < _diceSet.size(); i++)
+        vector<int> result(v.size());
+        for (int i = 0; i < v.size(); i++)
         {
-                int target = _diceSet.size() - i - 1;
-                v[i] = compare(i, target);
+                for (int j = i; j < v[i].size(); j++)
+                {
+                        // 내가 더 많이 줬다면 ~~
+                        if (v[i][j] > 0 && v[i][j] > v[j][i])
+                        {
+                                result[i]++;
+                        }
+                        // 내가 더 많이 받았다면 ~~
+                        else if (v[j][i] > 0 && v[i][j] < v[j][i])
+                        {
+                                result[j]++;
+                        }
 
-                if (v[maxId] < v[i])
-                        maxId = i;
+                        // 똑같이 받았다면 ~~ 선물 지수 체크
+                        else if (v[i][j] == v[j][i])
+                        {
+                                int i_score = 0;
+                                int j_score = 0;
+                                for (int n = 0; n < v[i].size(); n++) {
+                                        i_score += v[i][n];
+                                        i_score -= v[n][i];
+                                }
+
+                                for (int n = 0; n < v[j].size(); n++) {
+                                        j_score += v[j][n];
+                                        j_score -= v[n][j];
+                                }
+
+                                if (i_score > j_score)
+                                {
+                                        result[i]++;
+                                }
+                                else if (i_score < j_score)
+                                        result[j]++;
+                        }
+                }
         }
 
-        for (int& i : _diceSet[maxId])
-                ++i;
 
-        return _diceSet[maxId];
+        int MAX = 0;
+        for (int n : result)
+                MAX = max(n, MAX);
+
+
+        return MAX;
 }
