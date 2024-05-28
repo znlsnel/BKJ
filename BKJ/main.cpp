@@ -1,93 +1,82 @@
 ﻿#include <string>
-#include <vector>
 #include <iostream>
-#include <map>
+#include <vector>
+#include <cmath>
 
 using namespace std;
 
-int solution(vector<string> friends, vector<string> gifts) {
-        map<string, int> m;
-
-        for (int i = 0; i < friends.size(); i++)
-                m.insert(make_pair(friends[i], i));
-
-        vector<vector<int>> v(friends.size(), vector<int>(friends.size()));
-
-
-        for (string s : gifts)
+int ConvertDateToInt(string str, int& termID)
+{
+        int result = 0;
+        int p = 0;
+        for (int i = str.size() - 1; i >= 0; i--)
         {
-                string from;
-                string to;
-
-                bool findSpace = false;
-                for (auto c : s)
+                if (str[i] >= 'A' && str[i] <= 'Z')
                 {
-                        if (c == ' ')
-                        {
-                                findSpace = true;
-                                continue;
-                        }
-
-                        if (findSpace)
-                                to.push_back(c);
-
-                        else
-                                from.push_back(c);
+                        termID = str[i] - 'A';
+                        continue;
                 }
-                auto a = m.find(from);
-                auto b = m.find(to);
 
-                int fromID = (*a).second;
-                int toID = (*b).second;
-                v[fromID][toID]++;
+                if (str[i] == '.' || str[i] == ' ')
+                        continue;
+
+                result += int(str[i] - '0') * pow(10, p++);
         }
 
-        vector<int> result(v.size());
-        for (int i = 0; i < v.size(); i++)
+        return result;
+}
+
+static int _terms[26];
+vector<int> solution(string today, vector<string> terms, vector<string> privacies) {
+
+        for (string s : terms)
         {
-                for (int j = i; j < v[i].size(); j++)
+                int id = s[0] - 'A';
+                int p = 0;
+                for (int i = s.size() - 1; i > 0; i--)
                 {
-                        // 내가 더 많이 줬다면 ~~
-                        if (v[i][j] > 0 && v[i][j] > v[j][i])
-                        {
-                                result[i]++;
-                        }
-                        // 내가 더 많이 받았다면 ~~
-                        else if (v[j][i] > 0 && v[i][j] < v[j][i])
-                        {
-                                result[j]++;
-                        }
+                        if (s[i] == ' ')
+                                break;
 
-                        // 똑같이 받았다면 ~~ 선물 지수 체크
-                        else if (v[i][j] == v[j][i])
-                        {
-                                int i_score = 0;
-                                int j_score = 0;
-                                for (int n = 0; n < v[i].size(); n++) {
-                                        i_score += v[i][n];
-                                        i_score -= v[n][i];
-                                }
-
-                                for (int n = 0; n < v[j].size(); n++) {
-                                        j_score += v[j][n];
-                                        j_score -= v[n][j];
-                                }
-
-                                if (i_score > j_score)
-                                {
-                                        result[i]++;
-                                }
-                                else if (i_score < j_score)
-                                        result[j]++;
-                        }
+                        _terms[id] += int(s[i] - '0') * pow(10, p++);
                 }
         }
 
+        int dummy;
+        int TODAY = ConvertDateToInt(today, dummy);
 
-        int MAX = 0;
-        for (int n : result)
-                MAX = max(n, MAX);
+        vector<int> answer;
+        for (int i = 0; i < privacies.size(); i++)
+        {
+                int term;
+                int privacie = ConvertDateToInt(privacies[i], term);
+                term = _terms[term];
+
+                int year = privacie / 10000;
+                int month = ((privacie % 10000) / 100) + term;
+                int day = privacie % 100;
+
+                day--;
+                if (day == 0)
+                {
+                        day = 28;
+                        month--;
+                }
+
+                while (month > 12)
+                {
+                        month -= 12;
+                        year++;
+                }
+
+                int result = (year * 10000) + (month * 100) + day;
 
 
-        return MAX;
+                if (result < TODAY)
+                        answer.push_back(i + 1);
+
+
+        }
+
+        return answer;
 }
