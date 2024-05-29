@@ -1,82 +1,28 @@
 ﻿#include <string>
-#include <iostream>
 #include <vector>
-#include <cmath>
+#include <iostream>
 
 using namespace std;
 
-int ConvertDateToInt(string str, int& termID)
-{
-        int result = 0;
-        int p = 0;
-        for (int i = str.size() - 1; i >= 0; i--)
-        {
-                if (str[i] >= 'A' && str[i] <= 'Z')
-                {
-                        termID = str[i] - 'A';
-                        continue;
-                }
+static int deliverNum, pickupNum;
 
-                if (str[i] == '.' || str[i] == ' ')
-                        continue;
+long long solution(int cap, int n, vector<int> deliveries, vector<int> pickups) {
+        long long answer = 0;
+        int d = 0, p = 0, cnt = 0;
 
-                result += int(str[i] - '0') * pow(10, p++);
-        }
+        for (int i = n - 1; i >= 0; i--) {
+                d -= deliveries[i];
+                p -= pickups[i];
 
-        return result;
-}
-
-static int _terms[26];
-vector<int> solution(string today, vector<string> terms, vector<string> privacies) {
-
-        for (string s : terms)
-        {
-                int id = s[0] - 'A';
-                int p = 0;
-                for (int i = s.size() - 1; i > 0; i--)
-                {
-                        if (s[i] == ' ')
+                while (1) {
+                        if (d >= 0 && p >= 0)
                                 break;
-
-                        _terms[id] += int(s[i] - '0') * pow(10, p++);
+                        d += cap;
+                        p += cap;
+                        cnt++;
                 }
+                answer += (i + 1) * 2 * cnt;
+                cnt = 0;
         }
-
-        int dummy;
-        int TODAY = ConvertDateToInt(today, dummy);
-
-        vector<int> answer;
-        for (int i = 0; i < privacies.size(); i++)
-        {
-                int term;
-                int privacie = ConvertDateToInt(privacies[i], term);
-                term = _terms[term];
-
-                int year = privacie / 10000;
-                int month = ((privacie % 10000) / 100) + term;
-                int day = privacie % 100;
-
-                day--;
-                if (day == 0)
-                {
-                        day = 28;
-                        month--;
-                }
-
-                while (month > 12)
-                {
-                        month -= 12;
-                        year++;
-                }
-
-                int result = (year * 10000) + (month * 100) + day;
-
-
-                if (result < TODAY)
-                        answer.push_back(i + 1);
-
-
-        }
-
         return answer;
 }
