@@ -1,60 +1,58 @@
-﻿#include <string>
+﻿#include <iostream>
+#include <string>
 #include <vector>
-#include <iostream>
 
 using namespace std;
 
-int _kep = 0;
-int _price = 0;
-vector<int> _rates;
+string hexToDec(long long num);
+string changeToFullDec(string str);
+bool isAllZero(string str);
+bool canDraw(string str);
 
-void dfs(vector<vector<int>>& users, vector<int>& emoticons) {
-        if (_rates.size() < emoticons.size())
-        {
-                for (int i = 10; i <= 40; i += 10)
-                {
-                        _rates.push_back(i);
-                        dfs(users, emoticons);
-                        _rates.pop_back(); // rate vector 재사용을 위한 pop
-                }
-                return;
+vector<int> solution(vector<long long> numbers) {
+        vector<int> answer;
+        for (long long& num : numbers) {
+                string dec = hexToDec(num);
+                string fullDec = changeToFullDec(dec);
+                answer.push_back(canDraw(fullDec));
         }
-
-        int tmp_Kep = 0;
-        int tmp_price = 0;
-
-        for (int i = 0; i < users.size(); i++)
-        {
-                int p = 0;
-                for (int j = 0; j < emoticons.size(); j++)
-                {
-                        if (users[i][0] > _rates[j])
-                                continue;
-
-                        p += emoticons[j] * ((100 - _rates[j]) / 100.0f);
-                }
-
-                // i번 유저가 총 구매할 비용
-                if (p >= users[i][1])
-                        tmp_Kep++;
-                else
-                        tmp_price += p;
-        }
-
-        if (tmp_Kep > _kep)
-        {
-                _kep = tmp_Kep;
-                _price = tmp_price;
-        }
-        else if (tmp_Kep == _kep && tmp_price > _price)
-        {
-                _price = tmp_price;
-        }
-
+        return answer;
 }
 
-vector<int> solution(vector<vector<int>> users, vector<int> emoticons) {
+string hexToDec(long long num) {
+        string ret = "";
+        while (num) {
+                ret = to_string(num % 2) + ret;
+                num /= 2;
+        }
+        return ret;
+}
 
-        dfs(users, emoticons);
-        return { _kep, _price };
+string changeToFullDec(string str) {
+        string ret = str;
+        int idx = 2;
+        while (true) {
+                if (str.length() <= idx - 1) break;
+                idx *= 2;
+        }
+        for (int i = 0; i < idx - 1 - str.length(); i++) ret = "0" + ret;
+        return ret;
+}
+
+bool canDraw(string str) {
+        if (str.length() == 1 || isAllZero(str)) return true;
+
+        int midIdx = str.length() / 2;
+        string left = str.substr(0, midIdx);
+        string right = str.substr(midIdx + 1);
+
+        if (str[midIdx] == '1' && canDraw(left) && canDraw(right)) return true;
+        else return false;
+}
+
+bool isAllZero(string str) {
+        for (char c : str) {
+                if (c != '0') return false;
+        }
+        return true;
 }
