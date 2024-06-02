@@ -1,151 +1,74 @@
 ﻿#include <string>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
-struct cell
+
+
+struct Pos
 {
-        int ptr;
-        string value = "EMPTY";
+        int x;
+        int y;
+
+        Pos operator +(Pos other)
+        {
+                Pos r;
+                r.x = x + other.x;
+                r.y = y + other.y;
+                return r;
+        }
+
+        bool operator == (Pos other)
+        {
+                return x == other.x && y == other.y;
+        }
+
+        int Length(Pos other)
+        {
+                return abs(other.x - x) + abs(other.y - y);
+        }
 };
 
-int Find(int i);
-void Union(int i, int j);
-void Update(vector<string>& cmd);
-void Merge(vector<string>& cmd);
-void UnMerge(vector<string>& cmd);
-void Print(vector<string>& cmd);
-vector<string> split(string cmd);
+static int N, M, K;
+static Pos dst;
+string answer;
 
-vector<cell> table;
-vector<string> answer;
 
-vector<string> solution(vector<string> commands) {
-        table.resize(50 * 50);
-        for (int i = 0; i < table.size(); i++)
-                table[i].ptr = i;
+void DFS(Pos pos, string str)
+{
+        if (answer.size() > 0 ||
+                pos.Length(dst) > K - str.size() ||
+                pos.x >= N || pos.x < 0 ||
+                pos.y >= M || pos.y < 0)
+                return;
 
-        for (string c : commands)
-        {
-                vector<string> cmd = split(c);
+        if (str.size() == K) {
+                if (pos == dst)
+                        answer = str;
 
-                if (cmd[0] == "UPDATE")
-                        Update(cmd);
-                else if (cmd[0] == "MERGE")
-                        Merge(cmd);
-                else if (cmd[0] == "UNMERGE")
-                        UnMerge(cmd);
-                else if (cmd[0] == "PRINT")
-                        Print(cmd);
-
+                return;
         }
+
+        DFS(pos + Pos{ 1, 0 }, str + 'd');
+        DFS(pos + Pos{ 0, -1 }, str + 'l');
+        DFS(pos + Pos{ 0, 1 }, str + 'r');
+        DFS(pos + Pos{ -1, 0 }, str + 'u');
+}
+
+string solution(int n, int m, int x, int y, int r, int c, int k) {
+        N = n; M = m; K = k;
+        dst = Pos{ r - 1, c - 1 };
+
+        int remain = dst.Length(Pos{ x - 1, y - 1 });
+        if ((K - remain) % 2 != 0 || remain > k) {
+                answer = "impossible";
+        }
+        else
+                DFS(Pos{ x - 1, y - 1 }, "");
+
+
+
         return answer;
 }
-
-void Update(vector<string>& cmd)
-{
-        if (cmd.size() == 3)
-        {
-                for (cell& c : table) {
-                        int idx = Find(c.ptr);
-                        if (table[idx].value == cmd[1])
-                                table[idx].value = cmd[2];
-                }
-        }
-        else
-        {
-                int r = stoi(cmd[1]) - 1;
-                int c = stoi(cmd[2]) - 1;
-
-                int idx = Find(r * 50 + c);
-                table[idx].value = cmd[3];
-        }
-}
-
-void Merge(vector<string>& cmd)
-{
-        int r1 = stoi(cmd[1]) - 1;
-        int c1 = stoi(cmd[2]) - 1;
-        int r2 = stoi(cmd[3]) - 1;
-        int c2 = stoi(cmd[4]) - 1;
-
-        int idx1 = (r1 * 50) + c1;
-        int idx2 = (r2 * 50) + c2;
-
-        Union(idx1, idx2);
-}
-
-void UnMerge(vector<string>& cmd)
-{
-        int r = stoi(cmd[1]) - 1;
-        int c = stoi(cmd[2]) - 1;
-
-        int idx = (r * 50) + c;
-        int root = Find(idx);
-        string value = table[root].value;
-
-        vector<int> targets;
-        for (int i = 0; i < table.size(); i++)
-        {
-                if (Find(table[i].ptr) == root)
-                        targets.push_back(i);
-        }
-
-        for (int i : targets)
-        {
-                table[i].ptr = i;
-                table[i].value = "EMPTY";
-        }
-
-        table[idx].value = value;
-}
-
-void Print(vector<string>& cmd)
-{
-        int r = stoi(cmd[1]) - 1;
-        int c = stoi(cmd[2]) - 1;
-
-        int idx = Find(r * 50 + c);
-        answer.push_back(table[idx].value);
-}
-
-
-int Find(int i)
-{
-        if (table[i].ptr == i)
-                return i;
-
-        return table[i].ptr = Find(table[i].ptr);
-}
-
-void Union(int i, int j)
-{
-        i = Find(i);
-        j = Find(j);
-
-        if (table[i].value == "EMPTY" && table[j].value != "EMPTY")
-        {
-                table[i].ptr = j;
-        }
-        else
-                table[j].ptr = i;
-}
-
-vector<string> split(string cmd)
-{
-        vector<string> result;
-        string str;
-        for (char c : cmd) {
-                if (c == ' ') {
-                        result.push_back(str);
-                        str = "";
-                        continue;
-                }
-                str.push_back(c);
-        }
-        result.push_back(str);
-        return result;
-}
-
 
