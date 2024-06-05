@@ -1,47 +1,46 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
+#define INF 10001
 
 using namespace std;
 
-int solution(vector<int> queue1, vector<int> queue2) {
-        int answer = 0;
+int solution(int alp, int cop, vector<vector<int>> problems) {
 
-        long total_q1 = 0, total_q2 = 0, goal = 0;
-        int front_q1 = 0, front_q2 = 0;
+        int dp[151][151];
+        fill(&dp[0][0], &dp[150][150], INF);
 
-        for (int n : queue1)
-                total_q1 += n;
-        for (int n : queue2)
-                total_q2 += n;
-
-        goal = (total_q1 + total_q2) / 2;
-
-        int cnt = queue1.size() + queue2.size() + 10;
-        while (total_q1 != total_q2 && cnt--)
+        int goal_alp = 0;
+        int goal_cop = 0;
+        for (auto p : problems)
         {
-                if (total_q1 > total_q2)
-                {
-                        int value = queue1[front_q1];
-                        queue2.push_back(value);
-                        total_q2 += value;
-                        total_q1 -= value;
-                        front_q1++;
-                }
-                else
-                {
-                        int value = queue2[front_q2];
-                        queue1.push_back(value);
-                        total_q1 += value;
-                        total_q2 -= value;
-                        front_q2++;
-                }
+                goal_alp = max(p[0], goal_alp);
+                goal_cop = max(p[1], goal_cop);
+        }
+        alp = min(alp, goal_alp);
+        cop = min(cop, goal_cop);
 
-                answer++;
+        dp[alp][cop] = 0;
+        for (int i = alp; i <= goal_alp; i++)
+        {
+                for (int j = cop; j <= goal_cop; j++)
+                {
+                        if (i < goal_alp)
+                                dp[i + 1][j] = min(dp[i + 1][j], dp[i][j] + 1);
+                        if (j < goal_cop)
+                                dp[i][j + 1] = min(dp[i][j + 1], dp[i][j] + 1);
+
+                        for (auto p : problems)
+                        {
+                                if (i >= p[0] && j >= p[1])
+                                {
+                                        int nextAlp = min(i + p[2], goal_alp);
+                                        int nextCop = min(j + p[3], goal_cop);
+                                        dp[nextAlp][nextCop] = min(dp[nextAlp][nextCop], dp[i][j] + p[4]);
+                                }
+                        }
+                }
         }
 
-        if (cnt <= 0)
-                answer = -1;
 
-        return answer;
+        return dp[goal_alp][goal_cop];
 }
