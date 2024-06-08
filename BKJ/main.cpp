@@ -1,82 +1,73 @@
-﻿#include <string>
-#include <vector>
-#include <queue>
+﻿#include <vector>
+#include <deque>
 #include <iostream>
-
+#include <string>
 
 using namespace std;
 
-vector<int> costs;
-vector<int> answer;
-vector<bool> tops;
+vector<vector<int>> solution(vector<vector<int>> rc, vector<string> operations) {
+        int N = rc.size();
+        int M = rc[0].size();
+        deque<int> left_col, right_col;
+        deque<int> rows[N];
 
-vector<vector<pair<int, int>>> v;
-
-void dijkstra(vector<int>& gates)
-{
-        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q;
-
-        for (int gate : gates)
+        // Initialize the left and right columns and rows deque
+        for (int i = 0; i < N; ++i)
         {
-                q.push(make_pair(0, gate));
-                costs[gate] = 0;
+                left_col.push_back(rc[i][0]);
+                right_col.push_back(rc[i][M - 1]);
         }
 
-        while (!q.empty())
+        for (int i = 0; i < N; i++)
         {
-                int node = q.top().second;
-                int cost = q.top().first;
-                q.pop();
+                for (int j = 1; j < M - 1; j++)
+                        rows[i].push_back(rc[i][j]);
+        }
 
-                if (answer[0] > 0 && answer[1] < cost)
-                        continue;
-
-                if (tops[node])
+        int idx = 0;
+        for (const string& op : operations)
+        {
+                if (op == "ShiftRow")
                 {
-                        // cout << node << "\n";
-                        if (answer[0] == -1 || answer[1] > cost)
-                        {
-                                answer[0] = node;
-                                answer[1] = cost;
-                        }
-                        else if (answer[1] == cost && node < answer[0])
-                                answer[0] = node;
+                        left_col.push_front(left_col.back());
+                        left_col.pop_back();
 
-                        continue;
+                        right_col.push_front(right_col.back());
+                        right_col.pop_back();
+
+                        --idx;
+                        if (idx < 0) idx = N - 1;
                 }
-                //     cout << node << "\n";
-                    // cout << v[node].size() << "\n";
-                for (pair<int, int> next : v[node])
-                {
-                        int nextCost = max(next.second, cost);
-                        if (costs[next.first] == -1 || nextCost < costs[next.first])
-                        {
-                                q.push(make_pair(nextCost, next.first));
-                                costs[next.first] = nextCost;
-                        }
+                else
+                { // Rotate
+                        rows[idx].push_front(left_col.front());
+                        left_col.pop_front();
+
+                        right_col.push_front(rows[idx].back());
+                        rows[idx].pop_back();
+
+                        int backIdx = (idx + N - 1) % N;
+                        rows[backIdx].push_back(right_col.back());
+                        right_col.pop_back();
+
+                        left_col.push_back(rows[backIdx].front());
+                        rows[backIdx].pop_front();
                 }
         }
 
-}
-
-vector<int> solution(int n, vector<vector<int>> paths, vector<int> gates, vector<int> summits) {
-
-        v.resize(n + 1);
-        tops.resize(n + 1, false);
-        answer.resize(2, -1);
-        costs.resize(n + 1, -1);
-
-        for (int t : summits) {
-                tops[t] = true;
-        }
-
-        for (int i = 0; i < paths.size(); i++)
+        // Build the answer
+        vector<vector<int>> answer(N, vector<int>(M));
+        for (int i = 0; i < N; ++i)
         {
-                v[paths[i][0]].push_back(make_pair(paths[i][1], paths[i][2]));
-                v[paths[i][1]].push_back(make_pair(paths[i][0], paths[i][2]));
-        }
-        dijkstra(gates);
+                answer[i][0] = left_col[i];
 
+                for (int j = 1; j < M - 1; ++j)
+                {
+                        answer[i][j] = rows[(i + idx) % N][j - 1];
+                }
+
+                answer[i][M - 1] = right_col[i];
+        }
 
         return answer;
 }
