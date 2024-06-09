@@ -1,73 +1,74 @@
-﻿#include <vector>
-#include <deque>
-#include <iostream>
-#include <string>
-
+﻿#include <bits/stdc++.h>
 using namespace std;
 
-vector<vector<int>> solution(vector<vector<int>> rc, vector<string> operations) {
-        int N = rc.size();
-        int M = rc[0].size();
-        deque<int> left_col, right_col;
-        deque<int> rows[N];
+struct Pos
+{
+        int x;
+        int y;
 
-        // Initialize the left and right columns and rows deque
-        for (int i = 0; i < N; ++i)
+        Pos operator + (Pos other)
         {
-                left_col.push_back(rc[i][0]);
-                right_col.push_back(rc[i][M - 1]);
+                Pos ret;
+                ret.x = x + other.x;
+                ret.y = y + other.y;
+                return ret;
+        }
+};
+
+int N, M;
+vector<vector<bool>> visited;
+
+Pos dir[4] = {
+    {-1, 0}, {1, 0}, {0, -1}, {0, 1}
+};
+
+bool OOB(Pos p)
+{
+        return (p.x >= 0 && p.x < N) && (p.y >= 0 && p.y < M);
+}
+
+int dfs(vector<vector<int>>& board, Pos plr, Pos opp)
+{
+        if (visited[plr.x][plr.y])
+                return 0;
+
+        int result = 0;
+
+        for (int i = 0; i < 4; i++)
+        {
+                Pos next = plr + dir[i];
+                if (OOB(next) == false ||
+                        visited[next.x][next.y] ||
+                        board[next.x][next.y] == 0)
+                        continue;
+
+                visited[plr.x][plr.y] = true;
+                // dfs가 반환하는 값 % 2 == 0 ? 패배 : 승리
+                int val = dfs(board, opp, next) + 1;
+                // 위 코드는 상대의 관점이기 때문에
+                // dfs() % 2 == 0 ? 나의 승리 : 나의 패배
+                // + 1을 해주었기에 다시 뒤집힘
+                visited[plr.x][plr.y] = false;
+
+                if (result % 2 == 0 && val % 2 == 1)
+                        result = val;
+
+                // 무조건 패배 -> 최대한 오래 살아남기
+                else if (result % 2 == 0 && val % 2 == 0)
+                        result = max(result, val);
+
+                // 무조건 승리 -> 최대한 빨리 끝내기
+                else if (result % 2 == 1 && val % 2 == 1)
+                        result = min(result, val);
         }
 
-        for (int i = 0; i < N; i++)
-        {
-                for (int j = 1; j < M - 1; j++)
-                        rows[i].push_back(rc[i][j]);
-        }
+        return result;
+}
 
-        int idx = 0;
-        for (const string& op : operations)
-        {
-                if (op == "ShiftRow")
-                {
-                        left_col.push_front(left_col.back());
-                        left_col.pop_back();
+int solution(vector<vector<int>> board, vector<int> aloc, vector<int> bloc) {
+        N = board.size();
+        M = board[0].size();
+        visited.resize(board.size(), vector<bool>(board[0].size()));
 
-                        right_col.push_front(right_col.back());
-                        right_col.pop_back();
-
-                        --idx;
-                        if (idx < 0) idx = N - 1;
-                }
-                else
-                { // Rotate
-                        rows[idx].push_front(left_col.front());
-                        left_col.pop_front();
-
-                        right_col.push_front(rows[idx].back());
-                        rows[idx].pop_back();
-
-                        int backIdx = (idx + N - 1) % N;
-                        rows[backIdx].push_back(right_col.back());
-                        right_col.pop_back();
-
-                        left_col.push_back(rows[backIdx].front());
-                        rows[backIdx].pop_front();
-                }
-        }
-
-        // Build the answer
-        vector<vector<int>> answer(N, vector<int>(M));
-        for (int i = 0; i < N; ++i)
-        {
-                answer[i][0] = left_col[i];
-
-                for (int j = 1; j < M - 1; ++j)
-                {
-                        answer[i][j] = rows[(i + idx) % N][j - 1];
-                }
-
-                answer[i][M - 1] = right_col[i];
-        }
-
-        return answer;
+        return dfs(board, Pos{ aloc[0], aloc[1] }, Pos{ bloc[0], bloc[1] });
 }
