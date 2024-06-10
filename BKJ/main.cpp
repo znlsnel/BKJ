@@ -1,74 +1,48 @@
-﻿#include <bits/stdc++.h>
+﻿#include <string>
+#include <vector>
+#include <iostream>
+
 using namespace std;
 
-struct Pos
-{
-        int x;
-        int y;
+int solution(vector<vector<int>> board, vector<vector<int>> skills) {
+        int n = board.size();
+        int m = board[0].size();
+        vector<vector<int>> accumulate(n + 1, vector<int>(m + 1, 0));
 
-        Pos operator + (Pos other)
+        for (auto skill : skills)
         {
-                Pos ret;
-                ret.x = x + other.x;
-                ret.y = y + other.y;
-                return ret;
+                int type = skill[0];
+                int r1 = skill[1];
+                int c1 = skill[2];
+                int r2 = skill[3];
+                int c2 = skill[4];
+                int degree = skill[5];
+                if (type == 1)
+                        degree *= -1;
+
+                accumulate[r1][c1] += degree;
+                accumulate[r1][c2 + 1] -= degree;
+                accumulate[r2 + 1][c1] -= degree;
+                accumulate[r2 + 1][c2 + 1] += degree;
         }
-};
+        for (int i = 0; i < n; i++)
+                for (int j = 1; j < m; j++)
+                        accumulate[i][j] += accumulate[i][j - 1];
 
-int N, M;
-vector<vector<bool>> visited;
+        for (int i = 1; i < n; i++)
+                for (int j = 0; j < m; j++)
+                        accumulate[i][j] += accumulate[i - 1][j];
 
-Pos dir[4] = {
-    {-1, 0}, {1, 0}, {0, -1}, {0, 1}
-};
 
-bool OOB(Pos p)
-{
-        return (p.x >= 0 && p.x < N) && (p.y >= 0 && p.y < M);
-}
-
-int dfs(vector<vector<int>>& board, Pos plr, Pos opp)
-{
-        if (visited[plr.x][plr.y])
-                return 0;
-
-        int result = 0;
-
-        for (int i = 0; i < 4; i++)
-        {
-                Pos next = plr + dir[i];
-                if (OOB(next) == false ||
-                        visited[next.x][next.y] ||
-                        board[next.x][next.y] == 0)
-                        continue;
-
-                visited[plr.x][plr.y] = true;
-                // dfs가 반환하는 값 % 2 == 0 ? 패배 : 승리
-                int val = dfs(board, opp, next) + 1;
-                // 위 코드는 상대의 관점이기 때문에
-                // dfs() % 2 == 0 ? 나의 승리 : 나의 패배
-                // + 1을 해주었기에 다시 뒤집힘
-                visited[plr.x][plr.y] = false;
-
-                if (result % 2 == 0 && val % 2 == 1)
-                        result = val;
-
-                // 무조건 패배 -> 최대한 오래 살아남기
-                else if (result % 2 == 0 && val % 2 == 0)
-                        result = max(result, val);
-
-                // 무조건 승리 -> 최대한 빨리 끝내기
-                else if (result % 2 == 1 && val % 2 == 1)
-                        result = min(result, val);
+        int answer = 0;
+        for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
+                        board[i][j] += accumulate[i][j];
+                        if (board[i][j] > 0) {
+                                answer++;
+                        }
+                }
         }
 
-        return result;
-}
-
-int solution(vector<vector<int>> board, vector<int> aloc, vector<int> bloc) {
-        N = board.size();
-        M = board[0].size();
-        visited.resize(board.size(), vector<bool>(board[0].size()));
-
-        return dfs(board, Pos{ aloc[0], aloc[1] }, Pos{ bloc[0], bloc[1] });
+        return answer;
 }
