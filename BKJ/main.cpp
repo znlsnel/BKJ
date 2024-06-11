@@ -1,48 +1,57 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
 
 using namespace std;
 
-int solution(vector<vector<int>> board, vector<vector<int>> skills) {
-        int n = board.size();
-        int m = board[0].size();
-        vector<vector<int>> accumulate(n + 1, vector<int>(m + 1, 0));
+vector<vector<int>> v;
 
-        for (auto skill : skills)
+int maxSheep;
+void DFS(vector<int>& info, int node, int sheep, int wolf)
+{
+        if (sheep > 0 && sheep == wolf)
+                return;
+
+        if (info[node] == 0)
+                sheep++;
+        else
+                wolf++;
+
+        if (maxSheep < sheep)
+                maxSheep = sheep;
+
+        for (int i = 0; i < v[node].size(); i++)
         {
-                int type = skill[0];
-                int r1 = skill[1];
-                int c1 = skill[2];
-                int r2 = skill[3];
-                int c2 = skill[4];
-                int degree = skill[5];
-                if (type == 1)
-                        degree *= -1;
+                vector<int> addNodes;
+                for (int j = 0; j < v[node].size(); j++)
+                {
+                        if (i == j)
+                                continue;
 
-                accumulate[r1][c1] += degree;
-                accumulate[r1][c2 + 1] -= degree;
-                accumulate[r2 + 1][c1] -= degree;
-                accumulate[r2 + 1][c2 + 1] += degree;
-        }
-        for (int i = 0; i < n; i++)
-                for (int j = 1; j < m; j++)
-                        accumulate[i][j] += accumulate[i][j - 1];
-
-        for (int i = 1; i < n; i++)
-                for (int j = 0; j < m; j++)
-                        accumulate[i][j] += accumulate[i - 1][j];
-
-
-        int answer = 0;
-        for (int i = 0; i < n; i++) {
-                for (int j = 0; j < m; j++) {
-                        board[i][j] += accumulate[i][j];
-                        if (board[i][j] > 0) {
-                                answer++;
-                        }
+                        addNodes.push_back(v[node][j]);
                 }
-        }
 
-        return answer;
+                int cnt = addNodes.size();
+                int next = v[node][i];
+
+                for (int i = 0; i < cnt; i++)
+                {
+                        v[next].push_back(addNodes[i]);
+                }
+
+                DFS(info, next, sheep, wolf);
+
+                for (int i = 0; i < cnt; i++)
+                        v[next].pop_back();
+        }
+}
+
+int solution(vector<int> info, vector<vector<int>> edges) {
+        v.resize(info.size());
+
+        for (int i = 0; i < edges.size(); i++)
+                v[edges[i][0]].push_back(edges[i][1]);
+
+        DFS(info, 0, 0, 0);
+
+        return maxSheep;
 }
