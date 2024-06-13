@@ -1,57 +1,107 @@
 ﻿#include <string>
 #include <vector>
 #include <iostream>
+#include <algorithm>
+#include <set>
 
 using namespace std;
 
-int MaxScore;
-vector<int> mine(11);
-vector<int> answer{ -1 };
+int _in[10000];
+int _total[10000];
 
-void DFS(vector<int>& info, int idx, int coin, int score, int op_score)
+int ttoi(string str)
 {
-        // 이기던가 지던가 (비기면 안됨)
-        if (idx == 11)
-        {
-                mine[10] += coin;
-                if (score > op_score && MaxScore < (score - op_score))
-                {
-                        answer = mine;
-                        MaxScore = score - op_score;
-                }
-                else if (score > op_score && MaxScore == (score - op_score))
-                {
-                        for (int i = 10; i >= 0; --i)
-                        {
-                                if (mine[i] > answer[i])
-                                {
-                                        answer = mine;
-                                        break;
-                                }
-                                else if (mine[i] < answer[i])
-                                        break;
-                        }
-                }
-                return;
-        }
+        int ret = 0;
+        ret += (str[0] - '0') * 600;
+        ret += (str[1] - '0') * 60;
 
-        // 이길 경우
-        if (info[idx] < coin)
-        {
-                mine[idx] = info[idx] + 1;
-                DFS(info, idx + 1, coin - mine[idx], score + (10 - idx), op_score);
-
-        }
-
-        // 질 경우
-        if (info[idx] > 0)
-                op_score = op_score + (10 - idx);
-
-        mine[idx] = 0;
-        DFS(info, idx + 1, coin, score, op_score);
+        ret += (str[3] - '0') * 10;
+        ret += str[4] - '0';
+        return ret;
 }
 
-vector<int> solution(int n, vector<int> info) {
-        DFS(info, 0, n, 0, 0);
+vector<string> split(string str)
+{
+        vector<string> ret;
+
+        string temp;
+        for (char c : str)
+        {
+                if (c == ' ') {
+                        ret.push_back(temp);
+                        temp = "";
+                        continue;
+                }
+                temp.push_back(c);
+        }
+        ret.push_back(temp);
+        return ret;
+}
+
+vector<int> solution(vector<int> fees, vector<string> records) {
+        set<int> numbers;
+
+        for (string r : records)
+        {
+                vector<string> op = split(r);
+
+                int time = ttoi(op[0]);
+                int num = stoi(op[1]);
+                numbers.insert(num);
+
+                bool isIn = op[2] == "IN";
+
+                if (isIn)
+                {
+                        _in[num] = time;
+                }
+                else
+                {
+                        _total[num] += time - _in[num];
+                        _in[num] = -1;
+                }
+        }
+        vector<int> number;
+        for (int n : numbers)
+                number.push_back(n);
+        sort(number.begin(), number.end());
+
+        int maxT = 59 + (3 * 60) + (2 * 600);
+        vector<int> answer;
+
+        for (int num : number)
+        {
+                if (_in[num] >= 0)
+                {
+                        _total[num] += maxT - _in[num];
+                }
+
+                if (_total[num] > 0)
+                {
+                        if (fees[0] >= _total[num])
+                        {
+                                answer.push_back(fees[1]);
+                        }
+                        else
+                        {
+                                int overtime = _total[num] - fees[0];
+                                int cntTime = 1;
+
+                                while (overtime > fees[2])
+                                {
+                                        overtime -= fees[2];
+                                        cntTime++;
+                                }
+
+
+                                answer.push_back(fees[1] + (cntTime * fees[3]));
+
+                        }
+                }
+
+        }
+
+
+
         return answer;
 }
