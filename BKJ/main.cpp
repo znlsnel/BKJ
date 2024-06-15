@@ -1,107 +1,121 @@
 ﻿#include <string>
 #include <vector>
 #include <iostream>
-#include <algorithm>
-#include <set>
 
 using namespace std;
 
-int _in[10000];
-int _total[10000];
-
-int ttoi(string str)
+int ttoi(string time)
 {
         int ret = 0;
-        ret += (str[0] - '0') * 600;
-        ret += (str[1] - '0') * 60;
 
-        ret += (str[3] - '0') * 10;
-        ret += str[4] - '0';
+        ret += time[7] - '0';      // 1초
+        ret += (time[6] - '0') * 10; // 10초
+
+        ret += (time[4] - '0') * 60; // 1분
+        ret += (time[3] - '0') * 600; // 10분
+
+        ret += (time[1] - '0') * 3600; // 1시간
+        ret += (time[0] - '0') * 36000; // 10시간
+
         return ret;
 }
 
-vector<string> split(string str)
+string itot(int time)
+{
+        string ret;
+
+        ret += to_string(time / 36000);
+        time %= 36000;
+
+        ret += to_string(time / 3600);
+        time %= 3600;
+
+        ret += ":";
+
+        ret += to_string(time / 600);
+        time %= 600;
+
+        ret += to_string(time / 60);
+        time %= 60;
+
+        ret += ":";
+
+        ret += to_string(time / 10);
+        time %= 10;
+
+        ret += to_string(time);
+
+        return ret;
+}
+
+vector<string> splite(string str)
 {
         vector<string> ret;
-
-        string temp;
-        for (char c : str)
+        string s;
+        for (auto c : str)
         {
-                if (c == ' ') {
-                        ret.push_back(temp);
-                        temp = "";
+
+                if (c == '-')
+                {
+                        ret.push_back(s);
+                        s = "";
                         continue;
                 }
-                temp.push_back(c);
+                s += c;
         }
-        ret.push_back(temp);
+        ret.push_back(s);
         return ret;
 }
+long dp[360000];
 
-vector<int> solution(vector<int> fees, vector<string> records) {
-        set<int> numbers;
+string solution(string play_time, string adv_time, vector<string> logs) {
+        string answer = "";
 
-        for (string r : records)
+        int play_length = ttoi(play_time);
+        int adv_length = ttoi(adv_time);
+
+        for (string l : logs)
         {
-                vector<string> op = split(r);
+                vector<string> log = splite(l);
+                int start = ttoi(log[0]);
+                int end = ttoi(log[1]);
 
-                int time = ttoi(op[0]);
-                int num = stoi(op[1]);
-                numbers.insert(num);
+                dp[start]++;
+                dp[end]--;
+        }
 
-                bool isIn = op[2] == "IN";
+        for (int i = 1; i <= play_length; i++)
+                dp[i] += dp[i - 1];
 
-                if (isIn)
+        long long temp = 0;
+        long long max = 0;
+        long index = 0;
+
+        for (int i = 0; i < play_length; i++)
+        {
+                if (i < adv_length)
                 {
-                        _in[num] = time;
+                        temp += dp[i];
+                        max = temp;
                 }
                 else
                 {
-                        _total[num] += time - _in[num];
-                        _in[num] = -1;
-                }
-        }
-        vector<int> number;
-        for (int n : numbers)
-                number.push_back(n);
-        sort(number.begin(), number.end());
+                        temp -= dp[i - adv_length];
+                        temp += dp[i];
 
-        int maxT = 59 + (3 * 60) + (2 * 600);
-        vector<int> answer;
 
-        for (int num : number)
-        {
-                if (_in[num] >= 0)
-                {
-                        _total[num] += maxT - _in[num];
-                }
-
-                if (_total[num] > 0)
-                {
-                        if (fees[0] >= _total[num])
+                        if (temp > max)
                         {
-                                answer.push_back(fees[1]);
-                        }
-                        else
-                        {
-                                int overtime = _total[num] - fees[0];
-                                int cntTime = 1;
-
-                                while (overtime > fees[2])
-                                {
-                                        overtime -= fees[2];
-                                        cntTime++;
-                                }
-
-
-                                answer.push_back(fees[1] + (cntTime * fees[3]));
-
+                                max = temp;
+                                index = i - adv_length + 1;
                         }
                 }
+
 
         }
 
 
 
-        return answer;
+
+        return itot(index);
 }
