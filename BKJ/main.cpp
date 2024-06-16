@@ -1,121 +1,52 @@
 ﻿#include <string>
 #include <vector>
 #include <iostream>
+#include <limits>
 
 using namespace std;
+const int INF = 200000000;
 
-int ttoi(string time)
-{
-        int ret = 0;
+vector<vector<int>> dp;
 
-        ret += time[7] - '0';      // 1초
-        ret += (time[6] - '0') * 10; // 10초
 
-        ret += (time[4] - '0') * 60; // 1분
-        ret += (time[3] - '0') * 600; // 10분
+int solution(int n, int s, int a, int b, vector<vector<int>> fares) {
 
-        ret += (time[1] - '0') * 3600; // 1시간
-        ret += (time[0] - '0') * 36000; // 10시간
+        dp.resize(n + 1, vector<int>(n + 1, INF));
 
-        return ret;
-}
-
-string itot(int time)
-{
-        string ret;
-
-        ret += to_string(time / 36000);
-        time %= 36000;
-
-        ret += to_string(time / 3600);
-        time %= 3600;
-
-        ret += ":";
-
-        ret += to_string(time / 600);
-        time %= 600;
-
-        ret += to_string(time / 60);
-        time %= 60;
-
-        ret += ":";
-
-        ret += to_string(time / 10);
-        time %= 10;
-
-        ret += to_string(time);
-
-        return ret;
-}
-
-vector<string> splite(string str)
-{
-        vector<string> ret;
-        string s;
-        for (auto c : str)
+        for (auto fare : fares)
         {
+                int A = fare[0];
+                int B = fare[1];
+                int cost = fare[2];
 
-                if (c == '-')
-                {
-                        ret.push_back(s);
-                        s = "";
-                        continue;
-                }
-                s += c;
-        }
-        ret.push_back(s);
-        return ret;
-}
-long dp[360000];
-
-string solution(string play_time, string adv_time, vector<string> logs) {
-        string answer = "";
-
-        int play_length = ttoi(play_time);
-        int adv_length = ttoi(adv_time);
-
-        for (string l : logs)
-        {
-                vector<string> log = splite(l);
-                int start = ttoi(log[0]);
-                int end = ttoi(log[1]);
-
-                dp[start]++;
-                dp[end]--;
+                dp[A][B] = cost;
+                dp[B][A] = cost;
         }
 
-        for (int i = 1; i <= play_length; i++)
-                dp[i] += dp[i - 1];
+        for (int i = 1; i <= n; i++)
+                dp[i][i] = 0;
 
-        long long temp = 0;
-        long long max = 0;
-        long index = 0;
-
-        for (int i = 0; i < play_length; i++)
+        for (int k = 1; k <= n; k++)
         {
-                if (i < adv_length)
+                for (int i = 1; i <= n; i++)
                 {
-                        temp += dp[i];
-                        max = temp;
-                }
-                else
-                {
-                        temp -= dp[i - adv_length];
-                        temp += dp[i];
-
-
-                        if (temp > max)
+                        for (int j = 1; j <= n; j++)
                         {
-                                max = temp;
-                                index = i - adv_length + 1;
+                                if (dp[i][k] < INF && dp[k][j] < INF) {
+                                        dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+                                }
                         }
                 }
+        }
 
+
+        int answer = INF;
+        for (int i = 1; i <= n; ++i) {
+                answer = min(answer, dp[s][i] + dp[i][a] + dp[i][b]);
 
         }
 
 
 
-
-        return itot(index);
+        return answer;
 }
