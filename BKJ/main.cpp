@@ -1,141 +1,140 @@
 ﻿#include <string>
 #include <vector>
 #include <iostream>
+#include <queue>
 
 using namespace std;
 
-struct map
+int dx[4] = { 1, 0, -1, 0 };
+int dy[4] = { 0, 1, 0, -1 };
+
+bool road[51][51];
+int answer = 1000000000;
+int iy, ix;
+
+bool isInSide(vector<int>& r, float pnt_y, float pnt_x)
 {
-        map(int size = 50)
+        bool isInside = pnt_x > r[0] && pnt_x < r[2] && pnt_y > r[1] && pnt_y < r[3];
+        return isInside;
+}
+
+bool isOutSide(vector<int>& r, float pnt_y, float pnt_x)
+{
+        bool isOutSide = pnt_x < r[0] || pnt_x > r[2] || pnt_y < r[1] || pnt_y > r[3];
+        return isOutSide;
+}
+
+
+
+
+bool Check(int y, int x)
+{
+        return y >= 0 && y < 51 && x >= 0 && x < 51 && road[y][x];
+}
+
+
+void DFS(vector<vector<int>>& rectangle, int y, int x, int cost)
+{
+        //cout << "Y, X : "<<y << ", " << x << "  COST :" << cost << "\n";
+
+        for (auto& r : rectangle)
         {
-                table.resize(size);
-        }
-        int hash(string str, int size = 50)
-        {
-                int key = 0;
-
-                for (char& c : str)
-                        key += c - 'a';
-
-                key %= size;
-                return key;
-        }
-
-        void insert(string key, int value)
-        {
-                table[hash(key)].push_back(make_pair(key, value));
-        }
-
-        int get(string key)
-        {
-                int ret = -1;
-                int hkey = hash(key);
-
-                for (auto p : table[hkey])
+                if (isInSide(r, y, x))
                 {
-                        if (p.first == key)
-                        {
-                                ret = p.second;
-                                break;
-                        }
+                        road[y][x] = false;
+                        return;
                 }
 
-                return ret;
         }
 
-        vector<vector<pair<string, int>>> table;
 
-};
 
-struct Node
-{
-        vector<Node*> childs;
-        string value;
-
-        void Push(Node& str)
+        if (y == iy && x == ix)
         {
-                int cnt = 0;
-                for (int i = 0; i < str.value.size(); i++)
-                {
-                        if (str.value[i] != value[i])
-                                cnt++;
-
-                        if (cnt > 1)
-                                return;
-                }
-
-                if (cnt == 1)
-                        childs.push_back(&str);
-        }
-};
-vector<Node> nodes;
-vector<bool> visited;
-map m;
-
-const int INF = 100000000;
-int answer = INF;
-void DFS(Node& node, string& target, int depth)
-{
-        if (node.value == target)
-        {
-                answer = min(answer, depth);
+                answer = min(answer, cost);
                 return;
         }
 
-        int key = m.get(node.value);
-        visited[key] = true;
+        road[y][x] = false;
 
-
-        for (auto child : node.childs)
+        for (int i = 0; i < 4; i++)
         {
-                int ckey = m.get(child->value);
-                if (visited[ckey] == false)
-                        DFS(*child, target, depth + 1);
-        }
+                int ny = y + dy[i];
+                int nx = x + dx[i];
 
-
-        visited[key] = false;
-}
-
-int solution(string begin, string target, vector<string> words) {
-        visited.resize(words.size());
-
-        words.push_back(begin);
-        words.push_back(target);
-
-        for (int i = 0; i < words.size(); i++)
-        {
-                Node node;
-                node.value = words[i];
-
-                nodes.push_back(node);
-                m.insert(words[i], i);
-        }
-
-        for (int i = 0; i < words.size(); i++)
-        {
-                for (int j = 0; j < words.size(); j++)
+                bool movable = true;
+                bool allout = true;
+                for (auto& r : rectangle)
                 {
-                        nodes[i].Push(nodes[j]);
+                        if (isInSide(r, float(ny + y) / 2.0f, float(nx + x) / 2.0f))
+                        {
+                                movable = false;
+                                break;
+                        }
+
+                        if (isOutSide(r, float(ny + y) / 2.0f, float(nx + x) / 2.0f) == false)
+                        {
+                                allout = false;
+                        }
+                }
+
+                if (!allout && movable && Check(ny, nx))
+                {
+                        DFS(rectangle, ny, nx, cost + 1);
                 }
         }
 
-        DFS(nodes[m.get(begin)], target, 0);
-
-        //    for (auto c : nodes[0].childs)
-          //      cout << c->value << " ";
-        return answer == INF ? 0 : answer;
+        road[y][x] = true;
 }
 
-// begin -> target
-// hit -> cog
-// words = {hot, dot, dog, lot, log, cog}
-// answer = hit -> hot -> dot -> dog -> cog
+int solution(vector<vector<int>> rectangle, int characterX, int characterY, int itemX, int itemY) {
 
-// hit -> hot -> dot -> lot, dog -> log, cog
+        iy = itemY;
+        ix = itemX;
+        for (auto& r : rectangle)
+        {
+                int x1, y1, x2, y2;
+                x1 = r[0];
+                y1 = r[1];
+                x2 = r[2];
+                y2 = r[3];
 
-// 모든 문자열을 순회하여 트리로 만들기 (무한 루프를 막기 위해 방문여부 체크)
-// DFS를 이용해서 모든 자식노드 순회
-// target을 만나면 end
+                for (int i = y1; i <= y2; i++)
+                {
+                        road[i][x1] = true;
+                        road[i][x2] = true;
+                }
+
+                for (int i = x1; i <= x2; i++)
+                {
+                        road[y1][i] = true;
+                        road[y2][i] = true;
+                }
+        }
+
+        if (false)
+        {
+                for (int i = 50; i >= 0; i--)
+                {
+                        for (int j = 0; j < 51; j++)
+                        {
+                                if (road[i][j] == true)
+                                {
+                                        cout << "1 ";
+                                }
+                                else
+                                        cout << "  ";
+                        }
+                        cout << "\n";
+                }
+        }
 
 
+        DFS(rectangle, characterY, characterX, 0);
+        return answer;
+}
+
+
+// 선 으로 정라하기
+// 내 이동방향 -> 가로지르는 선이 있으면 그 선으로 가라타기
+// 두 방향으로 DFS
