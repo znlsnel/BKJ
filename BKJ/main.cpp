@@ -7,10 +7,10 @@ using namespace std;
 vector<vector<int>> dp(1002, vector<int>(52, 10000000));
 int answer = 1000000000;
 int _tmpt, _t1, _t2, _a, _b;
-int cnt;
+
 void DFS(vector<int>& onboard, int idx, int curTmpt, int cost)
 {
-        cnt++;
+
         if (idx >= onboard.size())
         {
                 answer = min(answer, cost);
@@ -45,13 +45,8 @@ int solution(int temperature, int t1, int t2, int a, int b, vector<int> onboard)
         _a = a;
         _b = b;
 
-        if (_tmpt < t1)
-        {
-                int dist = t1 - _tmpt;
-                int dist2 = t2 - t1;
-                _t2 = _tmpt - dist;
-                _t1 = _t2 - dist2;
-        }
+        if (_tmpt < _t1)
+                _tmpt = t2 + (_t1 - _tmpt);
 
         DFS(onboard, 0, _tmpt, 0);
 
