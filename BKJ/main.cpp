@@ -1,55 +1,60 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
-
+#include <set>
 using namespace std;
 
-vector<vector<int>> dp(1002, vector<int>(52, 10000000));
-int answer = 1000000000;
-int _tmpt, _t1, _t2, _a, _b;
-
-void DFS(vector<int>& onboard, int idx, int curTmpt, int cost)
+int N;
+bool canGoNextRound(set<int>& hands, set<int>& machs)
 {
-
-        if (idx >= onboard.size())
+        for (int card : hands)
         {
-                answer = min(answer, cost);
-                return;
+                int cntr = (N + 1) - card;
+                for (int mach : machs)
+                {
+                        if (mach == cntr)
+                        {
+                                hands.erase(card);
+                                machs.erase(mach);
+                                return true;
+                        }
+                }
+        }
+        return false;
+}
+int solution(int coin, vector<int> cards) {
+        int answer = 1;
+        N = cards.size();
+
+        set<int> hands;
+        set<int> draws;
+
+        for (int i = 0; i < cards.size() / 3; i++)
+                hands.insert(cards[i]);
+
+
+        for (int i = cards.size() / 3; i < cards.size(); i += 2)
+        {
+                draws.insert(cards[i]);
+                draws.insert(cards[i + 1]);
+
+                if (canGoNextRound(hands, hands))
+                {
+                        answer++;
+                }
+                else if (coin >= 1 && canGoNextRound(hands, draws))
+                {
+                        coin--;
+                        answer++;
+                }
+                else if (coin >= 2 && canGoNextRound(draws, draws))
+                {
+                        coin -= 2;
+                        answer++;
+                }
+                else
+                        break;
         }
 
-        // 범위를 벗어나면 리턴
-        if (onboard[idx] == 1 && (curTmpt < _t1 || curTmpt > _t2))
-                return;
-
-        // 이미 최적의 수를 찾았다면 리턴
-        if (dp[idx][curTmpt] <= cost)
-                return;
-
-
-        dp[idx][curTmpt] = cost;
-
-        // 끄는 경우
-        DFS(onboard, idx + 1, min(_tmpt, curTmpt + 1), cost);
-        // 온도 낮추는 경우
-        DFS(onboard, idx + 1, curTmpt - 1, cost + _a);
-        // 유지하는 경우
-        DFS(onboard, idx + 1, curTmpt, cost + _b);
-
-}
-
-int solution(int temperature, int t1, int t2, int a, int b, vector<int> onboard) {
-
-        _tmpt = temperature;
-        _t1 = t1;
-        _t2 = t2;
-        _a = a;
-        _b = b;
-
-        if (_tmpt < _t1)
-                _tmpt = t2 + (_t1 - _tmpt);
-
-        DFS(onboard, 0, _tmpt, 0);
 
         return answer;
 }
-
