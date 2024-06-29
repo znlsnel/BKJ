@@ -1,25 +1,44 @@
-﻿#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
+﻿#include <string>
+#include <vector>
+#include <iostream>
 
-long long dp[100002] = { 1, 1, 3, 10, 23, 62, 170, };
-long long sum[100002] = { 1, 1, 3, 11, 24, 65, 181, };
+using namespace std;
 
-const int INF = 1e9 + 7;
+long long solution(vector<int> sq) {
+        long long answer = 0;
 
-int solution(int n) {
-	for (int i = 7; i <= n; i++) {
-		dp[i] = dp[i - 1];
-		dp[i] += dp[i - 2] * 2;
-		dp[i] += dp[i - 3] * 5;
-		dp[i] += sum[i - 4] * 2;
-		dp[i] += sum[i - 5] * 2;
-		dp[i] += sum[i - 6] * 4;
-		dp[i] %= INF;
+        vector<int> v1(sq), v2(sq);
+        vector<long long> dp1(sq.size(), 0), dp2(sq.size(), 0);
+        long long max1 = 0, max2 = 0;
 
-		sum[i] = dp[i] + sum[i - 3];
-		sum[i] %= INF;
-	}
+        for (int i = 0; i < sq.size(); i++)
+        {
+                if (i % 2 == 0)
+                        v1[i] *= -1;
+                else
+                        v2[i] *= -1;
 
-	return dp[n];
+                if (i == 0) {
+                        dp1[i] = v1[i];
+                        dp2[i] = v2[i];
+                        max1 = dp1[i];
+                        max2 = dp2[i];
+                        continue;
+
+                }
+
+                if (dp1[i - 1] + v1[i] > v1[i])
+                        dp1[i] = dp1[i - 1] + v1[i];
+                else
+                        dp1[i] = v1[i];
+
+                max1 = max(max1, dp1[i]);
+
+                if (dp2[i - 1] + v2[i] > v2[i])
+                        dp2[i] = dp2[i - 1] + v2[i];
+                else
+                        dp2[i] = v2[i];
+                max2 = max(max2, dp2[i]);
+        }
+        return max(max1, max2);
 }
