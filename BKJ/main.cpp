@@ -1,70 +1,55 @@
 ﻿#include <string>
 #include <vector>
-#include <algorithm>
+#include <cmath>
 #include <iostream>
+
 using namespace std;
 
-int solution(vector<vector<int>> scores) {
-        int answer = 1;
-        int a = scores[0][0];
-        int b = scores[0][1];
+vector<int> solution(int e, vector<int> starts) {
+        vector<int> dp(e + 1), answer;
 
-        scores[0][0] = -10000;
-        scores[0][1] = -10000;
-
-        sort(scores.begin(), scores.end());
-        vector<int> startIdxs;
-
-        int start = scores[0][0];
-        for (int i = 1; i < scores.size(); i++) {
-                if (start != scores[i][0])
-                {
-                        start = scores[i][0];
-                        startIdxs.push_back(i - 1);
-                }
-        }
-        startIdxs.push_back(scores.size() - 1);
-
-        for (int i = 1; i < scores.size(); i++)
+        for (int i = 1; i <= e; i++)
         {
-                int na = scores[i][0];
-                int nb = scores[i][1];
-
-                scores[i][0] = -1000;
-                scores[i][1] = -1000;
-
-                if (na > a && nb > b)
-                        return -1;
-
-                // na, nb와 모든 것을 비교하여 이동이 가능한지 비교
-                // N^2 속도로 하면 불가능
-                // logN * N으로 해결
-
-                // 2,1  3,2  3,2  1,4
-                // 두 수의 합으로 scores 정렬(N Log N)
-                //  na + nb + 2 ~ 맨 뒤 탐색
-
-                int cnt = 10000;
-                bool flag = false;
-                int s = startIdxs.back();
-                for (int s = startIdxs.size() - 1; scores[startIdxs[s]][0] > na; s--, cnt--)
+                for (int j = 1; j <= e; j++)
                 {
-                        if (scores[startIdxs[s]][1] > nb) {
-                                flag = true;
+                        if (i * j > e)
                                 break;
-                        }
-                        if (cnt == 0)
-                                break;
+                        dp[i * j]++;
                 }
-                if (flag)
-                        continue;
-
-
-
-                int nsum = na + nb;
-                if (nsum > a + b)
-                        answer++;
         }
+
+        int maxId = e;
+        int maxV = dp[e];
+        for (int i = e; i >= 0; i--)
+        {
+                if (dp[i] >= maxV)
+                {
+                        maxId = i;
+                        maxV = dp[i];
+                }
+
+                dp[i] = maxId;
+        }
+
+        for (int idx : starts)
+                answer.push_back(dp[idx]);
+
+        //  for (int n : dp)
+            //  cout << n <<" ";
 
         return answer;
 }
+
+// arr[i][j] = 2 + arr[i/2][j/2];
+// arr[i] = 
+// 0 - 0
+// 1 - 1
+// 2 - 2
+// 3 - 2
+// 4 - 3
+// 5 - 2
+// 6 - 4
+
+
+// 1 2 2 3 2 4
+
