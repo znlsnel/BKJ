@@ -1,79 +1,64 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
+#include <queue>
 #include <algorithm>
-#include <cmath>
+#include <iostream>
 
 using namespace std;
+vector<vector<int>> lights;
+vector<bool> isLighting;
+int answer = 0;
 
-inline int GetCost(int y, int x, int dy, int dx)
+void DFS(int idx, int parent)
 {
-        if (y == dy && x == dx)
-                return 1;
-
-        int dirY = abs(dy - y);
-        int dirX = abs(dx - x);
-
-        int d = min(dirY, dirX);
-        int d2 = max(dirY, dirX) - d;
-
-        return d * 3 + d2 * 2;
-}
-
-inline void ctop(char c, int& ny, int& nx)
-{
-        //   cout << c << "\n";
-        if (c > '0' && c <= '9')
+        for (int& n : lights[idx])
         {
-                int a = (c - '1');
-                ny = a / 3;
-                nx = a % 3;
+                if (n != parent)
+                {
+                        DFS(n, idx);
+
+                        if (!isLighting[idx] && !isLighting[n]) {
+                                isLighting[idx] = true;
+                                answer++;
+                        }
+                }
         }
-        else if (c == '0') {
-                ny = 3;
-                nx = 1;
-        }
-        else if (c == '*')
+}
+
+int solution(int n, vector<vector<int>> lighthouse) {
+        lights.resize(n + 1);
+        isLighting.resize(n + 1);
+        for (auto& l : lighthouse)
         {
-                ny = 3;
-                nx = 0;
+                int a = l[0];
+                int b = l[1];
+                lights[a].push_back(b);
+                lights[b].push_back(a);
         }
-        else if (c == '#')
-        {
-                ny = 3;
-                nx = 2;
-        }
+        DFS(1, 0);
+        return answer;
 }
 
-int dp[100001][12][12];
-int DFS(const string& nums, int idx, int ly, int lx, int ry, int rx)
-{
-        if (idx == nums.size())
-                return 0;
+// 1 - 2 3 4 5
+// 2 - 1 9
+// 3 - 1
+// 4 - 1
+// 5 - 1 6
+// 6 - 5 7 8
+// 7 - 6
+// 8 - 6
+// 9 - 2 10
+// 10 - 9
 
-        if (ly == ry && lx == rx)
-                return 9999999;
+// 조건 1. 2개 이상의 노드와 연결된 애들
+// 조건 2. 옆에 켜져있는 등대가 있으면 안됨
 
-        int lnum = ly * 3 + lx + 1;
-        int rnum = ry * 3 + rx + 1;
-        if (dp[idx][lnum][rnum] != 0)
-                return dp[idx][lnum][rnum];
-
-        int ny, nx;
-        ctop(nums[idx], ny, nx);
-        int cost_1 = GetCost(ly, lx, ny, nx);
-        int cost_2 = GetCost(ry, rx, ny, nx);
-
-        int p1 = cost_1 + DFS(nums, idx + 1, ny, nx, ry, rx);
-        int p2 = cost_2 + DFS(nums, idx + 1, ly, lx, ny, nx);
-
-        return dp[idx][lnum][rnum] = min(p1, p2);
-}
-
-int solution(string numbers) {
-        return DFS(numbers, 0, 1, 0, 1, 2);
-}
-
-// 제자리 1
-// 상하좌우 2
-// 대각 3
+// 
+// priority_queue<연결된 노드 수, index> q;
+// vector<bool> visited;
+// if (q.top이 등대로 선정된 노드와 연결 되어 있다면)
+//      return;
+// 아니면 등대로 지정
+// 핵심은 등대로 선정된 노드와 연결 되어 있는지 어떻게 확인하는가?
+// 
+// 
