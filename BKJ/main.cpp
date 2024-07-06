@@ -1,45 +1,86 @@
-﻿#include <string>
-#include <vector>
-#include <queue>
+﻿#include <vector>
+#include <algorithm>
+#include <limits.h>
 
 using namespace std;
 
-void dijkstra(vector<vector<int>>& roads, vector<int>& dists, int start)
+int N, result = 100000000;
+vector<vector<int>> map;
+vector<int> rot;
+vector<int> dx = { 0, 0, 0, 1, -1 };
+vector<int> dy = { 0, 1, -1, 0, 0 };
+
+void dfs(int ind)
 {
-        dists[start] = 0;
-
-        priority_queue<pair<int, int>> q;
-        q.push({ 0, start });
-
-        while (!q.empty())
+        if (ind == N)
         {
-                auto [cost, node] = q.top(); q.pop();
-                cost *= -1;
+                vector<vector<int>> tmp(N, vector<int>(N));
+                vector<int> cur(N);
 
-                for (int& next : roads[node])
+                for (int i = 0; i < N; i++)
+                        cur[i] = rot[i];
+
+                for (int i = 0; i < N; i++)
                 {
-                        if (dists[next] == -1 || dists[next] > cost + 1)
+                        for (int j = 0; j < N; j++)
+                                tmp[i][j] = map[i][j];
+                }
+
+                int tmpRes = 0;
+                for (int i = 0; i < N; i++)
+                {
+                        for (int j = 0; j < N; j++)
                         {
-                                dists[next] = cost + 1;
-                                q.push({ -(cost + 1), next });
+                                tmpRes += cur[j];
+                                for (int d = 0; d < 5; d++)
+                                {
+                                        int X = i + dx[d];
+                                        int Y = j + dy[d];
+
+                                        if (X < 0 || Y < 0 || X >= N || Y >= N)
+                                                continue;
+
+                                        tmp[X][Y] = tmp[X][Y] - cur[j] >= 0 ? tmp[X][Y] - cur[j] : tmp[X][Y] - cur[j] + 4;
+                                }
+                        }
+
+                        for (int j = 0; j < N; j++)
+                                cur[j] = tmp[i][j];
+                }
+
+                bool flag = true;
+                for (int i = 0; i < N; i++)
+                {
+                        if (cur[i] != 0)
+                        {
+                                flag = false;
+                                break;
                         }
                 }
+
+                if (flag)
+                        result = min(result, tmpRes);
+
+                return;
+        }
+
+        for (int i = 0; i < 4; i++) {
+                rot[ind] = i;
+                dfs(ind + 1);
         }
 }
 
-vector<int> solution(int n, vector<vector<int>> roads, vector<int> sources, int destination) {
-        vector<vector<int>> _roads(n + 1);
-        for (auto& r : roads)
-        {
-                _roads[r[0]].push_back(r[1]);
-                _roads[r[1]].push_back(r[0]);
+int solution(vector<vector<int>> clockHands) {
+        N = clockHands.size();
+        map = vector<vector<int>>(N, vector<int>(N));
+        rot = vector<int>(N);
+
+        for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++)
+                        map[i][j] = (4 - clockHands[i][j]) % 4;
         }
 
-        vector<int> dists(n + 1, -1);
-        dijkstra(_roads, dists, destination);
-
-        for (int& s : sources)
-                s = dists[s];
-
-        return sources;
+        dfs(0);
+        return result;
 }
+
