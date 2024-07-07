@@ -1,86 +1,84 @@
-﻿#include <vector>
-#include <algorithm>
-#include <limits.h>
+﻿#include <string>
+#include <vector>
+#include <queue>
 
 using namespace std;
+const int MAX = 1000000000;
 
-int N, result = 100000000;
-vector<vector<int>> map;
-vector<int> rot;
-vector<int> dx = { 0, 0, 0, 1, -1 };
-vector<int> dy = { 0, 1, -1, 0, 0 };
-
-void dfs(int ind)
+struct compare
 {
-        if (ind == N)
+        bool operator()(pair<int, int>& a, pair<int, int>& b)
         {
-                vector<vector<int>> tmp(N, vector<int>(N));
-                vector<int> cur(N);
-
-                for (int i = 0; i < N; i++)
-                        cur[i] = rot[i];
-
-                for (int i = 0; i < N; i++)
-                {
-                        for (int j = 0; j < N; j++)
-                                tmp[i][j] = map[i][j];
-                }
-
-                int tmpRes = 0;
-                for (int i = 0; i < N; i++)
-                {
-                        for (int j = 0; j < N; j++)
-                        {
-                                tmpRes += cur[j];
-                                for (int d = 0; d < 5; d++)
-                                {
-                                        int X = i + dx[d];
-                                        int Y = j + dy[d];
-
-                                        if (X < 0 || Y < 0 || X >= N || Y >= N)
-                                                continue;
-
-                                        tmp[X][Y] = tmp[X][Y] - cur[j] >= 0 ? tmp[X][Y] - cur[j] : tmp[X][Y] - cur[j] + 4;
-                                }
-                        }
-
-                        for (int j = 0; j < N; j++)
-                                cur[j] = tmp[i][j];
-                }
-
-                bool flag = true;
-                for (int i = 0; i < N; i++)
-                {
-                        if (cur[i] != 0)
-                        {
-                                flag = false;
-                                break;
-                        }
-                }
-
-                if (flag)
-                        result = min(result, tmpRes);
-
-                return;
+                if (a.first == b.first)
+                        return a.second < b.second;
+                return a.first > b.first;
         }
+};
 
-        for (int i = 0; i < 4; i++) {
-                rot[ind] = i;
-                dfs(ind + 1);
-        }
+pair<int, int> ADD_PAIRS(pair<int, int>a, pair<int, int>b)
+{
+        pair<int, int> ret;
+        ret.first = a.first + b.first;
+        ret.second = a.second + b.second;
+        return ret;
 }
 
-int solution(vector<vector<int>> clockHands) {
-        N = clockHands.size();
-        map = vector<vector<int>>(N, vector<int>(N));
-        rot = vector<int>(N);
 
-        for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++)
-                        map[i][j] = (4 - clockHands[i][j]) % 4;
+vector<pair<int, int>> dp;
+int answer = -1;
+int cnt = 0;
+pair<int, int> DFS(int target)
+{
+        if (target == 0)
+                return { 0, 0 };
+
+        if (dp[target].first > 0)
+                return dp[target];
+
+        priority_queue<pair<int, int>, vector<pair<int, int>>, compare> q;
+
+
+
+        // 트리플 +  60 이상의 큰 수
+        if (target > 20)
+        {
+                int next = target - 60;
+                if (next < 0)
+                        next = target % 3;
+
+                q.push(ADD_PAIRS(DFS(next), { 1, 0 }));
         }
+        // 더블
+        if (target > 20 && target <= 40)
+                q.push(ADD_PAIRS(DFS(target % 2), { 1, 0 }));
 
-        dfs(0);
-        return result;
+        // 볼
+        if (target >= 50)
+                q.push(ADD_PAIRS(DFS(target - 50), { 1, 1 }));
+
+        // 싱글
+        int next = max(0, target - 20);
+        q.push(ADD_PAIRS(DFS(next), { 1, 1 }));
+
+
+
+        return dp[target] = q.top();
 }
 
+vector<int> solution(int target) {
+        dp.resize(target + 1, { -1, -1 });
+        DFS(target);
+        return { dp[target].first, dp[target].second };
+}
+
+//dp[idx]
+// 싱글, 더블, 트리플, 볼
+//      
+
+
+// 6까지는 트리플 x
+// 10까지는 더블 x
+
+// 1 ~ 20 // 싱글, 트리플 // 볼
+// 가장 적은 다트로 목표 점수 채우기
+// 싱글, 볼 맞춘 횟수 기록
