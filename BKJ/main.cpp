@@ -1,84 +1,67 @@
-﻿#include <string>
-#include <vector>
-#include <queue>
-
+﻿#include <vector>
+#include <algorithm>
 using namespace std;
-const int MAX = 1000000000;
 
-struct compare
-{
-        bool operator()(pair<int, int>& a, pair<int, int>& b)
-        {
-                if (a.first == b.first)
-                        return a.second < b.second;
-                return a.first > b.first;
+long long solution(int n, int m, int x, int y, vector<vector<int>> queries) {
+        // 초기 시작 지점과 끝 지점을 설정 (0-based index로 변경)
+        long long startX = x, endX = x, startY = y, endY = y;
+
+        // 명령어를 역순으로 처리
+        for (int i = queries.size() - 1; i >= 0; --i) {
+                int direction = queries[i][0];
+                int distance = queries[i][1];
+
+                if (direction == 0)
+                { // Left
+                        if (startY != 0)
+                        {
+                                startY += distance;
+                        }
+
+                        endY = min((long long)m - 1, endY + distance);
+                }
+
+                else if (direction == 1)
+                { // Right
+                        if (endY != m - 1)
+                        {
+                                endY -= distance;
+                        }
+
+                        startY = max(0LL, startY - distance);
+                }
+
+                else if (direction == 2)
+                { // Up
+                        if (startX != 0)
+                        {
+                                startX += distance;
+                        }
+
+                        endX = min((long long)n - 1, endX + distance);
+                }
+
+                else if (direction == 3)
+                { // Down
+                        if (endX != n - 1)
+                        {
+                                endX -= distance;
+                        }
+                        startX = max(0LL, startX - distance);
+                }
+
+                // 격자 범위를 벗어난 경우
+                if (startX >= n || startY >= m || endX < 0 || endY < 0) {
+                        return 0;
+                }
+
+                // 시작점이 끝점을 넘어서면 안됨
+                startX = max(0LL, startX);
+                startY = max(0LL, startY);
+                endX = min((long long)n - 1, endX);
+                endY = min((long long)m - 1, endY);
         }
-};
 
-pair<int, int> ADD_PAIRS(pair<int, int>a, pair<int, int>b)
-{
-        pair<int, int> ret;
-        ret.first = a.first + b.first;
-        ret.second = a.second + b.second;
-        return ret;
+        // 가능한 영역의 크기를 반환
+        return (endX - startX + 1) * (endY - startY + 1);
 }
-
-
-vector<pair<int, int>> dp;
-int answer = -1;
-int cnt = 0;
-pair<int, int> DFS(int target)
-{
-        if (target == 0)
-                return { 0, 0 };
-
-        if (dp[target].first > 0)
-                return dp[target];
-
-        priority_queue<pair<int, int>, vector<pair<int, int>>, compare> q;
-
-
-
-        // 트리플 +  60 이상의 큰 수
-        if (target > 20)
-        {
-                int next = target - 60;
-                if (next < 0)
-                        next = target % 3;
-
-                q.push(ADD_PAIRS(DFS(next), { 1, 0 }));
-        }
-        // 더블
-        if (target > 20 && target <= 40)
-                q.push(ADD_PAIRS(DFS(target % 2), { 1, 0 }));
-
-        // 볼
-        if (target >= 50)
-                q.push(ADD_PAIRS(DFS(target - 50), { 1, 1 }));
-
-        // 싱글
-        int next = max(0, target - 20);
-        q.push(ADD_PAIRS(DFS(next), { 1, 1 }));
-
-
-
-        return dp[target] = q.top();
-}
-
-vector<int> solution(int target) {
-        dp.resize(target + 1, { -1, -1 });
-        DFS(target);
-        return { dp[target].first, dp[target].second };
-}
-
-//dp[idx]
-// 싱글, 더블, 트리플, 볼
-//      
-
-
-// 6까지는 트리플 x
-// 10까지는 더블 x
-
-// 1 ~ 20 // 싱글, 트리플 // 볼
-// 가장 적은 다트로 목표 점수 채우기
-// 싱글, 볼 맞춘 횟수 기록
