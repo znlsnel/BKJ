@@ -1,67 +1,41 @@
-﻿#include <vector>
-#include <algorithm>
+﻿#include <string>
+#include <vector>
+#include <climits>
+
 using namespace std;
 
-long long solution(int n, int m, int x, int y, vector<vector<int>> queries) {
-        // 초기 시작 지점과 끝 지점을 설정 (0-based index로 변경)
-        long long startX = x, endX = x, startY = y, endY = y;
+long long solution(int a, int b, vector<int> g, vector<int> s, vector<int> w, vector<int> t) {
+        long long answer = LLONG_MAX;
 
-        // 명령어를 역순으로 처리
-        for (int i = queries.size() - 1; i >= 0; --i) {
-                int direction = queries[i][0];
-                int distance = queries[i][1];
+        // 이분탐색 start, end 초기화 (걸리는 시간)
+        long long start = 0;
+        long long end = 10e5 * 2 * 2 * 10e9; // 도시 수 * 재화 수 * 왕복 * 재화량 
 
-                if (direction == 0)
-                { // Left
-                        if (startY != 0)
-                        {
-                                startY += distance;
-                        }
+        // 이분탐색을 시행하면서
+        while (start <= end) {
 
-                        endY = min((long long)m - 1, endY + distance);
+                long long mid = (start + end) / 2;
+                long long gold = 0;
+                long long silver = 0;
+                long long weight = 0;
+
+                for (int i = 0; i < g.size(); i++)
+                {
+                        long long cnt = (mid + t[i]) / (t[i] * 2);
+                        gold += min(g[i] * 1LL, w[i] * cnt * 1LL);
+                        silver += min(s[i] * 1LL, w[i] * cnt * 1LL);
+                        weight += min(g[i] + s[i] * 1LL, w[i] * cnt * 1LL);
                 }
-
-                else if (direction == 1)
-                { // Right
-                        if (endY != m - 1)
-                        {
-                                endY -= distance;
-                        }
-
-                        startY = max(0LL, startY - distance);
+                if (weight >= a + b && gold >= a && silver >= b)
+                {
+                        answer = min(answer, mid);
+                        end = mid - 1;
                 }
-
-                else if (direction == 2)
-                { // Up
-                        if (startX != 0)
-                        {
-                                startX += distance;
-                        }
-
-                        endX = min((long long)n - 1, endX + distance);
+                else
+                {
+                        start = mid + 1;
                 }
-
-                else if (direction == 3)
-                { // Down
-                        if (endX != n - 1)
-                        {
-                                endX -= distance;
-                        }
-                        startX = max(0LL, startX - distance);
-                }
-
-                // 격자 범위를 벗어난 경우
-                if (startX >= n || startY >= m || endX < 0 || endY < 0) {
-                        return 0;
-                }
-
-                // 시작점이 끝점을 넘어서면 안됨
-                startX = max(0LL, startX);
-                startY = max(0LL, startY);
-                endX = min((long long)n - 1, endX);
-                endY = min((long long)m - 1, endY);
         }
 
-        // 가능한 영역의 크기를 반환
-        return (endX - startX + 1) * (endY - startY + 1);
+        return answer;
 }
