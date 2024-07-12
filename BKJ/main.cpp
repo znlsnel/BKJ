@@ -1,40 +1,87 @@
 ﻿#include <string>
 #include <vector>
-#include <climits>
+#include <sstream>
+#include <stack>
 
 using namespace std;
 
-long long solution(int a, int b, vector<int> g, vector<int> s, vector<int> w, vector<int> t) {
-        long long answer = LLONG_MAX;
+struct Node {
+        int n;
+        Node* prev;
+        Node* next;
+        Node(int n, Node* prev, Node* next) : n(n), prev(prev), next(next) {}
+};
 
-        // 이분탐색 start, end 초기화 (걸리는 시간)
-        long long start = 0;
-        long long end = 10e5 * 2 * 2 * 10e9; // 도시 수 * 재화 수 * 왕복 * 재화량 
+string solution(int n, int k, vector<string> cmd) {
+        string answer(n, 'O');
+        stack<Node*> remove_table;
 
-        // 이분탐색을 시행하면서
-        while (start <= end) {
+        Node* o = new Node(0, NULL, NULL);
 
-                long long mid = (start + end) / 2;
-                long long gold = 0;
-                long long silver = 0;
-                long long weight = 0;
+        // 현재 가리키는 행
+        Node* select = o;
 
-                for (int i = 0; i < g.size(); i++)
-                {
-                        long long cnt = (mid + t[i]) / (t[i] * 2);
-                        gold += min(g[i] * 1LL, w[i] * cnt * 1LL);
-                        silver += min(s[i] * 1LL, w[i] * cnt * 1LL);
-                        weight += min(g[i] + s[i] * 1LL, w[i] * cnt * 1LL);
+        // 테이블 만들기
+        for (int i = 1; i < n; i++) {
+                o->next = new Node(i, o, NULL);
+                o = o->next;
+        }
+
+        // k 번째 행을 가리키게 하기
+        for (int i = 0; i < k; i++) {
+                select = select->next;
+        }
+
+        // 명령어 실행
+        for (const auto& c : cmd) {
+                if (c == "C") {
+                        remove_table.push(select);
+                        if (select->prev != NULL) {
+                                select->prev->next = select->next;
+                        }
+
+                        if (select->next != NULL) {
+                                select->next->prev = select->prev;
+                        }
+
+                        if (select->next == NULL) {
+                                select = select->prev;
+                        }
+                        else {
+                                select = select->next;
+                        }
                 }
-                if (weight >= a + b && gold >= a && silver >= b)
-                {
-                        answer = min(answer, mid);
-                        end = mid - 1;
+                else if (c == "Z") {
+                        Node* t = remove_table.top();
+                        remove_table.pop();
+
+                        if (t->prev != NULL) {
+                                t->prev->next = t;
+                        }
+
+                        if (t->next != NULL) {
+                                t->next->prev = t;
+                        }
                 }
-                else
-                {
-                        start = mid + 1;
+                else {
+                        int count = stoi(c.substr(2));
+
+                        if (c[0] == 'D') {
+                                for (int i = 0; i < count; i++) {
+                                        select = select->next;
+                                }
+                        }
+                        else {
+                                for (int i = 0; i < count; i++) {
+                                        select = select->prev;
+                                }
+                        }
                 }
+        }
+
+        while (!remove_table.empty()) {
+                answer[remove_table.top()->n] = 'X';
+                remove_table.pop();
         }
 
         return answer;
