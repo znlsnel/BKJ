@@ -1,88 +1,59 @@
-﻿#include <string>
-#include <vector>
-#include <sstream>
-#include <stack>
+﻿#include <string>
+#include <vector>
 
-using namespace std;
+using namespace std;
 
-struct Node {
-        int n;
-        Node* prev;
-        Node* next;
-        Node(int n, Node* prev, Node* next) : n(n), prev(prev), next(next) {}
-};
+int Find_Last_Zero(string Str)
+{
+	for (int i  = Str.length() - 1; i  >= 0; i--)
+	{
+		if (Str[i] == '0') return i;
+	}
+	return  - 1;
+}
 
-string solution(int n, int k, vector<string> cmd) {
-        string answer(n, 'O');
-        stack<Node*> remove_table;
+vector<string> solution(vector<string> s)
+{
+	vector<string> answer;
+	for (int i  = 0; i  < s.size(); i++)
+	{
+		string Str  = "";
+		int Cnt  = 0;
+		for (int j  = 0; j  < s[i].length(); j++)
+		{
+			Str  += s[i][j];
+			if (Str.length() >= 3)
+			{
+				if (Str.substr(Str.length() - 3, 3) == "110")
+				{
+					Cnt++;
+					Str.erase(Str.length() - 3, Str.length());
+				}
+			}
+		}
 
-        Node* o = new Node(0, NULL, NULL);
-
-        // 현재 가리키는 행
-        Node* select = o;
-
-        // 테이블 만들기
-        for (int i = 1; i < n; i++) {
-                o->next = new Node(i, o, NULL);
-                o = o->next;
-        }
-
-        // k 번째 행을 가리키게 하기
-        for (int i = 0; i < k; i++) {
-                select = select->next;
-        }
-
-        // 명령어 실행
-        for (const auto& c : cmd) {
-                if (c == "C") {
-                        remove_table.push(select);
-                        if (select->prev != NULL) {
-                                select->prev->next = select->next;
-                        }
-
-                        if (select->next != NULL) {
-                                select->next->prev = select->prev;
-                        }
-
-                        if (select->next == NULL) {
-                                select = select->prev;
-                        }
-                        else {
-                                select = select->next;
-                        }
-                }
-                else if (c == "Z") {
-                        Node* t = remove_table.top();
-                        remove_table.pop();
-
-                        if (t->prev != NULL) {
-                                t->prev->next = t;
-                        }
-
-                        if (t->next != NULL) {
-                                t->next->prev = t;
-                        }
-                }
-                else {
-                        int count = stoi(c.substr(2));
-
-                        if (c[0] == 'D') {
-                                for (int i = 0; i < count; i++) {
-                                        select = select->next;
-                                }
-                        }
-                        else {
-                                for (int i = 0; i < count; i++) {
-                                        select = select->prev;
-                                }
-                        }
-                }
-        }
-
-        while (!remove_table.empty()) {
-                answer[remove_table.top()->n] = 'X';
-                remove_table.pop();
-        }
-
-        return answer;
+		int LZI  = Find_Last_Zero(Str);
+		if (LZI  == -1)
+		{
+			string Result  = "";
+			while (Cnt--) Result  += "110";
+			Result  += Str;
+			answer.push_back(Result);
+		}
+	else
+	{
+		string Result  = "";
+		for (int j  = 0; j  < Str.length(); j++)
+		{
+			if (j  == LZI)
+			{
+				Result  += Str[j];
+				while (Cnt--) Result  += "110";
+			}
+			else Result  += Str[j];
+		}
+		answer.push_back(Result);
+	}
+	}
+	return answer;
 }
