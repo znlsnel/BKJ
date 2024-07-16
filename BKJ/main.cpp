@@ -1,36 +1,47 @@
-﻿#include <string>
-#include <vector>
+﻿#include <string>
+#include <vector>
+#include <algorithm>
 
-using namespace std;
-
-long long answer = 0;
-// now : 현재 방문 중인 노드,  parent : 바로 이전 노드 (= 부모 노드)
-void DFS(vector<vector<int>>& graph, vector<long long>& sum, int now, int parent) {
-        for (int i = 0; i < graph[now].size(); ++i)
-                if (graph[now][i] != parent)
-                        DFS(graph, sum, graph[now][i], now);
-
-        sum[parent] += sum[now];
-        answer += abs(sum[now]);
+using namespace std;
+int Max(int A, int B)
+{
+        return A  > B  ? A  : B;
 }
 
-long long solution(vector<int> a, vector<vector<int>> edges) {
+bool Cmp(int A, int B)
+{
+        return A  > B  ? true  : false;
+}
 
-        vector<long long> sum(a.size());
+int solution(vector<int> a)
+{
+        int answer  = -1;
+        vector<int> Cnt(a.size() + 1, 0);
 
-        for (int i = 0; i < a.size(); ++i)
-                sum[i] = a[i];
+        for (int i  = 0; i  < a.size(); i++)
+                Cnt[a[i]]++;
 
-        vector<vector<int>> graph(a.size());
-        for (int i = 0; i < edges.size(); ++i) {
-                graph[edges[i][0]].push_back(edges[i][1]);
-                graph[edges[i][1]].push_back(edges[i][0]);
+        for (int i  = 0; i  < Cnt.size(); i++)
+        {
+                if (Cnt[i] == 0)
+                        continue;
+                if (Cnt[i] <= answer)
+                        continue;
+
+                int Result  = 0;
+                // 교집합 갯수 찾기
+                for (int j  = 0; j  < a.size() - 1; j++)
+                {
+                        if (a[j] != i  && a[j  + 1] != i)
+                                continue;
+                        if (a[j] == a[j  + 1])
+                                continue;
+                        Result++;
+                        j++;
+                }
+
+                answer  = Max(answer, Result);
         }
 
-        DFS(graph, sum, 0, 0);
-
-        if (sum[0] == 0)
-                return answer;
-        else
-                return -1;
+        return answer  * 2;
 }
