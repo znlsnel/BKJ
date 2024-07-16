@@ -1,47 +1,56 @@
-﻿#include <string>
-#include <vector>
-#include <algorithm>
+﻿#include <string>
+#include <vector>
+#include <iostream>
 
-using namespace std;
-int Max(int A, int B)
+using namespace std;
+
+int FindLastZero(string& s)
 {
-        return A  > B  ? A  : B;
-}
-
-bool Cmp(int A, int B)
-{
-        return A  > B  ? true  : false;
-}
-
-int solution(vector<int> a)
-{
-        int answer  = -1;
-        vector<int> Cnt(a.size() + 1, 0);
-
-        for (int i  = 0; i  < a.size(); i++)
-                Cnt[a[i]]++;
-
-        for (int i  = 0; i  < Cnt.size(); i++)
+        for (int i = s.size() - 1; i >= 0; i--)
         {
-                if (Cnt[i] == 0)
-                        continue;
-                if (Cnt[i] <= answer)
-                        continue;
+                if (s[i] == '0')
+                        return i;
+        }
+        return -1;
+}
 
-                int Result  = 0;
-                // 교집합 갯수 찾기
-                for (int j  = 0; j  < a.size() - 1; j++)
+vector<string> solution(vector<string> s) {
+        vector<string> answer;
+        for (string& str : s)
+        {
+                int cnt = 0;
+                string temp = "";
+
+                for (int i = 0; i < str.size(); i++)
                 {
-                        if (a[j] != i  && a[j  + 1] != i)
-                                continue;
-                        if (a[j] == a[j  + 1])
-                                continue;
-                        Result++;
-                        j++;
+                        temp += str[i];
+
+                        int idx = temp.size() - 1;
+                        if (idx >= 2 && temp.substr(idx - 2, 3) == "110") {
+                                cnt++;
+                                temp = temp.substr(0, idx - 2);
+                        }
                 }
 
-                answer  = Max(answer, Result);
-        }
+                int idx = FindLastZero(temp);
+                string ans;
+                if (idx == -1)
+                {
+                        while (cnt--)
+                                ans += "110";
+                        ans += temp;
+                }
 
-        return answer  * 2;
+                else
+                {
+                        for (int i = 0; i < temp.size(); i++)
+                        {
+                                ans += temp[i];
+                                while (i == idx && cnt--)
+                                        ans += "110";
+                        }
+                }
+                answer.push_back(ans);
+        }
+        return answer;
 }
