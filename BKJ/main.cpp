@@ -15,16 +15,20 @@ int dx[4] = { 0, 1, 0, -1 };
 int dijkstra(vector<vector<int>>& board)
 {
         // cost, node, type (아래 - 0, 옆 - 1);
-        vector<vector<int>> dist(board.size(), vector<int>(board[0].size(), 1000000000));
+        vector<vector<int>> dist0(board.size(), vector<int>(board[0].size(), 1000000000));
+        vector<vector<int>> dist1(board.size(), vector<int>(board[0].size(), 1000000000));
+
         priority_queue<tuple<int, int, int, int>> q;
         q.push({ 0, 0, 0, 0 });
         q.push({ 0, 0, 0, 1 });
-        dist[0][0] = 0;
+        dist0[0][0] = 0;
+        dist1[0][0] = 0;
+
 
         while (!q.empty())
         {
                 auto [cost, cy, cx, type] = q.top(); q.pop();
-                //  cout << cy << " " << cx << "--- cost : " << cost <<", type : " <<type << "\n";
+                cost *= -1;
 
                 for (int i = 0; i < 4; i++)
                 {
@@ -33,19 +37,25 @@ int dijkstra(vector<vector<int>>& board)
                         if (!CHECK(board, ny, nx))
                                 continue;
 
-                        int nt = ny == cy ? 1 : 0;
-                        int nc = nt == type ? cost + 100 : cost + 600;
+                        int nextType = ny == cy ? 1 : 0;
+                        int nextCost = nextType == type ? cost + 100 : cost + 600;
 
-                        if (dist[ny][nx] >= nc)
+                        if (nextType == 0 && dist0[ny][nx] > nextCost)
                         {
-                                dist[ny][nx] = nc;
-                                q.push({ nc, ny, nx, nt });
+                                dist0[ny][nx] = nextCost;
+                                q.push({ -(nextCost), ny, nx, nextType });
+                        }
+                        else if (nextType == 1 && dist1[ny][nx] > nextCost)
+                        {
+                                dist1[ny][nx] = nextCost;
+                                q.push({ -(nextCost), ny, nx, nextType });
                         }
                 }
         }
+
         int y = board.size() - 1;
         int x = board[0].size() - 1;
-        return dist[y][x];
+        return min(dist0[y][x], dist1[y][x]);
 }
 
 // 0 0 1 0
