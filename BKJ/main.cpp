@@ -1,111 +1,47 @@
 ﻿#include <string>
 #include <vector>
-#include <set>
-#include <iostream>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace std;
 
-struct MAP
-{
-        MAP(int size = 1000000)
-        {
-                table.resize(size);
-        }
-
-        int Hash(string str)
-        {
-                int ret = 1;
-                for (char& c : str)
-                {
-                        ret *= c - 'A';
-                        ret %= table.size();
-                }
-                return ret;
-        }
-
-        bool Insert(string key, int value)
-        {
-                int hash = Hash(key);
-                for (auto& t : table[hash])
-                {
-                        if (t.first == key)
-                                return false;
-                }
-
-                table[hash].push_back({ key, value });
-                return true;
-        }
-
-        int GetValue(string key)
-        {
-                int hash = Hash(key);
-                for (auto& t : table[hash])
-                {
-                        if (t.first == key)
-                                return t.second;
-                }
-
-                return -1;
-        }
-
-        vector<vector<pair<string, int>>> table;
-};
-
 vector<int> solution(vector<string> gems) {
+        unordered_set<string> gemKinds(gems.begin(), gems.end());
+        unordered_map<string, int> gemCount;
 
-        MAP map;
-        int gemCnt = 0;
-        for (string& str : gems)
-        {
-                if (map.Insert(str, gemCnt))
-                        gemCnt++;
-        }
-        vector<int> haveGem(gemCnt);
-        vector<bool> foundGem(gemCnt);
+        for (string& gem : gems)
+                gemKinds.insert(gem);
 
+        int requireGemCnt = gemKinds.size();
         int foundGemCnt = 0;
-        int s = 0;
-        int e = 0;
+        int start = 0; int end = 0;
+        int min_start = 0; int min_end = gems.size();
 
-        for (int i = 0; i < gems.size(); i++)
+        while (end < gems.size())
         {
-                if (foundGemCnt >= gemCnt)
-                        break;
-
-                int idx = map.GetValue(gems[i]);
-                haveGem[idx]++;
-
-                if (!foundGem[idx])
-                {
-                        foundGem[idx] = true;
+                if (gemCount[gems[end]] == 0)
                         foundGemCnt++;
-                }
-                e = i;
-        }
-        vector<int> answer{ s, e };
 
-        for (int i = e + 1; i < gems.size(); i++)
-        {
-                string& gem = gems[i];
+                gemCount[gems[end]]++;
+                end++;
 
-                int sidx = map.GetValue(gems[s]);
-                while (haveGem[sidx] > 1)
+                while (foundGemCnt == requireGemCnt)
                 {
-                        haveGem[sidx]--;
-                        s++;
-                        sidx = map.GetValue(gems[s]);
-                }
+                        if (min_end - min_start > end - start)
+                        {
+                                min_end = end;
+                                min_start = start;
+                        }
 
-                if (answer[1] - answer[0] > e - s)
-                {
-                        answer[0] = s;
-                        answer[1] = e;
-                }
+                        gemCount[gems[start]]--;
+                        if (gemCount[gems[start]] == 0)
+                                foundGemCnt--;
 
-                int idx = map.GetValue(gem);
-                haveGem[idx]++;
-                e = i;
+                        start++;
+                }
         }
 
-        return { answer[0] + 1, answer[1] + 1 };
+
+
+        return { min_start + 1, min_end };
 }
