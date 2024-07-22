@@ -1,47 +1,65 @@
 ﻿#include <string>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
+#include <iostream>
+#include <set>
+#include <algorithm>
 
 using namespace std;
 
-vector<int> solution(vector<string> gems) {
-        unordered_set<string> gemKinds(gems.begin(), gems.end());
-        unordered_map<string, int> gemCount;
+set<string> answers;
+vector<bool> visited_u;
+vector<bool> visited_b;
 
-        for (string& gem : gems)
-                gemKinds.insert(gem);
+bool CHECK(string& user, string& banned)
+{
+        if (user.size() != banned.size())
+                return false;
 
-        int requireGemCnt = gemKinds.size();
-        int foundGemCnt = 0;
-        int start = 0; int end = 0;
-        int min_start = 0; int min_end = gems.size();
-
-        while (end < gems.size())
+        for (int i = 0; i < user.size(); i++)
         {
-                if (gemCount[gems[end]] == 0)
-                        foundGemCnt++;
+                if (user[i] != banned[i] && banned[i] != '*')
+                        return false;
+        }
+        return true;
+}
 
-                gemCount[gems[end]]++;
-                end++;
-
-                while (foundGemCnt == requireGemCnt)
-                {
-                        if (min_end - min_start > end - start)
-                        {
-                                min_end = end;
-                                min_start = start;
-                        }
-
-                        gemCount[gems[start]]--;
-                        if (gemCount[gems[start]] == 0)
-                                foundGemCnt--;
-
-                        start++;
-                }
+void DFS(vector<string>& user, vector<string>& banned, int bidx, vector<string> found)
+{
+        if (found.size() == banned.size())
+        {
+                sort(found.begin(), found.end());
+                string ret = "";
+                for (string& s : found)
+                        ret += s;
+                answers.insert(ret);
+                return;
         }
 
+        for (int i = bidx; i < banned.size(); i++)
+        {
+                if (visited_b[i]) continue;
 
+                for (int j = 0; j < user.size(); j++)
+                {
+                        if (visited_u[j]) continue;
 
-        return { min_start + 1, min_end };
+                        if (CHECK(user[j], banned[i]))
+                        {
+                                visited_b[i] = true; visited_u[j] = true;
+                                found.push_back(user[j]);
+                                DFS(user, banned, i + 1, found);
+                                found.pop_back();
+
+                        }
+                        visited_b[i] = false; visited_u[j] = false;
+                }
+        }
+}
+
+int solution(vector<string> user_id, vector<string> banned_id) {
+        visited_u.resize(user_id.size());
+        visited_b.resize(banned_id.size());
+
+        DFS(user_id, banned_id, 0, vector<string>());
+        return answers.size();
 }
