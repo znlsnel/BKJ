@@ -1,65 +1,162 @@
 ﻿#include <string>
 #include <vector>
 #include <iostream>
-#include <set>
-#include <algorithm>
+#include <memory>
 
 using namespace std;
 
-set<string> answers;
-vector<bool> visited_u;
-vector<bool> visited_b;
-
-bool CHECK(string& user, string& banned)
+template<typename T>
+struct priority_queue
 {
-        if (user.size() != banned.size())
-                return false;
+        priority_queue(bool b = false) : isDescOrder(b) {}
 
-        for (int i = 0; i < user.size(); i++)
+        void insert(T value)
         {
-                if (user[i] != banned[i] && banned[i] != '*')
-                        return false;
-        }
-        return true;
-}
+                int idx = data.size();
+                data.push_back(value);
 
-void DFS(vector<string>& user, vector<string>& banned, int bidx, vector<string> found)
-{
-        if (found.size() == banned.size())
-        {
-                sort(found.begin(), found.end());
-                string ret = "";
-                for (string& s : found)
-                        ret += s;
-                answers.insert(ret);
-                return;
-        }
-
-        for (int i = bidx; i < banned.size(); i++)
-        {
-                if (visited_b[i]) continue;
-
-                for (int j = 0; j < user.size(); j++)
+                while (idx > 0)
                 {
-                        if (visited_u[j]) continue;
-
-                        if (CHECK(user[j], banned[i]))
+                        int parent = (idx - 1) / 2;
+                        if (!CMP(data[idx], data[parent]))
                         {
-                                visited_b[i] = true; visited_u[j] = true;
-                                found.push_back(user[j]);
-                                DFS(user, banned, i + 1, found);
-                                found.pop_back();
-
+                                break;
                         }
-                        visited_b[i] = false; visited_u[j] = false;
+                        swap(data[idx], data[parent]);
+
+                        idx = parent;
+                }
+
+        }
+
+        void pop()
+        {
+                if (data.empty())
+                        return;
+
+                int idx = 0;
+                data[idx] = data.back();
+                data.pop_back();
+
+                while (idx < data.size())
+                {
+                        int left = (idx * 2) + 1;
+                        int right = left + 1;
+
+                        if (left >= data.size())
+                                break;
+
+                        if (right < data.size() && CMP(data[right], data[left]))
+                                left = right;
+
+                        if (!CMP(data[left], data[idx]))
+                                break;
+
+                        swap(data[left], data[idx]);
+                        idx = left;
                 }
         }
+
+        bool CMP(const T& a, const T& b)
+        {
+                if (isDescOrder)
+                        return *a > *b;
+
+                else
+                        return *a < *b;
+        }
+
+        T top()
+        {
+                return data.empty() == true ? nullptr : data[0];
+        }
+
+        bool empty()
+        {
+                return data.empty();
+        }
+
+        bool isDescOrder = false;
+        vector<T> data;
+};
+
+struct NODE
+{
+        bool use = false;
+        int value;
+
+        bool operator < (NODE other)
+        {
+                return value < other.value;
+        }
+
+        bool operator > (NODE other)
+        {
+                return value > other.value;
+        }
+
+        NODE(int v) : value(v) { use = false; };
+};
+
+vector<int> solution(vector<string> operations) {
+        priority_queue<NODE*> minQ;
+        priority_queue<NODE*> maxQ(true);
+        vector<unique_ptr<NODE>> nodes;
+
+        for (string& str : operations)
+        {
+                int value = stoi(str.substr(2));
+
+                if (str[0] == 'I')
+                {
+                        nodes.push_back(make_unique<NODE>(value));
+                        NODE* node = nodes.back().get();
+
+                        minQ.insert(node);
+                        maxQ.insert(node);
+                }
+                else if (value == 1)
+                {
+                        while (!maxQ.empty() && maxQ.top()->use)
+                                maxQ.pop();
+
+
+                        if (!maxQ.empty())
+                        {
+                                NODE* node = maxQ.top();
+                                node->use = true;
+                                maxQ.pop();
+                        }
+
+                }
+                else if (value == -1)
+                {
+                        while (!minQ.empty() && minQ.top()->use)
+                                minQ.pop();
+
+                        if (!minQ.empty())
+                        {
+                                NODE* node = minQ.top();
+                                node->use = true;
+                                minQ.pop();
+                        }
+                }
+
+        }
+
+        while (!maxQ.empty() && maxQ.top()->use == true)
+                maxQ.pop();
+
+        while (!minQ.empty() && minQ.top()->use == true)
+                minQ.pop();
+
+        int minTop = minQ.empty() ? 0 : minQ.top()->value;
+        int maxTop = maxQ.empty() ? 0 : maxQ.top()->value;
+        return { maxTop, minTop };
 }
 
-int solution(vector<string> user_id, vector<string> banned_id) {
-        visited_u.resize(user_id.size());
-        visited_b.resize(banned_id.size());
+// ["I -45", "I 653", "D 1", "I -642", "I 45", "I 97", "D 1", "D -1", "I 333"]
+// -5643
 
-        DFS(user_id, banned_id, 0, vector<string>());
-        return answers.size();
-}
+// min   -45 45 333
+// max   333 45 -45
