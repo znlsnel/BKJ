@@ -1,24 +1,42 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
 
 using namespace std;
 
-int dp[501][501];
+vector<bool> visited;
+vector<vector<int>> v;
 
-int solution(vector<vector<int>> triangle) {
-        fill(&dp[0][0], &dp[500][500], -1);
-        int n = triangle.size();
-
-        for (int i = 0; i < triangle.size(); i++)
-                dp[n - 1][i] = triangle[n - 1][i];
-
-        for (int i = n - 2; i >= 0; i--)
+void DFS(int node)
+{
+        visited[node] = true;
+        for (int next : v[node])
         {
-                for (int j = 0; j <= i; j++)
+                if (visited[next])
+                        continue;
+                DFS(next);
+        }
+}
+
+int solution(int n, vector<vector<int>> computers) {
+        visited.resize(n);
+        v.resize(n);
+        for (int i = 0; i < computers.size(); i++)
+        {
+                for (int j = 0; j < computers[i].size(); j++)
                 {
-                        dp[i][j] = triangle[i][j] + max(dp[i + 1][j], dp[i + 1][j + 1]);
+                        if (i == j || computers[i][j] == 0)
+                                continue;
+                        v[i].push_back(j);
                 }
         }
-        return dp[0][0];
+        int answer = 0;
+        for (int i = 0; i < n; i++)
+        {
+                if (!visited[i]) {
+                        DFS(i);
+                        answer++;
+                }
+        }
+
+        return answer;
 }
