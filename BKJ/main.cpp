@@ -1,36 +1,27 @@
 ﻿#include <string>
 #include <vector>
+#include <algorithm>
+#include <iostream>
+
 
 using namespace std;
 
+int solution(vector<int> A, vector<int> B) {
 
-vector<int> solution(int n, int s) {
-        if (s < n)
-                return { -1 };
+        sort(A.begin(), A.end(), [](int& a, int& b) {return a > b; });
+        sort(B.begin(), B.end(), [](int& a, int& b) {return a > b; });
 
-        vector<int> answer;
+        int answer = 0;
+        for (int idx_a = 0, idx_b = 0; idx_a < A.size(); idx_a++)
+        {
+                int numA = A[idx_a];
+                int numB = B[idx_b];
 
-        int cnt = n;
-        while (cnt--)
-                answer.push_back(s / n);
-
-        cnt = s % n;
-        int idx = n - 1;
-        while (cnt--)
-                answer[idx--]++;
-
+                if (numA < numB)
+                {
+                        answer++;
+                        idx_b++;
+                }
+        }
         return answer;
 }
-// 4 4 3 - 48
-
-// 3 3 5 - 45
-// 3 4 4
-
-// 3 3 3
-// 나머지 2
-
-// 3, 9
-// 3 3 3 27
-// 4 3 2 24
-// 5 2 2 20
-// 5 3 1 15
