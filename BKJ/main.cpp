@@ -1,72 +1,57 @@
 ﻿#include <string>
 #include <vector>
 #include <iostream>
-#include <queue>
 
 using namespace std;
 
-vector<vector<int>> orders;
-void backtracking(vector<int> mentos, int idx, int coin)
+int Check(vector<vector<int>>& board, int y, int x)
 {
-        if (coin == 0) {
-                orders.push_back(mentos);
-                return;
-        }
-
-        for (int i = idx; i < mentos.size(); i++)
-        {
-                mentos[i]++;
-                backtracking(mentos, i, coin - 1);
-                mentos[i]--;
-        }
+        return y >= 0 && y < board.size() && x >= 0 && x < board[0].size() && board[y][x] == 1;
 }
 
-int Counseling(vector<int>& order, vector<vector<int>>& reqs)
+int dx[4] = { 0, 1, 0, -1 };
+int dy[4] = { 1, 0, -1, 0 };
+
+int DFS(vector<vector<int>>& board, int y, int x, int oy, int ox)
 {
-        priority_queue<int, vector<int>, greater<int>> q[order.size()];
-
-        for (int i = 0; i < order.size(); i++)
-        {
-                while (order[i]-- > 0)
-                        q[i].push(0);
+        if (board[y][x] == 0) {
+                cout << y << ", " << x << "\n";
+                return 0;
 
         }
 
+        int cnt = 0;
 
+        board[y][x] = 0;
 
-        int ret = 0;
-        for (vector<int>& req : reqs)
+        for (int i = 0; i < 4; i++)
         {
-                int start = req[0];
-                int time = req[1];
-                int type = req[2] - 1;
+                int ny = y + dy[i];
+                int nx = x + dx[i];
 
-                int mento = q[type].top(); q[type].pop();
+                if (!Check(board, ny, nx))
+                        continue;
 
-                if (mento > start)
-                {
-                        ret += mento - start;
-                        q[type].push(mento + time);
-                }
-                else if (mento <= start)
-                {
-                        q[type].push(start + time);
-                }
+                // return 값이 0이면 진거
+                int value = DFS(board, oy, ox, ny, nx) + 1;
+
+                // 패배였는데 이기는 경우가 있다면
+                if (cnt % 2 == 0 && value % 2 == 1)
+                        cnt = value;
+
+                // 무조건 진다면 ? 최대한 도망
+                else if (cnt % 2 == 0 && value % 2 == 0)
+                        cnt = max(cnt, value);
+
+                // 무조건 승리 ? 최대한 빠르게
+                else if (cnt % 2 == 1 && value % 2 == 1)
+                        cnt = min(cnt, value);
         }
 
-
-
-        return ret;
+        board[y][x] = 1;
+        return cnt;
 }
 
-int solution(int k, int n, vector<vector<int>> reqs) {
-        vector<int> mentos(k, 1);
-        backtracking(mentos, 0, n - k);
-
-
-        int answer = Counseling(orders[0], reqs);
-        for (int i = 1; i < orders.size(); i++)
-                answer = min(answer, Counseling(orders[i], reqs));
-
-        return answer;
+int solution(vector<vector<int>> board, vector<int> aloc, vector<int> bloc) {
+        return DFS(board, aloc[0], aloc[1], bloc[0], bloc[1]);
 }
