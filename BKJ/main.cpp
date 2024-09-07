@@ -1,20 +1,27 @@
-﻿#include <vector>
-#include <algorithm>
-
+﻿#include <iostream>
+#include <vector>
 using namespace std;
 
-int solution(vector<vector<int>> routes) {
-        int answer = 1;
+int GetCost(int length, int w)
+{
+        int ret = length / (w * 2 + 1);
+        ret += length % (w * 2 + 1) > 0 ? 1 : 0;
+        return ret;
+}
+int solution(int n, vector<int> stations, int w)
+{
+        int answer  = GetCost((stations[0] - w) - 1, w);
 
-        sort(routes.begin(), routes.end());
+        for (int i  = 1; i  < stations.size(); i++)
+        {
+                int left = stations[i - 1] + w + 1;
+                int right = stations[i] - w - 1;
 
-        int temp = routes[0][1];
-        for (auto a : routes) {
-                if (temp < a[0]) {
-                        answer++;
-                        temp = a[1];
-                }
-                if (temp >= a[1])    temp = a[1];
+                // left -> 6, right -> 9일 때 길이는 4
+                int length = right - left + 1;
+                answer += GetCost(length, w);
         }
-        return answer;
+        answer += GetCost(n - (stations[stations.size() - 1] + w), w);
+
+        return answer;
 }
