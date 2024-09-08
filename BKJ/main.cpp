@@ -2,26 +2,29 @@
 #include <vector>
 using namespace std;
 
-int GetCost(int length, int w)
+int dp[100010];
+int solution(vector<int> sticker)
 {
-        int ret = length / (w * 2 + 1);
-        ret += length % (w * 2 + 1) > 0 ? 1 : 0;
-        return ret;
-}
-int solution(int n, vector<int> stations, int w)
-{
-        int answer  = GetCost((stations[0] - w) - 1, w);
+        int answer = 0;
+        int length = sticker.size();
+        if (length == 1)
+                return sticker[0];
 
-        for (int i  = 1; i  < stations.size(); i++)
-        {
-                int left = stations[i - 1] + w + 1;
-                int right = stations[i] - w - 1;
+        dp[0] = sticker[0];
+        dp[1] = sticker[0];
 
-                // left -> 6, right -> 9일 때 길이는 4
-                int length = right - left + 1;
-                answer += GetCost(length, w);
-        }
-        answer += GetCost(n - (stations[stations.size() - 1] + w), w);
+        for (int i = 2; i < length - 1; i++)
+                dp[i] = max(dp[i - 2] + sticker[i], dp[i - 1]);
 
-        return answer;
+        answer = dp[length - 2];
+
+        dp[0] = 0;
+        dp[1] = sticker[1];
+
+        for (int i = 2; i < length; i++)
+                dp[i] = max(dp[i - 2] + sticker[i], dp[i - 1]);
+
+        answer = max(answer, dp[length - 1]);
+
+        return answer;
 }
