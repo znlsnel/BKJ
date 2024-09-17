@@ -1,30 +1,23 @@
-﻿#include <iostream>
-#include <vector>
+﻿#include <vector>
+#include <deque>
+#include <algorithm>
 using namespace std;
 
-int dp[100010];
-int solution(vector<int> sticker)
-{
-        int answer = 0;
-        int length = sticker.size();
-        if (length == 1)
-                return sticker[0];
+int solution(vector<int> stones, int k) {
+        deque<int> dq;
+        int answer = 1000000000;
 
-        dp[0] = sticker[0];
-        dp[1] = sticker[0];
+        for (int i = 0; i < stones.size(); i++) {
+                // 새로운 요소 추가를 위해 덱의 뒤쪽에서 큰 값 제거
+                while (!dq.empty() && stones[dq.back()] <= stones[i]) dq.pop_back();
+                dq.push_back(i);
 
-        for (int i = 2; i < length - 1; i++)
-                dp[i] = max(dp[i - 2] + sticker[i], dp[i - 1]);
+                // 덱의 앞쪽에서 윈도우에서 벗어난 값 제거
+                if (dq.front() <= i - k) dq.pop_front();
 
-        answer = dp[length - 2];
-
-        dp[0] = 0;
-        dp[1] = sticker[1];
-
-        for (int i = 2; i < length; i++)
-                dp[i] = max(dp[i - 2] + sticker[i], dp[i - 1]);
-
-        answer = max(answer, dp[length - 1]);
+                // 첫 번째 윈도우가 채워진 후부터 최소값 계산
+                if (i >= k - 1) answer = min(answer, stones[dq.front()]);
+        }
 
         return answer;
 }
