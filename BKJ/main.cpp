@@ -1,23 +1,58 @@
-﻿#include <vector>
-#include <deque>
+﻿#include <string>
+#include <vector>
 #include <algorithm>
+
 using namespace std;
 
-int solution(vector<int> stones, int k) {
-        deque<int> dq;
-        int answer = 1000000000;
-
-        for (int i = 0; i < stones.size(); i++) {
-                // 새로운 요소 추가를 위해 덱의 뒤쪽에서 큰 값 제거
-                while (!dq.empty() && stones[dq.back()] <= stones[i]) dq.pop_back();
-                dq.push_back(i);
-
-                // 덱의 앞쪽에서 윈도우에서 벗어난 값 제거
-                if (dq.front() <= i - k) dq.pop_front();
-
-                // 첫 번째 윈도우가 채워진 후부터 최소값 계산
-                if (i >= k - 1) answer = min(answer, stones[dq.front()]);
+struct Edge
+{
+        int s, d, cost;
+        Edge(int a, int b, int c) : s(a), d(b), cost(c) {}
+        bool operator < (Edge other)
+        {
+                return cost < other.cost;
         }
+};
+
+vector<int> parent;
+
+int Find(int a)
+{
+        if (parent[a] == a)
+                return a;
+
+        return parent[a] = Find(parent[a]);
+}
+
+void Union(int a, int b)
+{
+        a = Find(a);
+        b = Find(b);
+
+        parent[a] = b;
+}
+
+int solution(int n, vector<vector<int>> costs) {
+
+        vector<Edge> edges;
+        for (auto& cost : costs)
+                edges.push_back({ cost[0], cost[1], cost[2] });
+
+        sort(edges.begin(), edges.end());
+        parent.resize(n);
+        for (int i = 0; i < n; i++)
+                parent[i] = i;
+
+        int answer = 0;
+        for (Edge& edge : edges)
+        {
+                if (Find(edge.s) != Find(edge.d))
+                {
+                        Union(edge.s, edge.d);
+                        answer += edge.cost;
+                }
+        }
+
 
         return answer;
 }
