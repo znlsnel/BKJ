@@ -1,58 +1,34 @@
 ﻿#include <string>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 using namespace std;
 
-struct Edge
-{
-        int s, d, cost;
-        Edge(int a, int b, int c) : s(a), d(b), cost(c) {}
-        bool operator < (Edge other)
+long long solution(int n, vector<int> times) {
+
+        long long answer = 0;
+
+        sort(times.begin(), times.end());
+        long long start = 1;
+        long long end = (long long)times.back() * n;
+
+        while (start <= end)
         {
-                return cost < other.cost;
-        }
-};
+                long long mid = (start + end) / 2;
 
-vector<int> parent;
+                long long cnt = 0;
+                for (int time : times)
+                        cnt += mid / (long long)time;
 
-int Find(int a)
-{
-        if (parent[a] == a)
-                return a;
-
-        return parent[a] = Find(parent[a]);
-}
-
-void Union(int a, int b)
-{
-        a = Find(a);
-        b = Find(b);
-
-        parent[a] = b;
-}
-
-int solution(int n, vector<vector<int>> costs) {
-
-        vector<Edge> edges;
-        for (auto& cost : costs)
-                edges.push_back({ cost[0], cost[1], cost[2] });
-
-        sort(edges.begin(), edges.end());
-        parent.resize(n);
-        for (int i = 0; i < n; i++)
-                parent[i] = i;
-
-        int answer = 0;
-        for (Edge& edge : edges)
-        {
-                if (Find(edge.s) != Find(edge.d))
-                {
-                        Union(edge.s, edge.d);
-                        answer += edge.cost;
+                if (cnt < n)
+                        start = mid + 1;
+                else {
+                        end = mid - 1;
                 }
         }
 
-
-        return answer;
+        return end + 1;
 }
+
+// 
