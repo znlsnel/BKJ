@@ -1,34 +1,30 @@
-﻿#include <string>
-#include <vector>
-#include <algorithm>
-#include <iostream>
-
+﻿#include <iostream>
+#include <string>
 using namespace std;
 
-long long solution(int n, vector<int> times) {
-
-        long long answer = 0;
-
-        sort(times.begin(), times.end());
-        long long start = 1;
-        long long end = (long long)times.back() * n;
-
-        while (start <= end)
+int palindrome(string& s, int left, int right)
+{
+        while (left >= 0 && right < s.size())
         {
-                long long mid = (start + end) / 2;
+                if (s[left] != s[right])
+                        break;
 
-                long long cnt = 0;
-                for (int time : times)
-                        cnt += mid / (long long)time;
-
-                if (cnt < n)
-                        start = mid + 1;
-                else {
-                        end = mid - 1;
-                }
+                left--;
+                right++;
         }
 
-        return end + 1;
+        return right - left - 1;
 }
 
-// 
+int solution(string s)
+{
+        int answer = 0;
+        for (int i = 0; i < s.size(); i++)
+        {
+                int a = palindrome(s, i, i);
+                int b = palindrome(s, i - 1, i);
+                answer = max(answer, max(a, b));
+        }
+
+        return answer;
+}
