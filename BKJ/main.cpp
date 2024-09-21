@@ -45,41 +45,34 @@ string solution(int n, int t, int m, vector<string> timetable) {
 
         int idx = 0, seatsLeft = m;
 
-        while (curBus <= lastBus)
-        {
-                if (seatsLeft > 0 && idx < times.size() && times[idx] <= curBus)
-                {
+        // 마지막 버스까지 계속 처리
+        for (int i = 0; i < n; ++i) {
+                int seatsLeft = m;
+
+                while (seatsLeft > 0 && idx < times.size() && times[idx] <= curBus) {
                         seatsLeft--;
-                        cout << "한명 앉음 idx : " << idx << "\n";
                         idx++;
-
                 }
-                else
+
+                // 마지막 버스일 때
+                if (i == n - 1)
                 {
-                        if (curBus == lastBus)
-                                break;
+                        // 자리가 남으면 마지막 버스 시간에 탑승 가능
+                        if (seatsLeft > 0)
+                        {
+                                return itot(curBus);
+                        }
 
-                        cout << "다음 버스요~ " << "\n";
-                        curBus += t;
-                        seatsLeft = m;
-
+                        // 자리가 없으면 마지막으로 탄 사람보다 1분 빨리
+                        else
+                        {
+                                return itot(times[idx - 1] - 1);
+                        }
                 }
-        }
-        if (idx > times.size() - 1)
-                idx = times.size() - 1;
 
-        // 현재 버스가 마지막 버스일 때    
-        if (curBus == lastBus)
-        {
-                // 남은 자리가 있다면 버스 시간에
-                if (seatsLeft > 0)
-                        return itot(lastBus);
-
-                // 자리가 없다면
-                else
-                        return itot(times[idx] - 1);
+                curBus += t;  // 다음 버스 시간으로 갱신
         }
-        else
-                return itot(lastBus);
+
+        return itot(lastBus);
 
 }
