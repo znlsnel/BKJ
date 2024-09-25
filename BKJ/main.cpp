@@ -1,49 +1,52 @@
 ﻿#include <string>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
-int solution(int n, vector<vector<int>> results) {
-        vector<vector<int>> v(n, vector<int>(n, 0));
+bool check(vector<vector<int>>& key, vector<vector<int>>& lock, int n, int y, int x)
+{
+        for (int i = 0; i < lock.size(); i++)
+                for (int j = 0; j < lock[i].size(); j++)
+                        if (lock[i][j] == key[i + n + y][j + n + x])
+                                return false;
 
-        for (auto& result : results)
-        {
-                v[result[0] - 1][result[1] - 1] = 1;
-                v[result[1] - 1][result[0] - 1] = -1;
-        }
-
-        for (int k = 0; k < n; k++)
-        {
-                for (int i = 0; i < n; i++)
-                {
-                        for (int j = 0; j < n; j++)
-                        {
-                                if (v[i][k] != 0 && v[i][k] == v[k][j])
-                                        v[i][j] = v[i][k];
-                        }
-                }
-        }
-
-        int answer = 0;
-        for (int i = 0; i < n; i++)
-        {
-                int cnt = 0;
-                for (int j = 0; j < n; j++)
-                {
-                        if (v[i][j] == 0)
-                                cnt++;
-                }
-                if (cnt == 1)
-                        answer++;
-        }
-
-        return answer;
+        return true;
 }
 
-// 4 3 1 [2 5]   
-// 4는 3보다 쎄지만 4-1, 3-1은 결과는 없기 때문에 순위 매길 수 없음
+void Rotate(vector<vector<int>>& key)
+{
+        int n = key.size();
+        vector<vector<int>> ret(n, vector<int>(n));
 
-// 길찾기가 가능한지 체크하면 되는거였음
-// 4->3, 3->2, 1->2, 2->5
-// 
-// 
+        for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                        ret[i][j] = key[j][n - 1 - i];
+
+        key = ret;
+}
+
+
+
+bool solution(vector<vector<int>> k, vector<vector<int>> lock) {
+
+        int n = lock.size();
+        int m = k.size();
+
+        vector<vector<int>> key(n * 3, vector<int>(n * 3));
+        for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                        key[i + n][j + n] = i >= m || j >= m ? 0 : k[i][j];
+
+        for (int i = 0; i < 4; i++)
+        {
+                for (int i = -n + 1; i < n; i++)
+                        for (int j = -n + 1; j < n; j++)
+                                if (check(key, lock, n, i, j))
+                                        return true;
+
+                Rotate(key);
+        }
+
+        return false;
+}
