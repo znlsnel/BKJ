@@ -1,104 +1,59 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
 #include <algorithm>
 
 using namespace std;
 
-struct Node
-{
-        int idx;
-        int x;
-        int y;
-        Node* left;
-        Node* right;
-
-
-        bool operator < (Node& other)
-        {
-                if (y == other.y)
-                        return x < other.x;
-                return y > other.y;
-        }
-
-        void insert(Node& node)
-        {
-                if (x > node.x)
-                {
-                        if (left == nullptr)
-                                left = &node;
-                        else
-                                left->insert(node);
+// 현재 구조물이 유효한지 확인하는 함수
+bool isValid(vector<vector<int>>& build) {
+        for (auto& b : build) {
+                int x = b[0], y = b[1], a = b[2];
+                if (a == 0) { // 기둥
+                        if (y == 0 || // 바닥 위에 있거나
+                                find(build.begin(), build.end(), vector<int>{x - 1, y, 1}) != build.end() || // 왼쪽에 보가 있거나
+                                find(build.begin(), build.end(), vector<int>{x, y, 1}) != build.end() || // 오른쪽에 보가 있거나
+                                find(build.begin(), build.end(), vector<int>{x, y - 1, 0}) != build.end()) { // 아래에 기둥이 있거나
+                                continue;
+                        }
+                        else {
+                                return false;
+                        }
                 }
-                else
-                {
-                        if (right == nullptr)
-                                right = &node;
-                        else
-                                right->insert(node);
+                else { // 보
+                        if (find(build.begin(), build.end(), vector<int>{x, y - 1, 0}) != build.end() || // 왼쪽 아래에 기둥이 있거나
+                                find(build.begin(), build.end(), vector<int>{x + 1, y - 1, 0}) != build.end() || // 오른쪽 아래에 기둥이 있거나
+                                (find(build.begin(), build.end(), vector<int>{x - 1, y, 1}) != build.end() &&
+                                        find(build.begin(), build.end(), vector<int>{x + 1, y, 1}) != build.end())) { // 양쪽에 보가 있거나
+                                continue;
+                        }
+                        else {
+                                return false;
+                        }
                 }
         }
-
-
-        void Preorder(vector<int>& answer, int cnt = 1)
-        {
-                answer.push_back(idx + 1);
-
-                if (left != nullptr)
-                        left->Preorder(answer, cnt);
-
-                if (right != nullptr)
-                        right->Preorder(answer, cnt);
-        }
-
-        void Postorder(vector<int>& answer)
-        {
-                if (left != nullptr)
-                        left->Postorder(answer);
-
-                if (right != nullptr)
-                        right->Postorder(answer);
-
-                answer.push_back(idx + 1);
-        }
-};
-
-
-vector<vector<int>> solution(vector<vector<int>> nodeinfo) {
-
-        vector<Node> nodes;
-        for (int i = 0; i < nodeinfo.size(); i++)
-        {
-                auto& node = nodeinfo[i];
-                nodes.push_back(Node{ i, node[0], node[1], nullptr, nullptr });
-        }
-
-        sort(nodes.begin(), nodes.end());
-
-        Node root = nodes[0];
-
-        for (int i = 1; i < nodeinfo.size(); i++)
-                root.insert(nodes[i]);
-
-
-
-        vector<vector<int>> answer(2);
-        root.Preorder(answer[0]);
-        root.Postorder(answer[1]);
-
-        return answer;
+        return true;
 }
-// [1,3] [2,2] [3,5] [5,3] [6,1] [7,2] [8,6] [11,5] [13,5]
-// y가 높으면 부모
-// x가 높으면 오른쪽 노드
 
-// 좌표를 노드화
+vector<vector<int>> solution(int n, vector<vector<int>> build_frame) {
+        vector<vector<int>> build;
 
-// 노드를 전위 순회, 후위 순회한 노드 순서 출력
+        for (auto& frame : build_frame) {
+                int x = frame[0], y = frame[1], a = frame[2], b = frame[3];
 
-// 문제의 핵심 부분 - 좌표의 노드화
-// 나의 바로 윗 노드이면서 가장 가까운 노드가 나의 부모 노드
+                if (b == 1) { // 설치
+                        build.push_back({ x, y, a });
+                        if (!isValid(build)) { // 설치 후 유효하지 않으면 취소
+                                build.pop_back();
+                        }
+                }
+                else { // 제거
+                        build.erase(remove(build.begin(), build.end(), vector<int>{x, y, a}), build.end());
+                        if (!isValid(build)) { // 제거 후 유효하지 않으면 다시 설치
+                                build.push_back({ x, y, a });
+                        }
+                }
+        }
 
-// 1. y를 기준으로 정렬
-// 2. x를 기준으로 정렬
-// 3. 가장가까운 y면서 가장 가까운 x인 Node를 map에서 찾기
+        sort(build.begin(), build.end()); // 최종 결과를 정렬
+        return build;
+}
