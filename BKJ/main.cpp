@@ -1,50 +1,43 @@
 ﻿#include <vector>
-#include <iostream>
+#include <algorithm>
 
 using namespace std;
 
-int MOD = 20170805;
+int solution(int n, vector<int> weak, vector<int> dist) {
+        int answer = 1e8;
+        int w_size = weak.size();
 
-
-// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
-int solution(int m, int n, vector<vector<int>> city_map) {
-
-        vector<vector<int>> right(m, vector<int>(n, 0));
-        vector<vector<int>> down(m, vector<int>(n, 0));
-
-        right[0][1] = 1;
-        down[1][0] = 1;
-
-
-        for (int i = 0; i < m; i++)
-        {
-                for (int j = 0; j < n; j++)
-                {
-                        if (city_map[i][j] == 1)
-                                continue;
-
-                        else if (city_map[i][j] == 2)
-                        {
-                                if (i < m - 1 && i > 0)
-                                        down[i + 1][j] = down[i][j] % MOD;
-
-                                if (j < n - 1 && j > 0)
-                                        right[i][j + 1] += right[i][j] % MOD;
-                        }
-                        else
-                        {
-                                if (i < m - 1)
-                                        down[i + 1][j] += (down[i][j] + right[i][j]) % MOD;
-
-                                if (j < n - 1)
-                                        right[i][j + 1] += (down[i][j] + right[i][j]) % MOD;
-                        }
-                }
+        for (int i = 0; i < w_size - 1; ++i) {
+                weak.push_back(weak[i] + n);
         }
 
-        return (right[m - 1][n - 1] + down[m - 1][n - 1]) % MOD;
-}
+        sort(dist.begin(), dist.end()); // next_permutation 사용 위해 정렬
 
-// 0 = 통행가능
-// 1 = 동행불가능
-// 2 = 직진만 가능
+        do {
+                for (int i = 0; i < w_size; ++i) {
+                        int start = weak[i];
+                        int end = weak[i + w_size - 1];
+
+                        for (int j = 0; j < dist.size(); ++j) {
+                                start += dist[j]; // 친구 이동
+
+                                if (start >= end) { // 모든 지점 점검 마쳤을 경우
+                                        answer = min(answer, j + 1);
+                                        break;
+                                }
+
+                                // 외벽 점검을 마치지 않았지만 더이상 이동할 수 없으면 다음 지점으로 이동
+                                for (int z = i + 1; z < i + w_size; ++z) {
+                                        if (weak[z] > start) {
+                                                start = weak[z];
+                                                break;
+                                        }
+                                }
+                        }
+                }
+        } while (next_permutation(dist.begin(), dist.end()));
+
+        if (answer == 1e8) return -1;
+
+        return answer;
+}
