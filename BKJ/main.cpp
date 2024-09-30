@@ -1,43 +1,44 @@
 ﻿#include <vector>
-#include <algorithm>
-
 using namespace std;
 
-int solution(int n, vector<int> weak, vector<int> dist) {
-        int answer = 1e8;
-        int w_size = weak.size();
+int solution(int totalTasks, vector<int> cores) {
+        int low = -1, high = 200000, mid = 0;
 
-        for (int i = 0; i < w_size - 1; ++i) {
-                weak.push_back(weak[i] + n);
-        }
+        // 이진 탐색으로 시간을 찾음
+        while (low + 1 < high) {
+                mid = (low + high) / 2;
+                int completedTasks = cores.size(); // 코어들이 한 번씩 기본적으로 작업을 처리하는 시간 계산
 
-        sort(dist.begin(), dist.end()); // next_permutation 사용 위해 정렬
-
-        do {
-                for (int i = 0; i < w_size; ++i) {
-                        int start = weak[i];
-                        int end = weak[i + w_size - 1];
-
-                        for (int j = 0; j < dist.size(); ++j) {
-                                start += dist[j]; // 친구 이동
-
-                                if (start >= end) { // 모든 지점 점검 마쳤을 경우
-                                        answer = min(answer, j + 1);
-                                        break;
-                                }
-
-                                // 외벽 점검을 마치지 않았지만 더이상 이동할 수 없으면 다음 지점으로 이동
-                                for (int z = i + 1; z < i + w_size; ++z) {
-                                        if (weak[z] > start) {
-                                                start = weak[z];
-                                                break;
-                                        }
-                                }
+                // 각 코어가 주어진 시간 내에 처리할 수 있는 작업 수 계산
+                if (mid > 0) {
+                        for (int i = 0; i < cores.size(); i++) {
+                                completedTasks += mid / cores[i];
                         }
                 }
-        } while (next_permutation(dist.begin(), dist.end()));
 
-        if (answer == 1e8) return -1;
+                // 총 처리한 작업 수가 필요한 작업 수보다 적으면 더 큰 시간 범위를 탐색
+                if (completedTasks < totalTasks) {
+                        low = mid;
+                }
+                else {
+                        high = mid;
+                }
+        }
 
-        return answer;
+        if (low == -1) return totalTasks; // 초기 상태에서 해결 가능한 경우
+
+        int completedTasks = cores.size(); // 기본적으로 코어들이 처리한 작업 수
+        for (int i = 0; i < cores.size(); i++) {
+                completedTasks += low / cores[i]; // low 시간 동안 각 코어가 처리한 작업 수를 다시 계산
+        }
+
+        // 마지막 작업을 처리한 코어 찾기
+        for (int i = 0; i < cores.size(); i++) {
+                if ((low + 1) % cores[i] == 0) {
+                        completedTasks++;
+                }
+                if (completedTasks == totalTasks) return i + 1;
+        }
+
+        return 0; // 예외 처리
 }
