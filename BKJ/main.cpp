@@ -1,56 +1,166 @@
-﻿#include <vector>
-#include <algorithm>
+﻿#include <string>
+#include <vector>
 #include <iostream>
+#include <set>
 
 using namespace std;
 
-const int INF = 1000000000;
+bool Compute(int a, int b, int& result, int base, bool plus)
+{
+        int thirdDigit = 0;
+        int secondDigit = (a / 10) + (b / 10);
+        int firstDigit = (a % 10) + (b % 10);
 
-int solution(int n, int m, vector<vector<int>> edge_list, int k, vector<int> gps_log) {
-        vector<vector<int>> edge(n + 1);
+        if (plus)
+        {
+                if (firstDigit / base > 0)
+                {
+                        secondDigit++;
+                        firstDigit -= base;
+                }
 
-        // 간선 정보 입력
-        for (auto& e : edge_list) {
-                edge[e[0]].push_back(e[1]);
-                edge[e[1]].push_back(e[0]);
+                if (secondDigit / base > 0)
+                {
+                        thirdDigit++;
+                        secondDigit -= base;
+                }
+        }
+        else
+        {
+                secondDigit = (a / 10) - (b / 10); // 무조건 0보다 큼
+                firstDigit = (a % 10) - (b % 10);
+                if (firstDigit < 0) {
+                        secondDigit--;
+                        firstDigit = (firstDigit % base + base) % base;
+                }
         }
 
-        // 자기 자신으로 이동하는 것도 가능함
-        for (int i = 1; i <= n; i++) {
-                edge[i].push_back(i);
+
+
+        int total = thirdDigit * 100 + secondDigit * 10 + firstDigit;
+        char p = plus ? '+' : '-';
+        //   cout << "[" << base << "] " << a << " "<< p <<" " << b << " = " << total << "\n";
+
+        if (result == -1)
+                result = total;
+
+        return total == result;
+}
+
+void Parsing(string& exprs, int& a, int& b, int& result, bool& plus)
+{
+        a = exprs[0] - '0';
+        int next = 2;
+
+        if (exprs[1] != ' ') {
+                a = a * 10 + exprs[1] - '0';
+                next++;
         }
 
-        // dp[i][j] -> i시간에 j 노드에 도착했을 때 변경된 횟수의 최솟값
-        vector<vector<int>> dp(k, vector<int>(n + 1, INF));
-        dp[0][gps_log[0]] = 0;  // 시작점에서의 변경 횟수는 0
+        plus = false;
+        if (exprs[next] == '+')
+                plus = true;
 
-        for (int t = 1; t < k; t++) {
-                for (int i = 1; i <= n; i++) {
-                        if (dp[t - 1][i] == INF) continue;  // 이전에 도달 불가능한 경우는 패스
+        next += 2;
 
-                        for (int next : edge[i]) {
-                                int change = (next != gps_log[t]) ? 1 : 0;  // 다음 노드가 gps_log와 다르면 1번 변경
-                                dp[t][next] = min(dp[t][next], dp[t - 1][i] + change);
+        b = exprs[next] - '0';
+        if (exprs[next + 1] != ' ') {
+                b = b * 10 + exprs[next + 1] - '0';
+                next++;
+        }
+
+        next += 4;
+
+
+        result = exprs[next] - '0';
+        if (exprs[next] == 'X')
+                result = -1;
+
+        next++;
+        while (next < exprs.size())
+        {
+                result = result * 10 + exprs[next] - '0';
+                next++;
+        }
+
+        //  cout << "A : " << a << " B : " << b << " result : " << result << " plus : " << plus << "\n";
+}
+
+vector<string> solution(vector<string> expressions) {
+        set<int> questions;
+        set<int> bases;
+
+        // 진법 범위 찾기
+        int start = 2;
+        for (int i = 0; i < expressions.size(); i++)
+        {
+                string& exprs = expressions[i];
+
+                if (exprs.back() == 'X')
+                        questions.insert(i);
+
+                for (char c : exprs)
+                {
+                        if (c >= '2' && c <= '9') {
+                                start = max(start, (c - '0') + 1);
                         }
                 }
         }
 
-        // 마지막 시간에 목적지에 도착했을 때의 최소 변경 횟수
-        int answer = dp[k - 1][gps_log[k - 1]];
+        for (int i = start; i <= 9; i++)
+                bases.insert(i);
 
-        return (answer == INF) ? -1 : answer;
-}
 
-int main() {
-        // 예시 입력
-        int n = 7;
-        int m = 10;
-        vector<vector<int>> edge_list = { {1, 2}, {1, 3}, {2, 3}, {2, 4}, {3, 4}, {3, 5}, {4, 5}, {4, 6}, {5, 6}, {5, 7} };
-        int k = 6;
-        vector<int> gps_log = { 1, 2, 3, 3, 6, 7 };
+        // 맞는 진법 찾기
+        for (int base : bases)
+        {
+                for (int i = 0; i < expressions.size(); i++)
+                {
+                        // 문제면 패스
+                        if (questions.find(i) != questions.end())
+                                continue;
 
-        int result = solution(n, m, edge_list, k, gps_log);
-        cout << "결과: " << result << endl;
+                        string& exprs = expressions[i];
+                        int a, b, result; bool isPlus;
+                        Parsing(exprs, a, b, result, isPlus);
 
-        return 0;
+                        if (!Compute(a, b, result, base, isPlus))
+                        {
+                                bases.erase(base);
+                                break;
+                        }
+                }
+        }
+
+        // 살아남은 진법들과, 문제들을 비교하여 풀이
+        // 모든 진법에서 같은 정답이 나오면 표기,
+        // 다른 정답이 나오면 '?'로 정답 표기
+
+        vector<string> answer;
+        for (int q : questions)
+        {
+                set<int> results;
+                string& exprs = expressions[q];
+
+                for (int base : bases)
+                {
+                        int a, b, result; bool isPlus;
+                        Parsing(exprs, a, b, result, isPlus);
+                        Compute(a, b, result, base, isPlus);
+                        results.insert(result);
+                }
+
+                if (results.size() > 1)
+                        exprs[exprs.size() - 1] = '?';
+                else
+                {
+                        exprs.pop_back();
+                        exprs += to_string(*results.begin());
+                }
+
+                answer.push_back(exprs);
+        }
+
+
+        return answer;
 }
