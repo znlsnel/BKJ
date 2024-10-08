@@ -1,124 +1,166 @@
 ﻿#include <string>
 #include <vector>
-#include <queue>
-
+#include <iostream>
+#include <map>
+#include <algorithm>
 using namespace std;
+using PagesMap = map<string, class PageInfo*>;
 
-typedef struct qinfo {
-        //행, 열, 방향, 꺾은 횟수
-        int x, y, dir, cnt;
+// 입력받은 문자열을 모두 소문자로 변환
+void ToSmall(string& str)
+{
+        const int diff = 'A' - 'a';
+        for (char& c : str)
+                if ('A' <= c && c <= 'Z')
+                        c -= diff;
+}
+// str[pos] 부터 하나의 알파벳 단어 추출. 
+string GetWord(const string& str, int& pos)
+{
+        string retval;
+        if (pos >= str.size()) return retval;
+
+        while (pos < str.size())
+        {
+                if ('a' <= str[pos] && str[pos] <= 'z')
+                {
+                        retval += str[pos];
+                        pos++;
+
+                }
+                else //특수문자를 만나면 break
+                        break;
+        }
+        // str이 특수문자로 시작한 경우
+        if (retval.size() == 0)
+        {
+                retval += str[pos];
+                pos++;
+        }
+        return retval;
+}
+class PageInfo {
+public:
+        PageInfo(PagesMap& pages_map, string page, int idx);
+        void AddExternalLinks();
+        void CalBasicPoint(const string& target);
+        void CalLinkPoint();
+        int GetIndex() const { return mIdx; }
+        double GetMatchingPoint() const { return mMatchingPoint; }
+private:
+        // method
+        void RegisterURL();
+        void AddMatchingPoint(double amount) { mMatchingPoint += amount; }
+
+        // attributes
+        PagesMap& mPagesMap;
+        string mHtml;
+        int mIdx{};
+        int mBasicPoint{};
+        double mMatchingPoint{};
+        vector<PageInfo*> mLinks{};
+
 };
-typedef struct ainfo {
-        int x, y;
-};
-
-int pairCnt = 0;
-int N = 0, M = 0;
-
-bool inRange(int x, int y) {
-        return (0 <= x && x < M && 0 <= y && y < N);
+PageInfo::PageInfo(PagesMap& pages_map, string page, int idx)
+        : mPagesMap(pages_map), mHtml(move(page)), mIdx(idx)
+{
+        RegisterURL();
 }
 
-bool BFS(int start_x, int start_y, int end_x, int end_y, vector<string>& boards) {
-
-        pair<int, int> nextdir[4] = { {1,0},{0,1},{-1,0},{0,-1} };
-
-        queue<qinfo> q;
-
-        //어떤 방향으로 출발해도 상관 없다는 표시로 dir = -1;
-        q.push({ start_x, start_y, -1, 0 });
-
-        while (!q.empty()) {
-
-                int now_x = q.front().x; int now_y = q.front().y;
-                int cnt = q.front().cnt; int dir = q.front().dir;
-                q.pop();
-
-                for (int i = 0; i < 4; i++) {
-
-                        //dir이 -1이 아닐 때 역 방향이라면 continue
-                        if (dir != -1 && abs(dir - i) == 2)
-                                continue;
-
-                        int next_x = now_x + nextdir[i].first;
-                        int next_y = now_y + nextdir[i].second;
-                        int next_cnt = (dir == i || dir == -1) ? cnt : cnt + 1; //방향이 다르다면 꺾어야만 함
-
-                        if (inRange(next_x, next_y)) {
-                                //어디로 가던지 꺾은 횟수가 1번 이하여야 함
-                                if (next_cnt <= 1) {
-                                        if (boards[next_x][next_y] == '*') {
-                                                continue;
-                                        }
-                                        else if (boards[next_x][next_y] == '.') {
-                                                q.push({ next_x, next_y, i, next_cnt });
-                                        }
-                                        else {
-                                                //제거 할 수 있는 패를 찾았다면
-                                                if (next_x == end_x && next_y == end_y)
-                                                        return true;
-                                        }
-                                }
-                        }
+void PageInfo::CalLinkPoint()
+{
+        double linkPoint = (double)mBasicPoint / (double)mLinks.size();
+        for (PageInfo* link : mLinks)
+        {
+                if (link != nullptr)
+                {
+                        //cout << mIdx << "가 " <<link->mIdx << "에 링크점수 " << linkPoint << "점 추가 "<< endl; 
+                        link->AddMatchingPoint(linkPoint);
                 }
         }
-        return false;
 }
-
-string solve(vector<vector<ainfo>>& arr, vector<string>& boards) {
-
-        string ans = "";
-        bool flag = true;
-
-        while (flag) {
-
-                flag = false;
-
-                //2번 과정, A~Z까지 검사
-                for (int i = 0; i < arr.size(); i++) {
-                        //해결 해야할 요소가 있다면
-                        if (arr[i].size() > 1) {
-                                //BFS를 통해 제거 가능한 짝이 있는지 검사
-                                if (BFS(arr[i][0].x, arr[i][0].y, arr[i][1].x, arr[i][1].y, boards)) {
-                                        //3번 과정, 제거한 부분을 빈 공간으로 변경
-                                        boards[arr[i][0].x][arr[i][0].y] = boards[arr[i][1].x][arr[i][1].y] = '.'; //빈칸으로 만듬
-                                        arr[i].clear(); //배열 정보 삭제
-                                        pairCnt -= 2; //제거 해야할 짝의 수 감소
-                                        ans += char(i + int('A'));
-                                        flag = true;
-                                        break;
-                                }
-                        }
+void PageInfo::AddExternalLinks()
+{
+        string a_str("<a href=\"https://");
+        int start_pos{};
+        while ((start_pos = mHtml.find(a_str, start_pos)) != string::npos)
+        {
+                start_pos += a_str.size();
+                int end_pos = mHtml.find("\">", start_pos);
+                string URL(mHtml, start_pos, end_pos - start_pos);
+                auto iter = mPagesMap.find(URL);
+                if (iter != mPagesMap.end())
+                {
+                        // Pages Map에 등록된 링크라면 해당 링크의 주소를 mLinks 배열에 저장
+                        mLinks.push_back(iter->second);
+                }
+                else
+                {
+                        // Pages Map에 등록되지 않은 링크는 mLinks 배열에 nullptr로 저장
+                        mLinks.push_back(nullptr);
                 }
         }
-
-        //4번 과정
-        if (pairCnt == 0) //모든 짝을 제거한 경우
-                return ans;
-        else //더 이상 해결을 못하는 경우
-                return "IMPOSSIBLE";
 }
+void PageInfo::RegisterURL()
+{
+        // URL 추출
+        string meta_str("<meta property=\"og:url\" content=\"https://");
+        int start_pos = mHtml.find(meta_str);
+        start_pos += meta_str.size();
+        int end_pos = mHtml.find("\"/>", start_pos);
+        string URL(mHtml, start_pos, end_pos - start_pos);
+        // 추출한 URL을 map에 등록
+        mPagesMap[URL] = this;
+}
+void PageInfo::CalBasicPoint(const string& target)
+{
+        int pos{};
+        string word;
+        while ((word = GetWord(mHtml, pos)) != "")
+        {
+                if (word == target)// word를 발견한 경우
+                        mBasicPoint++;
+        }
+        mMatchingPoint += (double)mBasicPoint;
+        //cout << mBasicPoint << endl;
+}
+int solution(string word, vector<string> pages) {
+        int answer = 0;
+        PagesMap pages_map;
+        // 주어진 입력을 모두 소문자로 변환
+        ToSmall(word);
+        for (string& html : pages)
+                ToSmall(html);
 
-// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
-string solution(int m, int n, vector<string> board) {
-
-        string answer = "";
-        vector<vector<ainfo>> arr(26, vector<ainfo>());
-
-        //전역 변수 초기화
-        pairCnt = 0;
-        M = m; N = n;
-
-        //1번 과정, 모든 짝의 위치를 저장
-        for (int i = 0; i < m; i++) {
-                for (int j = 0; j < n; j++) {
-                        if ('A' <= board[i][j] && board[i][j] <= 'Z') {
-                                //alphabet을 int로 변환 후 위치 저장
-                                arr[int(board[i][j]) - int('A')].push_back({ i,j });
-                                pairCnt++; //제거 해야 할 짝의 수 증가
-                        }
-                }
+        // PageInfo 생성
+        vector<PageInfo> page_infos;
+        page_infos.reserve(pages.size());
+        for (int i = 0; i < pages.size(); ++i)
+        {
+                page_infos.emplace_back(pages_map, move(pages[i]), i);
         }
 
-        return answer = solve(arr, board);
+        for (auto& info : page_infos)
+        {
+                // 외부링크 연결
+                info.AddExternalLinks();
+        }
+        for (auto& info : page_infos)
+        {
+                // 기본 점수 계산
+                info.CalBasicPoint(word);
+                // 링크 점수 계산
+                info.CalLinkPoint();
+        }
+
+        auto comp = [](const PageInfo& lhs, const PageInfo& rhs)
+                {
+                        if (lhs.GetMatchingPoint() < rhs.GetMatchingPoint()) return true;
+                        else if (lhs.GetMatchingPoint() == rhs.GetMatchingPoint() &&
+                                lhs.GetIndex() > rhs.GetIndex()) return true;
+                        else return false;
+                };
+        auto iter = max_element(page_infos.begin(), page_infos.end(), comp);
+        answer = iter->GetIndex();
+        return answer;
 }
