@@ -1,69 +1,47 @@
-﻿#include <string>
-#include <vector>
-#include <utility>
+﻿#include <vector>
 #include <algorithm>
-#include <iostream>
-#include <queue>
-#include <math.h>
-
+#include <cmath>
 using namespace std;
 
-double end_t[2001];
-double start_t[2001];
-double work_t[2001]; // 실행 시간
-
-void make_end(string s, int pos) { // 시작 시간,분,초,걸리는 시간
-        double end_c = stod(s.substr(11, 2)) * (double)3600.0;
-        double end_m = stod(s.substr(14, 2)) * (double)60.0;
-        double end_s = stod(s.substr(17, 6));
-        string temp = "";
-        for (int i = 24; i < s.size() - 1; i++) {
-                temp.push_back(s[i]);
-        }
-        work_t[pos] = stod(temp);
-        end_t[pos] = end_c + end_m + end_s;
-}
-
-void make_start(int pos) { // 끝나는 시간,분,초
-        start_t[pos] = end_t[pos] - work_t[pos] + (double)0.001;
-}
-
-bool cmp(int a, int b) {
-        if (start_t[a] != start_t[b])
-                return start_t[a] < start_t[b];
-
-        else if (end_t[a] != end_t[b])
-                return end_t[a] < end_t[b];
-        else
-                return a < b;
-}
-
-int solution(vector<string> lines) {
-        int answer = 1;
-        vector<int> v;
-        for (int i = 0; i < lines.size(); i++) {
-                v.push_back(i);
-                make_end(lines[i], i);
-                make_start(i);
-        }
-        sort(v.begin(), v.end(), cmp);
-
-        priority_queue<double> q;
-        q.push(-end_t[v[0]]);
-
-        // v = 시작 시간이 먼저 오는 애들, 같다면 끝 시간이 먼저 오는 애들
-
-        for (int i = 1; i < v.size(); i++) { //start - end > 이면 계속 pop, 마지막에 push
-                int next = v[i];
-                while (!q.empty()) {
-                        if (start_t[next] - 1.0 >= -q.top())
-                                q.pop();
-                        else
-                                break;
+// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
+int solution(int n, vector<vector<int>> data) {
+        int answer = 0;
+        sort(data.begin(), data.end(), [](vector<int> a, vector<int>b) {
+                return a[0] == b[0] ? a[1] < b[1] : a[0] < b[0];
+                });
+        int upV, downV, tempUp, tempDown; //실제로 비교하는 변수, 높이가 변하기 전까지 값을 저장할 변수
+        for (int i = 0; i < data.size(); i++)
+        {
+                upV = pow(2, 31) - 1, downV = 0;
+                tempUp = upV, tempDown = downV;
+                for (int j = i + 1; j < data.size(); j++)
+                {
+                        if (data[j - 1][0] != data[j][0])
+                        { // 높이가 변하는 경우 값을 갱신
+                                upV = tempUp;
+                                downV = tempDown;
+                        }
+                        if (data[j][1] == data[i][1] || data[i][0] == data[j][0])
+                        {
+                                continue;
+                        }
+                        else if (data[j][1] > data[i][1])
+                        {
+                                if (upV >= data[j][1])
+                                {
+                                        answer += 1;
+                                }
+                                tempUp = min(tempUp, data[j][1]);
+                        }
+                        else if (data[j][1] < data[i][1])
+                        {
+                                if (downV <= data[j][1])
+                                {
+                                        answer += 1;
+                                }
+                                tempDown = max(tempDown, data[j][1]);
+                        }
                 }
-                q.push(-end_t[next]);
-                answer = max(answer, (int)q.size());
         }
-
         return answer;
 }
