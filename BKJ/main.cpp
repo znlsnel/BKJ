@@ -1,47 +1,59 @@
-﻿#include <vector>
+﻿#include <string>
+#include <vector>
 #include <algorithm>
-#include <cmath>
+#include <iostream>
+
 using namespace std;
 
-// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
-int solution(int n, vector<vector<int>> data) {
-        int answer = 0;
-        sort(data.begin(), data.end(), [](vector<int> a, vector<int>b) {
-                return a[0] == b[0] ? a[1] < b[1] : a[0] < b[0];
-                });
-        int upV, downV, tempUp, tempDown; //실제로 비교하는 변수, 높이가 변하기 전까지 값을 저장할 변수
-        for (int i = 0; i < data.size(); i++)
+int solution(int n, vector<int> cores) {
+        // sort(cores.begin(), cores.end());
+
+        int start = -1;
+        int end = 1000000;
+
+        if (n <= cores.size())
+                return n;
+
+        while (start + 1 < end)
         {
-                upV = pow(2, 31) - 1, downV = 0;
-                tempUp = upV, tempDown = downV;
-                for (int j = i + 1; j < data.size(); j++)
-                {
-                        if (data[j - 1][0] != data[j][0])
-                        { // 높이가 변하는 경우 값을 갱신
-                                upV = tempUp;
-                                downV = tempDown;
-                        }
-                        if (data[j][1] == data[i][1] || data[i][0] == data[j][0])
-                        {
-                                continue;
-                        }
-                        else if (data[j][1] > data[i][1])
-                        {
-                                if (upV >= data[j][1])
-                                {
-                                        answer += 1;
-                                }
-                                tempUp = min(tempUp, data[j][1]);
-                        }
-                        else if (data[j][1] < data[i][1])
-                        {
-                                if (downV <= data[j][1])
-                                {
-                                        answer += 1;
-                                }
-                                tempDown = max(tempDown, data[j][1]);
-                        }
-                }
+                int mid = (start + end) / 2;
+
+                int total = cores.size();
+                for (int i = 0; mid > 0 && i < cores.size(); i++)
+                        total += mid / cores[i];
+
+                if (total < n)
+                        start = mid;
+                else
+                        end = mid;
         }
-        return answer;
+
+        int total = cores.size();
+        for (int i = 0; i < cores.size(); i++)
+                total += start / cores[i];
+        for (int i = 0; i < cores.size(); i++)
+        {
+                if ((start + 1) % cores[i] == 0)
+                        total++;
+                if (total == n)
+                        return i + 1;
+        }
+
+
+
+        return -1;
 }
+
+// n번째에 처리하는 cpu는 누구일까
+// [1] [2] [3]
+// [4] [] []
+// [5] [6] []
+// [7] [0] [8]
+// [9] [10]
+
+
+// X분에 몇개의 작업을 끝낼 수 있는지 찾기 
+// X분에 N개를 처리할 수 있다면
+// 마지막으로 계산한 애가 누구인지 찾기
+// X분에 N-M개 처리할 수 있다면
+// 마지막 + M번째에 처리하는 애 찾기
