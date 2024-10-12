@@ -3,57 +3,37 @@
 #include <algorithm>
 #include <iostream>
 
+#define d 10000000
 using namespace std;
 
-int solution(int n, vector<int> cores) {
-        // sort(cores.begin(), cores.end());
+int solution(string myString, string pat) {
+        long long key = 0;
 
-        int start = -1;
-        int end = 1000000;
+        std::transform(pat.begin(), pat.end(), pat.begin(), [](unsigned char c) {
+                return std::tolower(c);
+                });
+        std::transform(myString.begin(), myString.end(), myString.begin(), [](unsigned char c) {
+                return std::tolower(c);
+                });
 
-        if (n <= cores.size())
-                return n;
-
-        while (start + 1 < end)
+        int M = pat.size();
+        int N = myString.size();
+        int p = 0, k = 0;
+        for (int i = 0; i < M; i++)
         {
-                int mid = (start + end) / 2;
-
-                int total = cores.size();
-                for (int i = 0; mid > 0 && i < cores.size(); i++)
-                        total += mid / cores[i];
-
-                if (total < n)
-                        start = mid;
-                else
-                        end = mid;
+                p += pat[i];
+                k += myString[i];
         }
 
-        int total = cores.size();
-        for (int i = 0; i < cores.size(); i++)
-                total += start / cores[i];
-        for (int i = 0; i < cores.size(); i++)
+        int answer = 0;
+        for (int i = 0; i < N - M + 1; i++)
         {
-                if ((start + 1) % cores[i] == 0)
-                        total++;
-                if (total == n)
-                        return i + 1;
+                if (p == k && pat == myString.substr(i, M))
+                        answer++;
+
+                k -= myString[i];
+                k += myString[i + M];
         }
 
-
-
-        return -1;
+        return answer > 0 ? 1 : 0;
 }
-
-// n번째에 처리하는 cpu는 누구일까
-// [1] [2] [3]
-// [4] [] []
-// [5] [6] []
-// [7] [0] [8]
-// [9] [10]
-
-
-// X분에 몇개의 작업을 끝낼 수 있는지 찾기 
-// X분에 N개를 처리할 수 있다면
-// 마지막으로 계산한 애가 누구인지 찾기
-// X분에 N-M개 처리할 수 있다면
-// 마지막 + M번째에 처리하는 애 찾기
