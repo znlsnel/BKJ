@@ -1,39 +1,35 @@
 ﻿#include <string>
 #include <vector>
-#include <algorithm>
 #include <iostream>
 
-#define d 10000000
 using namespace std;
 
-int solution(string myString, string pat) {
-        long long key = 0;
+string solution(string s) {
 
-        std::transform(pat.begin(), pat.end(), pat.begin(), [](unsigned char c) {
-                return std::tolower(c);
-                });
-        std::transform(myString.begin(), myString.end(), myString.begin(), [](unsigned char c) {
-                return std::tolower(c);
-                });
+        int minNum = 1000000000;
+        int maxNum = -1000000000;
 
-        int M = pat.size();
-        int N = myString.size();
-        int p = 0, k = 0;
-        for (int i = 0; i < M; i++)
+        int num = 0;
+        bool isMinus = 0;
+        for (int i = 0; i <= s.size(); i++)
         {
-                p += pat[i];
-                k += myString[i];
+                if (i == s.size() || s[i] == ' ') {
+                        if (isMinus) {
+                                num *= -1;
+                        }
+                        minNum = min(minNum, num);
+                        maxNum = max(maxNum, num);
+
+                        num = 0;
+                        isMinus = false;
+                        continue;
+                }
+
+                if (s[i] == '-')
+                        isMinus = true;
+                else
+                        num = num * 10 + (s[i] - '0');
         }
 
-        int answer = 0;
-        for (int i = 0; i < N - M + 1; i++)
-        {
-                if (p == k && pat == myString.substr(i, M))
-                        answer++;
-
-                k -= myString[i];
-                k += myString[i + M];
-        }
-
-        return answer > 0 ? 1 : 0;
+        return to_string(minNum) + " " + to_string(maxNum);
 }
