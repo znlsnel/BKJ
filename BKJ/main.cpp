@@ -1,35 +1,36 @@
 ﻿#include <string>
 #include <vector>
+#include <algorithm>
 #include <iostream>
+
 
 using namespace std;
 
-string solution(string s) {
+int solution(vector<int> diffs, vector<int> times, long long limit) {
 
-        int minNum = 1000000000;
-        int maxNum = -1000000000;
+        int minLevel = 1;
+        int maxLevel = *max_element(diffs.begin(), diffs.end());
 
-        int num = 0;
-        bool isMinus = 0;
-        for (int i = 0; i <= s.size(); i++)
+        int answer = maxLevel;
+        while (minLevel <= maxLevel)
         {
-                if (i == s.size() || s[i] == ' ') {
-                        if (isMinus) {
-                                num *= -1;
-                        }
-                        minNum = min(minNum, num);
-                        maxNum = max(maxNum, num);
+                int curLevel = (minLevel + maxLevel) / 2;
 
-                        num = 0;
-                        isMinus = false;
-                        continue;
+                long long time = 0;
+                for (int i = 0; i < times.size(); i++)
+                {
+                        int prev = i == 0 ? 1 : times[i - 1];
+                        time += max(diffs[i] - curLevel, 0) * (times[i] + prev) + times[i];
                 }
 
-                if (s[i] == '-')
-                        isMinus = true;
+                if (time <= limit)
+                {
+                        maxLevel = curLevel - 1;
+                        answer = min(answer, curLevel);
+                }
                 else
-                        num = num * 10 + (s[i] - '0');
+                        minLevel = curLevel + 1;
         }
 
-        return to_string(minNum) + " " + to_string(maxNum);
+        return answer;
 }
