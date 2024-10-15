@@ -2,34 +2,63 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <map>
 
 
 using namespace std;
+map<pair<int, pair<int, int>>, int> times;
 
-int solution(vector<int> diffs, vector<int> times, long long limit) {
+void update(pair<int, pair<int, int>> key)
+{
+        if (times.find(key) != times.end())
+                times[key]++;
+        else
+                times.insert({ key, 1 });
+}
 
-        int minLevel = 1;
-        int maxLevel = *max_element(diffs.begin(), diffs.end());
+int solution(vector<vector<int>> points, vector<vector<int>> routes) {
+        // 시간, 좌표
 
-        int answer = maxLevel;
-        while (minLevel <= maxLevel)
+        for (int i = 0; i < routes.size(); i++)
         {
-                int curLevel = (minLevel + maxLevel) / 2;
-
-                long long time = 0;
-                for (int i = 0; i < times.size(); i++)
+                int time = 0;
+                for (int j = 1; j < routes[i].size(); j++)
                 {
-                        int prev = i == 0 ? 1 : times[i - 1];
-                        time += max(diffs[i] - curLevel, 0) * (times[i] + prev) + times[i];
-                }
+                        int start = routes[i][j - 1] - 1;
+                        int dest = routes[i][j] - 1;
 
-                if (time <= limit)
-                {
-                        maxLevel = curLevel - 1;
-                        answer = min(answer, curLevel);
+                        int y = points[start][0];
+                        int x = points[start][1];
+
+                        int dirY = points[dest][0] - y > 0 ? 1 : -1;
+                        int dirX = points[dest][1] - x > 0 ? 1 : -1;
+
+                        if (j == 1) {
+                                update({ time++, {y, x} });
+                        }
+
+
+                        while (y != points[dest][0])
+                        {
+                                y += dirY;
+                                update({ time++, {y, x} });
+                        }
+
+                        while (x != points[dest][1])
+                        {
+                                x += dirX;
+                                update({ time++, {y, x} });
+                        }
                 }
-                else
-                        minLevel = curLevel + 1;
+        }
+
+        int answer = 0;
+        for (auto& time : times)
+        {
+                int cnt = time.second;
+                if (cnt > 1) {
+                        answer++;
+                }
         }
 
         return answer;
