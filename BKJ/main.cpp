@@ -1,64 +1,108 @@
 ﻿#include <string>
 #include <vector>
-#include <algorithm>
+#include <queue>
 #include <iostream>
-#include <map>
-
 
 using namespace std;
-map<pair<int, pair<int, int>>, int> times;
 
-void update(pair<int, pair<int, int>> key)
+
+int Find(vector<int>& parents, int a)
 {
-        if (times.find(key) != times.end())
-                times[key]++;
+        if (parents[a] == a)
+                return a;
+
+        return parents[a] = Find(parents, parents[a]);
+}
+void Union(vector<int>& parents, int a, int b)
+{
+        a = Find(parents, a);
+        b = Find(parents, b);
+
+        if (a < b)
+                parents[b] = a;
         else
-                times.insert({ key, 1 });
+                parents[a] = b;
 }
 
-int solution(vector<vector<int>> points, vector<vector<int>> routes) {
-        // 시간, 좌표
 
-        for (int i = 0; i < routes.size(); i++)
+int dy[4] = { 0, 1, 0, -1 };
+int dx[4] = { 1, 0, -1, 0 };
+int BFS(vector<vector<int>>& land, vector<vector<bool>>& visited, vector<int>& parents, int y, int x)
+{
+        vector<pair<int, int>> pos;
+        queue<pair<int, int>> q;
+
+        q.push({ y, x });
+        pos.push_back({ y, x });
+
+        int cnt = 1;
+        while (!q.empty())
         {
-                int time = 0;
-                for (int j = 1; j < routes[i].size(); j++)
+                auto& [cy, cx] = q.front(); q.pop();
+
+                for (int i = 0; i < 4; i++)
                 {
-                        int start = routes[i][j - 1] - 1;
-                        int dest = routes[i][j] - 1;
+                        int ny = cy + dy[i];
+                        int nx = cx + dx[i];
 
-                        int y = points[start][0];
-                        int x = points[start][1];
+                        if (ny < 0 || ny >= land.size() || nx < 0 || nx >= land[0].size() ||
+                                visited[ny][nx] || land[ny][nx] == 0)
+                                continue;
 
-                        int dirY = points[dest][0] - y > 0 ? 1 : -1;
-                        int dirX = points[dest][1] - x > 0 ? 1 : -1;
+                        visited[ny][nx] = true;
+                        q.push({ ny, nx });
+                        pos.push_back({ ny, nx });
 
-                        if (j == 1) {
-                                update({ time++, {y, x} });
-                        }
+                        int cidx = cy * land[0].size() + cx;
+                        int nidx = ny * land[0].size() + nx;
+                        Union(parents, cidx, nidx);
 
-
-                        while (y != points[dest][0])
-                        {
-                                y += dirY;
-                                update({ time++, {y, x} });
-                        }
-
-                        while (x != points[dest][1])
-                        {
-                                x += dirX;
-                                update({ time++, {y, x} });
-                        }
+                        cnt++;
                 }
         }
 
-        int answer = 0;
-        for (auto& time : times)
+        for (auto& p : pos)
+                land[p.first][p.second] = cnt;
+
+        return cnt;
+}
+
+int solution(vector<vector<int>> land) {
+        int answer = -11110;
+        int size = land.size() * land[0].size();
+        vector<vector<bool>> visited(land.size(), vector<bool>(land[0].size()));
+
+        vector<int> parents(size);
+        for (int i = 0; i < size; i++)
+                parents[i] = i;
+
+        for (int i = 0; i < land.size(); i++)
         {
-                int cnt = time.second;
-                if (cnt > 1) {
-                        answer++;
+                for (int j = 0; j < land[i].size(); j++)
+                {
+                        if (visited[i][j] || land[i][j] == 0)
+                                continue;
+                        visited[i][j] = true;
+                        BFS(land, visited, parents, i, j);
                 }
+        }
+
+        for (int j = 0; j < land[0].size(); j++)
+        {
+                vector<bool> visit(size, false);
+                int total = 0;
+                for (int i = 0; i < land.size(); i++)
+                {
+                        int idx = i * land[0].size() + j;
+                        int parent = Find(parents, idx);
+
+                        if (visit[parent] == false)
+                        {
+                                total += land[i][j];
+                                visit[parent] = true;
+                        }
+                }
+                answer = max(answer, total);
         }
 
         return answer;
