@@ -1,109 +1,91 @@
-﻿#include <string>
+﻿#include <iostream>
 #include <vector>
-#include <queue>
-#include <iostream>
+#include <cmath>
 
 using namespace std;
 
+// 각 시간과 시간과 관련된 로직을 가지는 Time 클래스 정의
+class Time {
+public:
+        int h, m, s;
 
-int Find(vector<int>& parents, int a)
-{
-        if (parents[a] == a)
-                return a;
-
-        return parents[a] = Find(parents, parents[a]);
-}
-void Union(vector<int>& parents, int a, int b)
-{
-        a = Find(parents, a);
-        b = Find(parents, b);
-
-        if (a < b)
-                parents[b] = a;
-        else
-                parents[a] = b;
-}
-
-
-int dy[4] = { 0, 1, 0, -1 };
-int dx[4] = { 1, 0, -1, 0 };
-int BFS(vector<vector<int>>& land, vector<vector<bool>>& visited, vector<int>& parents, int y, int x)
-{
-        vector<pair<int, int>> pos;
-        queue<pair<int, int>> q;
-
-        q.push({ y, x });
-        pos.push_back({ y, x });
-
-        int cnt = 1;
-        while (!q.empty())
-        {
-                auto& [cy, cx] = q.front(); q.pop();
-
-                for (int i = 0; i < 4; i++)
-                {
-                        int ny = cy + dy[i];
-                        int nx = cx + dx[i];
-
-                        if (ny < 0 || ny >= land.size() || nx < 0 || nx >= land[0].size() ||
-                                visited[ny][nx] || land[ny][nx] == 0)
-                                continue;
-
-                        visited[ny][nx] = true;
-                        q.push({ ny, nx });
-                        pos.push_back({ ny, nx });
-
-                        int cidx = cy * land[0].size() + cx;
-                        int nidx = ny * land[0].size() + nx;
-                        Union(parents, cidx, nidx);
-
-                        cnt++;
-                }
+        // 초로 변환된 시간을 가지고도 Time을 만들 수 있도록 생성자 정의
+        Time(int seconds) {
+                this->h = seconds / 3600;
+                this->m = (seconds % 3600) / 60;
+                this->s = (seconds % 3600) % 60;
         }
 
-        for (auto& p : pos)
-                land[p.first][p.second] = cnt;
+        // 모든 시간을 초로 변환
+        int toSeconds() {
+                return h * 3600 + m * 60 + s;
+        }
 
-        return cnt;
+        // 각도를 계산해서 List 형태로 반환
+        vector<double> getDegree() {
+                double hDegree = (h % 12) * 30.0 + m * 0.5 + s * (1 / 120.0);
+                double mDegree = m * 6.0 + s * (0.1);
+                double sDegree = s * 6.0;
+
+                return vector<double>{hDegree, mDegree, sDegree};
+        }
+};
+
+// 시침가 초침의 겹침을 판단
+bool hourMatch(vector<double> cnt, vector<double> next) {
+        if (cnt[0] > cnt[2] && next[0] <= next[2]) {
+                return true;
+        }
+
+        // 초침이 354도에서 0도로 넘어갈 때 예외 케이스
+        if (cnt[2] == 354 && cnt[0] > 354) {
+                return true;
+        }
+        return false;
 }
 
-int solution(vector<vector<int>> land) {
-        int answer = -11110;
-        int size = land.size() * land[0].size();
-        vector<vector<bool>> visited(land.size(), vector<bool>(land[0].size()));
-
-        vector<int> parents(size);
-        for (int i = 0; i < size; i++)
-                parents[i] = i;
-
-        for (int i = 0; i < land.size(); i++)
-        {
-                for (int j = 0; j < land[i].size(); j++)
-                {
-                        if (visited[i][j] || land[i][j] == 0)
-                                continue;
-                        visited[i][j] = true;
-                        BFS(land, visited, parents, i, j);
-                }
+// 분침과 초침의 겹침을 판단
+bool minuteMatch(vector<double> cnt, vector<double> next) {
+        if (cnt[1] > cnt[2] && next[1] <= next[2]) {
+                return true;
         }
 
-        for (int j = 0; j < land[0].size(); j++)
-        {
-                vector<bool> visit(size, false);
-                int total = 0;
-                for (int i = 0; i < land.size(); i++)
-                {
-                        int idx = i * land[0].size() + j;
-                        int parent = Find(parents, idx);
+        // 초침이 354도에서 0도로 넘어갈 때 예외 케이스
+        if (cnt[2] == 354 && cnt[1] > 354) {
+                return true;
+        }
+        return false;
+}
 
-                        if (visit[parent] == false)
-                        {
-                                total += land[i][j];
-                                visit[parent] = true;
-                        }
+int solution(int h1, int m1, int s1, int h2, int m2, int s2) {
+        int answer = 0;
+
+        // 시작 시간과, 종료 시간을 초 단위로 변경
+        int start = Time(h1 * 3600 + m1 * 60 + s1).toSeconds();
+        int end = Time(h2 * 3600 + m2 * 60 + s2).toSeconds();
+
+        // 시작 시간부터 1초씩 올려가며 계산(마지막 초는 포함되면 안됨)
+        // 마지막 초 + 1까지 판단해버림
+        for (int i = start; i < end; i++) {
+                vector<double> cnt = Time(i).getDegree();
+                vector<double> next = Time(i + 1).getDegree();
+
+                bool hMatch = hourMatch(cnt, next);
+                bool mMatch = minuteMatch(cnt, next);
+
+                // 초침이 분침과 시침과 겹침이 발생했을 때,
+                if (hMatch && mMatch) {
+                        // 시침과 분침의 각도가 같다면 +1만 해줘야함
+                        if (next[0] == next[1]) answer++;
+                        // 아니라면 +2
+                        else answer += 2;
                 }
-                answer = max(answer, total);
+                // 둘 중 하나라도 겹치면 +1
+                else if (hMatch || mMatch) answer++;
         }
 
+        // 위 로직은 시작시간에 대한 검사를 안해줬음
+        // 그래서 0시 또는 12시에 시작한다면, 한번 겹치고 시작하는 것이기 때문에 +1
+        if (start == 0 || start == 43200) answer++;
         return answer;
 }
