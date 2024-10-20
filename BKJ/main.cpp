@@ -1,22 +1,19 @@
-﻿#include<string>
-#include <iostream>
-
+﻿#include <iostream>
+#include<vector>
+#include <algorithm>
 using namespace std;
 
-bool solution(string s)
+int solution(vector<int> A, vector<int> B)
 {
-        int cnt = 0;
-        for (char c : s)
-        {
-                if (c == '(')
-                        cnt++;
-                else
-                        cnt--;
 
-                if (cnt < 0)
-                        return false;
-        }
+        sort(A.begin(), A.end());
+        sort(B.begin(), B.end(), [](int a, int b) {return a > b; });
 
-        return cnt == 0;
+        int answer = 0;
+
+        for (int i = 0; i < A.size(); i++)
+                answer += A[i] * B[i];
+
+
+        return answer;
 }
-
