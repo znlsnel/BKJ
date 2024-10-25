@@ -3,42 +3,48 @@
 #include <iostream>
 
 using namespace std;
+int ttoi(string time)
+{
+        int ret = 0;
+        ret += time[4] - '0';
+        ret += (time[3] - '0') * 10;
+        ret += (time[1] - '0') * 60;
+        ret += (time[0] - '0') * 600;
 
-int solution(vector<int> bandage, int health, vector<vector<int>> attacks) {
-
-        int hp = health;
-        int healCnt = 0;
-
-        int time = 0;
-        int idx = 0;
-        while (idx < attacks.size())
-        {
-                // 공격 받을 시간이 됐다면 ?
-                if (attacks[idx][0] == time)
-                {
-                        hp -= attacks[idx++][1];
-                        healCnt = 0;
-                        if (hp <= 0)
-                                return -1;
-                }
-                else
-                {
-                        hp += bandage[1];
-                        if (++healCnt == bandage[0])
-                        {
-                                healCnt = 0;
-                                hp += bandage[2];
-                        }
-                        hp = min(hp, health);
-                }
-
-                //  cout << "TIME : " << time << " IDX : " << idx << " HP : " << hp <<"\n";
-                time++;
-        }
-
-        return hp;
+        return ret;
 }
 
-// bandage = [시전 시간, 초당 회복량, 추가 회복량(시전 시간 채웠을 경우))]
-// health = 최대 체력
-// attacks = [[공격 받는 시간, 피해량], ... ... ... ]
+string itot(int time)
+{
+        string ret;
+        ret = to_string(time / 600);
+        ret += to_string((time % 600) / 60);
+        ret += ':';
+        ret += to_string((time % 600 % 60) / 10);
+        ret += to_string(time % 600 % 60 % 10);
+
+        return ret;
+
+}
+string solution(string video_len, string pos, string op_start, string op_end, vector<string> commands) {
+
+        int start_op = ttoi(op_start);
+        int end_op = ttoi(op_end);
+
+        int time = ttoi(pos);
+        time = time >= start_op && time < end_op ? end_op : time;
+        int videoSize = ttoi(video_len);
+
+        for (string& command : commands)
+        {
+                if (command == "next")
+                        time = min(time + 10, videoSize);
+                else if (command == "prev")
+                        time = max(time - 10, 0);
+
+                if (time >= start_op && time <= end_op)
+                        time = end_op;
+        }
+
+        return itot(time);
+}
