@@ -1,50 +1,31 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
+#include <algorithm>
 
 using namespace std;
-int ttoi(string time)
-{
-        int ret = 0;
-        ret += time[4] - '0';
-        ret += (time[3] - '0') * 10;
-        ret += (time[1] - '0') * 60;
-        ret += (time[0] - '0') * 600;
 
-        return ret;
-}
+int solution(vector<int> diffs, vector<int> times, long long limit) {
 
-string itot(int time)
-{
-        string ret;
-        ret = to_string(time / 600);
-        ret += to_string((time % 600) / 60);
-        ret += ':';
-        ret += to_string((time % 600 % 60) / 10);
-        ret += to_string(time % 600 % 60 % 10);
+        int start = 1;
+        int end = *max_element(diffs.begin(), diffs.end());
+        int answer = end;
 
-        return ret;
-
-}
-string solution(string video_len, string pos, string op_start, string op_end, vector<string> commands) {
-
-        int start_op = ttoi(op_start);
-        int end_op = ttoi(op_end);
-
-        int time = ttoi(pos);
-        time = time >= start_op && time < end_op ? end_op : time;
-        int videoSize = ttoi(video_len);
-
-        for (string& command : commands)
+        while (start <= end)
         {
-                if (command == "next")
-                        time = min(time + 10, videoSize);
-                else if (command == "prev")
-                        time = max(time - 10, 0);
+                int level = (start + end) / 2;
+                long long time = times[0] * max(diffs[0] - level, 0) + times[0];
+                for (int i = 1; i < times.size(); i++)
+                        time += (times[i - 1] + times[i]) * max(diffs[i] - level, 0) + times[i];
 
-                if (time >= start_op && time <= end_op)
-                        time = end_op;
+                if (time <= limit) {
+                        end = level - 1;
+                        answer = min(answer, level);
+                }
+                else
+                        start = level + 1;
         }
-
-        return itot(time);
+        return answer;
 }
+
+// 제한 시간 내에 문제를 모두 풀기 위한 최소 레벨
+// 2 4 7
