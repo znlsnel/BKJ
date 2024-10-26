@@ -1,2 +1,7 @@
-﻿MSVCRTD.lib(exe_main.obj) : error LNK2019: main"int __cdecl invoke_main(void)" (?invoke_main@@YAHXZ) 함수에서 참조되는 확인할 수 없는 외부 기호
-D:\PROJECTS\Git\BKJ\x64\Debug\BKJ.exe : fatal error LNK1120: 1개의 확인할 수 없는 외부 참조입니다.
+﻿  main.cpp
+D:\PROJECTS\Git\BKJ\BKJ\main.cpp(50,37): warning C4267: '인수': 'size_t'에서 '_Ty'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              _Ty=int
+          ]
+  BKJ.vcxproj -> D:\PROJECTS\Git\BKJ\x64\Debug\BKJ.exe
