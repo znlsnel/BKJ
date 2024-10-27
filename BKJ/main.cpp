@@ -31,6 +31,8 @@ void DFS(vector<bool> visited = vector<bool>(origin.size()), string str = "")
 
 // 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
 int solution(int n, vector<string> data) {
+        strs.resize(0);
+        origin = "ACFJMNRT";
 
         DFS();
 
