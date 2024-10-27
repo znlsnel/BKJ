@@ -1,74 +1,71 @@
-﻿#include <iostream>
+﻿#include <string>
 #include <vector>
-#include <string>
+#include <iostream>
+
 using namespace std;
 
+vector<string> strs;
+string origin = "ACFJMNRT";
 
-vector<int> makeTable(string pattern)
+void DFS(vector<bool> visited = vector<bool>(origin.size()), string str = "")
 {
-	vector<int> table(pattern.size(), 0);
+        if (str.size() == origin.size())
+        {
+                strs.push_back(str);
+                return;
+        }
 
-	// 0 0 1 2 0 1 2 
-	// A B A B C A B
+        for (int i = 0; i < origin.size(); i++)
+        {
+                if (visited[i] == true)
+                        continue;
+                visited[i] = true;
+                str += origin[i];
 
-	// 0 0 0 
-	// A B C D C D C
-	int head = 0;
-	for (int tail = 1; tail < pattern.size(); tail++)
-	{
-		while (head > 0 && pattern[head] != pattern[tail])
-			head = table[head - 1];
+                DFS(visited, str);
 
-		if (pattern[head] == pattern[tail])
-		{
-			table[tail] = ++head;
-		}
-	}
-
-	return table;
+                visited[i] = false;
+                str.pop_back();
+        }
 }
 
-void KMP(string str, string pattern)
-{
-	vector<int> table = makeTable(pattern);
-	vector<int> pN;
+// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
+int solution(int n, vector<string> data) {
 
-	// A B A B A B C A B
-	// A B A B C A B
-	// 0 0 1 2 0 1 2
+        DFS();
 
-	int P = 0;
-	for (int S = 0; S < str.size(); S++)
-	{
-		while (P > 0 && pattern[P] != str[S])
-			P = table[P - 1];
+        int answer = 0;
+        for (string str : strs)
+        {
+                bool success = true;
+                for (string d : data)
+                {
+                        char a = d[0];
+                        char b = d[2];
 
-		if (pattern[P] == str[S])
-		{
-			if (P == pattern.size() - 1)
-			{
-				pN.push_back(S - pattern.size() + 2);
-				P = table[P];
-			}
-			else
-				++P;
-		}
-	}
+                        int idxA, idxB;
+                        for (int i = 0; i < str.size(); i++)
+                        {
+                                if (str[i] == a)
+                                        idxA = i;
+                                if (str[i] == b)
+                                        idxB = i;
+                        }
 
-	cout << pN.size() << '\n';
-	for (int i = 0; i < pN.size(); i++)
-		cout << pN[i] << '\n';
-}
+                        int dist = abs(idxA - idxB) - 1;
+                        int targetDist = d[4] - '0';
 
-int main()
-{
-	string str;
-	string pattern;
+                        success = (d[3] == '=' && dist == targetDist) ||
+                                (d[3] == '<' && dist < targetDist) ||
+                                (d[3] == '>' && dist > targetDist);
 
-	getline(cin, str);
-	getline(cin, pattern);
+                        if (success == false)
+                                break;
+                }
 
-	KMP(str, pattern);
+                if (success)
+                        answer++;
+        }
 
-	return 0;
+        return answer;
 }
