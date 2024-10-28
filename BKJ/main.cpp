@@ -1,71 +1,32 @@
-﻿#include <vector>
-#include <queue>
+﻿#include <string>
+#include <vector>
+#include <iostream>
 
 using namespace std;
 
-// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
+int solution(int n) {
+        if (n % 2 == 1)
+                return 0;
 
-int dy[4] = { 0, 0, 1, -1 };
-int dx[4] = { 1, -1, 0, 0 };
+        vector<long long> dp(n + 1);
 
-int BFS(vector<vector<int>>& picture, vector<vector<bool>>& visited, int y, int x)
-{
-        int size = 1;
+        dp[0] = 1;
+        dp[2] = 3;
+        dp[4] = 11;
 
-        int color = picture[y][x];
-        visited[y][x] = true;
-        queue<pair<int, int>> q;
-        q.push({ y, x });
-
-
-        while (!q.empty())
+        for (int i = 6; i <= n; i += 2)
         {
-                auto [cy, cx] = q.front(); q.pop();
+                dp[i] = dp[i - 2] * 3;
+                for (int j = i - 4; j >= 0; j -= 2)
+                        dp[i] += dp[j] * 2;
 
-                for (int i = 0; i < 4; i++)
-                {
-                        auto [ny, nx] = make_pair(cy + dy[i], cx + dx[i]);
-
-                        if (ny < 0 || ny >= picture.size() ||
-                                nx < 0 || nx >= picture[0].size() ||
-                                picture[ny][nx] == 0 || picture[ny][nx] != color || visited[ny][nx])
-                                continue;
-
-                        visited[ny][nx] = true;
-                        q.push({ ny, nx });
-                        size++;
-                }
+                dp[i] %= 1000000007;
         }
 
-        return size;
+        return dp[n];
 }
-
-vector<int> solution(int m, int n, vector<vector<int>> picture) {
-
-        vector<int> answer(2);
-
-        vector<vector<bool>> visited(m, vector<bool>(n));
-        for (int i = 0; i < m; i++)
-        {
-                for (int j = 0; j < n; j++)
-                {
-                        if (visited[i][j] || picture[i][j] == 0)
-                                continue;
-
-                        int ret = BFS(picture, visited, i, j);
-                        if (ret > 0) {
-                                answer[0]++;
-                                answer[1] = max(answer[1], ret);
-                        }
-                }
-        }
-
-        return answer;
-}
-
-// 1 1 1 0 
-// 1 1 1 0
-// 0 0 0 1
-// 0 0 0 1
-// 0 0 0 1
-// 0 0 0 1
+// 연결 -> 4칸 -> 2개 * 
+// 0 = 1;
+// 2 = 3
+// 4 = 11
+// 6 = 33 6 2
