@@ -1,73 +1,71 @@
-﻿#include <string>
-#include <vector>
-#include <iostream>
+﻿#include <vector>
+#include <queue>
 
 using namespace std;
 
-vector<string> strs;
-string origin = "ACFJMNRT";
+// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
 
-void DFS(vector<bool> visited = vector<bool>(origin.size()), string str = "")
+int dy[4] = { 0, 0, 1, -1 };
+int dx[4] = { 1, -1, 0, 0 };
+
+int BFS(vector<vector<int>>& picture, vector<vector<bool>>& visited, int y, int x)
 {
-        if (str.size() == origin.size())
+        int size = 1;
+
+        int color = picture[y][x];
+        visited[y][x] = true;
+        queue<pair<int, int>> q;
+        q.push({ y, x });
+
+
+        while (!q.empty())
         {
-                strs.push_back(str);
-                return;
+                auto [cy, cx] = q.front(); q.pop();
+
+                for (int i = 0; i < 4; i++)
+                {
+                        auto [ny, nx] = make_pair(cy + dy[i], cx + dx[i]);
+
+                        if (ny < 0 || ny >= picture.size() ||
+                                nx < 0 || nx >= picture[0].size() ||
+                                picture[ny][nx] == 0 || picture[ny][nx] != color || visited[ny][nx])
+                                continue;
+
+                        visited[ny][nx] = true;
+                        q.push({ ny, nx });
+                        size++;
+                }
         }
 
-        for (int i = 0; i < origin.size(); i++)
-        {
-                if (visited[i] == true)
-                        continue;
-                visited[i] = true;
-                str += origin[i];
-
-                DFS(visited, str);
-
-                visited[i] = false;
-                str.pop_back();
-        }
+        return size;
 }
 
-// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
-int solution(int n, vector<string> data) {
-        strs.resize(0);
-        origin = "ACFJMNRT";
+vector<int> solution(int m, int n, vector<vector<int>> picture) {
 
-        DFS();
+        vector<int> answer(2);
 
-        int answer = 0;
-        for (string str : strs)
+        vector<vector<bool>> visited(m, vector<bool>(n));
+        for (int i = 0; i < m; i++)
         {
-                bool success = true;
-                for (string d : data)
+                for (int j = 0; j < n; j++)
                 {
-                        char a = d[0];
-                        char b = d[2];
+                        if (visited[i][j] || picture[i][j] == 0)
+                                continue;
 
-                        int idxA, idxB;
-                        for (int i = 0; i < str.size(); i++)
-                        {
-                                if (str[i] == a)
-                                        idxA = i;
-                                if (str[i] == b)
-                                        idxB = i;
+                        int ret = BFS(picture, visited, i, j);
+                        if (ret > 0) {
+                                answer[0]++;
+                                answer[1] = max(answer[1], ret);
                         }
-
-                        int dist = abs(idxA - idxB) - 1;
-                        int targetDist = d[4] - '0';
-
-                        success = (d[3] == '=' && dist == targetDist) ||
-                                (d[3] == '<' && dist < targetDist) ||
-                                (d[3] == '>' && dist > targetDist);
-
-                        if (success == false)
-                                break;
                 }
-
-                if (success)
-                        answer++;
         }
 
         return answer;
 }
+
+// 1 1 1 0 
+// 1 1 1 0
+// 0 0 0 1
+// 0 0 0 1
+// 0 0 0 1
+// 0 0 0 1
