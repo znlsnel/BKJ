@@ -1,51 +1,75 @@
 ﻿#include <string>
 #include <vector>
-#include <set>
-#include <utility>
+#include <sstream>
 #include <algorithm>
+#include <map>
 
 using namespace std;
 
-vector<string> solution(vector<vector<int>> line) {
-        vector<string> answer;
-        set<pair<long long, long long>> pos;
+map<string, vector<int>> scores; // 각 query에 대한 코딩테스트 점수를 담은 객체
 
-        for (int i = 0; i < line.size() - 1; i++) {
-                for (int j = i + 1; j < line.size(); j++) {
-                        long long AD_BC = (long long)line[i][0] * line[j][1] - (long long)line[i][1] * line[j][0];
-                        if (AD_BC != 0) {
-                                double x = ((double)line[i][1] * line[j][2] - (double)line[i][2] * line[j][1]) / AD_BC;
-                                double y = ((double)line[i][2] * line[j][0] - (double)line[i][0] * line[j][2]) / AD_BC;
+// 각 info에 대해 가능한 모든 query에 코딩테스트 점수 저장
+void storeScore(vector<vector<string>>& tmp, int score) {
+        string c1, c2, c3, c4;
 
-                                if (x - (long long)x == 0 && y - (long long)y == 0) {
-                                        pos.insert({ x, y });
+        for (int i = 0; i < 2; i++) {
+                c1 = tmp[0][i];
+                for (int j = 0; j < 2; j++) {
+                        c2 = tmp[1][j];
+                        for (int k = 0; k < 2; k++) {
+                                c3 = tmp[2][k];
+                                for (int l = 0; l < 2; l++) {
+                                        c4 = tmp[3][l];
+                                        scores[c1 + c2 + c3 + c4].push_back(score);
                                 }
                         }
                 }
         }
+}
 
-        long long min_x = 9223372036854775807;
-        long long max_x = -9223372036854775808;
-        long long min_y = 9223372036854775807;
-        long long max_y = -9223372036854775808;
+vector<int> solution(vector<string> info, vector<string> query) {
+        vector<int> answer;
+        vector<vector<string>> tmp(4, vector<string>(2, "-"));
 
-        for (const auto& p : pos) {
-                min_x = min(p.first, min_x);
-                min_y = min(p.second, min_y);
-                max_x = max(p.first, max_x);
-                max_y = max(p.second, max_y);
-        }
+        for (int i = 0; i < info.size(); i++) {
+                string s;
+                int idx = 0, score = 0;
 
-        for (long long y = min_y; y <= max_y; y++) {
-                string tmp = "";
-                for (long long x = min_x; x <= max_x; x++) {
-                        tmp += ".";
+                stringstream ss(info[i]);
+
+                while (ss >> s) {
+                        if (idx < 4) tmp[idx++][0] = s;
+                        else score = stoi(s);
                 }
-                answer.push_back(tmp);
+
+                storeScore(tmp, score);
         }
 
-        for (const auto& p : pos) {
-                answer[abs(p.second - max_y)][abs(p.first - min_x)] = '*';
+        // 코딩테스트 점수 오름차순 정렬
+        for (auto it : scores) {
+                sort(scores[it.first].begin(), scores[it.first].end());
+        }
+
+        for (string q : query) {
+                string s, key = "";
+                int idx = 0, score = 0;
+
+                stringstream ss(q);
+
+                while (ss >> s) {
+                        if (s == "and") continue;
+
+                        if (idx < 4) {
+                                key += s;
+                                idx++;
+                        }
+                        else {
+                                score = stoi(s);
+                        }
+                }
+
+                auto it = lower_bound(scores[key].begin(), scores[key].end(), score);
+                answer.push_back(scores[key].size() - (it - scores[key].begin()));
         }
 
         return answer;
