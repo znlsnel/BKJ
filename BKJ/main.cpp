@@ -1,33 +1,35 @@
 ﻿#include <string>
 #include <vector>
 #include <algorithm>
-#include <iostream>
 
 using namespace std;
 
-int solution(vector<int> cards) {
+bool cmp(vector<int>& v1, vector<int>& v2) {
+	if (v1[1] == v2[1])
+		return v1[0] < v2[0];
+	return v1[1] < v2[1];
+}
 
-        vector<bool> visited(cards.size(), false);
+int solution(vector<vector<int>> targets) {
 
-        vector<int> answer;
-        for (int i = 0; i < cards.size(); i++)
-        {
-                if (visited[i])
-                        continue;
-                visited[i] = true;
+	int answer = 0;
 
-                int size = 1;
-                int idx = cards[i] - 1;
-                while (visited[idx] == false)
-                {
-                        visited[idx] = true;
-                        idx = cards[idx] - 1;
-                        size++;
-                }
+	sort(targets.begin(), targets.end(), cmp);
 
-                answer.push_back(size);
-        }
+	int e = targets[0][1];
 
-        sort(answer.begin(), answer.end(), [](int A, int B) {return A > B; });
-        return answer.size() == 1 ? 0 : answer[0] * answer[1];
+	answer++;
+
+	for (int i = 1; i < targets.size(); i++) {
+		if (targets[i][0] < e) {
+			continue;
+		}
+		else {
+			answer++;
+			e = targets[i][1];
+		}
+
+	}
+
+	return answer;
 }
