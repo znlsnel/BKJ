@@ -1,35 +1,43 @@
 ﻿#include <string>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
-bool cmp(vector<int>& v1, vector<int>& v2) {
-	if (v1[1] == v2[1])
-		return v1[0] < v2[0];
-	return v1[1] < v2[1];
+
+int DFS(vector<pair<int, int>>& queens, int y, int n)
+{
+
+        if (queens.size() == n)
+                return 1;
+
+        int answer = 0;
+        for (int x = 0; x < n; x++)
+        {
+                bool flag = true;
+                for (auto& queen : queens)
+                {
+                        if (x == queen.second || y == queen.first ||
+                                abs(x - queen.second) == abs(y - queen.first))
+                        {
+                                flag = false;
+                                break;
+                        }
+                }
+
+                if (flag)
+                {
+                        queens.push_back({ y, x });
+                        answer += DFS(queens, y + 1, n);
+                        queens.pop_back();
+                }
+        }
+
+        return answer;
 }
 
-int solution(vector<vector<int>> targets) {
+int solution(int n) {
 
-	int answer = 0;
+        vector<pair<int, int>> queens;
+        return DFS(queens, 0, n);
 
-	sort(targets.begin(), targets.end(), cmp);
-
-	int e = targets[0][1];
-
-	answer++;
-
-	for (int i = 1; i < targets.size(); i++) {
-		if (targets[i][0] < e) {
-			continue;
-		}
-		else {
-			answer++;
-			e = targets[i][1];
-		}
-
-	}
-
-	return answer;
 }
