@@ -1,43 +1,18 @@
-﻿#include <string>
-#include <vector>
+﻿#include <iostream>
+#include <cmath>
 
 using namespace std;
 
+long long solution(int r1, int r2) {
+        long long count = 0;
 
-int DFS(vector<pair<int, int>>& queens, int y, int n)
-{
-
-        if (queens.size() == n)
-                return 1;
-
-        int answer = 0;
-        for (int x = 0; x < n; x++)
+        for (int x = 1; x <= r2; ++x)
         {
-                bool flag = true;
-                for (auto& queen : queens)
-                {
-                        if (x == queen.second || y == queen.first ||
-                                abs(x - queen.second) == abs(y - queen.first))
-                        {
-                                flag = false;
-                                break;
-                        }
-                }
+                int max_y = int(floor(sqrt((long long)(r2)*r2 - (long long)(x)*x)));
 
-                if (flag)
-                {
-                        queens.push_back({ y, x });
-                        answer += DFS(queens, y + 1, n);
-                        queens.pop_back();
-                }
+                int min_y = (x >= r1) ? 0 : int(ceil(sqrt((long long)(r1)*r1 - (long long)(x)*x)));
+
+                count += (max_y - min_y + 1);
         }
-
-        return answer;
-}
-
-int solution(int n) {
-
-        vector<pair<int, int>> queens;
-        return DFS(queens, 0, n);
-
+        return count * 4;
 }
