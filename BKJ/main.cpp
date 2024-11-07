@@ -1,57 +1,64 @@
 ﻿#include <string>
 #include <vector>
+#include <tuple>
+#include <algorithm>
+#include <stack>
 
 using namespace std;
 
-bool winnerCheck(vector<string>& b, char c)
+bool cmp(tuple<int, int, int> A, tuple<int, int, int> B)
 {
-        if (b[0][0] == c && b[0][0] == b[1][1] && b[1][1] == b[2][2])
-                return true;
-        if (b[0][2] == c && b[0][2] == b[1][1] && b[1][1] == b[2][0])
-                return true;
-
-        for (int i = 0; i < 3; i++)
-        {
-                if (b[i][0] == c && b[i][0] == b[i][1] && b[i][1] == b[i][2])
-                        return true;
-                if (b[0][i] == c && b[0][i] == b[1][i] && b[1][i] == b[2][i])
-                        return true;
-        }
-        return false;
+        return get<0>(A) < get<0>(B);
 }
+vector<string> solution(vector<vector<string>> plans) {
 
-int solution(vector<string> board) {
-
-        int oCnt = 0;
-        int xCnt = 0;
-        for (string& b : board)
+        vector<tuple<int, int, int>> p;
+        for (int i = 0; i < plans.size(); i++)
         {
-                for (char& c : b)
-                {
-                        if (c == 'O')
-                                oCnt++;
-                        else if (c == 'X')
-                                xCnt++;
-                }
+                string st = plans[i][1];
+                int start = st[4] - '0' + (st[3] - '0') * 10 + (st[1] - '0') * 60 + (st[0] - '0') * 600;
+                p.push_back({ start, start + stoi(plans[i][2]), i });
         }
-        bool isOWinner = winnerCheck(board, 'O');
-        bool isXWinner = winnerCheck(board, 'X');
+        sort(p.begin(), p.end(), cmp);
 
-        // 나올 수 없는 경우를 찾아서 0을 반환,  없다면 1을 반환
-        // 1. 둘다 이긴 경우
-        // 2. O의 개수가 X보다 2이상 클 경우 
-        // 3. O의 개수가 X보다 작을 경우 
-        // 4. O가 이겼는데 개수가 같을 경우
-        // 5. X가 이겼는데 O의 개수가 더 많을 경우
+        vector<string> answer;
+        stack<pair<int, int>> st;
 
-        if (oCnt < xCnt || oCnt > xCnt + 1)
-                return 0;
-        if (isOWinner && isXWinner)
-                return 0;
-        if (isOWinner && oCnt == xCnt)
-                return 0;
-        if (isXWinner && oCnt > xCnt)
-                return 0;
+        for (int i = 0; i < p.size() - 1; i++)
+        {
+                auto [s, e, i1] = p[i];
+                auto [s2, e2, i2] = p[i + 1];
+                int interval = s2 - e;
 
-        return 1;
+                if (e <= s2)
+                {
+                        answer.push_back(plans[i1][0]);
+
+                        while (!st.empty() && interval > 0)
+                        {
+                                pair<int, int> t = st.top(); st.pop();
+                                int temp = t.first;
+
+                                t.first = max(0, temp - interval);
+                                interval = max(0, interval - temp);
+
+                                if (t.first > 0)
+                                        st.push({ t.first, t.second });
+                                else
+                                        answer.push_back(plans[t.second][0]);
+                        }
+                }
+                else
+                        st.push({ e - s2, i1 });
+        }
+        answer.push_back(plans[get<2>(p.back())][0]);
+
+        while (!st.empty())
+        {
+                answer.push_back(plans[st.top().second][0]);
+                st.pop();
+        }
+
+
+        return answer;
 }
