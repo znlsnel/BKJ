@@ -4,16 +4,42 @@
 
 using namespace std;
 
-string solution(string s) {
+vector<int> solution(string s) {
 
-        for (int i = 0; i < s.size(); i++)
+        int cnt = 0;
+        int zero = 0;
+
+        while (s.size() > 1)
         {
-                if ((i == 0 || s[i - 1] == ' ') && (s[i] >= 'a' && s[i] <= 'z'))
-                        s[i] = s[i] + ('A' - 'a');
+                int c = 0;
+                for (int i = 0; i < s.size(); i++)
+                {
+                        if (s[i] == '1')
+                                c++;
+                }
 
-                else if ((i > 0 && s[i - 1] != ' ') && s[i] >= 'A' && s[i] <= 'Z')
-                        s[i] = s[i] - ('A' - 'a');
+                // cout << c << " : ";
+                string next = "";
+                int num = c;
+                for (int i = 2; num > 0; i *= 2) {
+                        if (num % i == i / 2)
+                        {
+                                next = '1' + next;
+                                num -= i / 2;
+                        }
+                        else
+                                next = '0' + next;
+
+                }
+                //    cout << next << "\n";
+
+                zero += (s.size() - c);
+                cnt++;
+
+                s = next;
         }
 
-        return s;
+
+
+        return { cnt, zero };
 }
