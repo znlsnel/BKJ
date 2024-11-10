@@ -4,42 +4,34 @@
 
 using namespace std;
 
-vector<int> solution(string s) {
+string solution(string s) {
 
-        int cnt = 0;
-        int zero = 0;
+        int minNum = 1000000000;
+        int maxNum = -1000000000;
 
-        while (s.size() > 1)
+        int num = 0;
+        bool isMinus = 0;
+        for (int i = 0; i <= s.size(); i++)
         {
-                int c = 0;
-                for (int i = 0; i < s.size(); i++)
-                {
-                        if (s[i] == '1')
-                                c++;
-                }
-
-                // cout << c << " : ";
-                string next = "";
-                int num = c;
-                for (int i = 2; num > 0; i *= 2) {
-                        if (num % i == i / 2)
-                        {
-                                next = '1' + next;
-                                num -= i / 2;
+                if (i == s.size() || s[i] == ' ') {
+                        if (isMinus) {
+                                num *= -1;
                         }
-                        else
-                                next = '0' + next;
+                        minNum = min(minNum, num);
+                        maxNum = max(maxNum, num);
 
+                        num = 0;
+                        isMinus = false;
+                        continue;
                 }
-                //    cout << next << "\n";
 
-                zero += (s.size() - c);
-                cnt++;
-
-                s = next;
+                if (s[i] == '-')
+                        isMinus = true;
+                else
+                        num = num * 10 + (s[i] - '0');
         }
 
+        //  cout << minNum << " " << maxNum;
 
-
-        return { cnt, zero };
+        return to_string(minNum) + " " + to_string(maxNum);
 }
