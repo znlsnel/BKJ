@@ -1,37 +1,27 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
-
 using namespace std;
 
-string solution(string s) {
+long long solution(int k, int d)
+{
+        long long length = (long long)d * d;
+        long long answer = d / k + 1;
 
-        int minNum = 1000000000;
-        int maxNum = -1000000000;
-
-        int num = 0;
-        bool isMinus = 0;
-        for (int i = 0; i <= s.size(); i++)
+        for (long long y = 0; y < d; y += k)
         {
-                if (i == s.size() || s[i] == ' ') {
-                        if (isMinus) {
-                                num *= -1;
+                int start = 1, end = d, ret = 0;
+                while (start <= end)
+                {
+                        long long x = (start + end) / 2;
+                        if (x * x + y * y <= length) {
+                                start = x + 1;
+                                ret = x;
                         }
-                        minNum = min(minNum, num);
-                        maxNum = max(maxNum, num);
-
-                        num = 0;
-                        isMinus = false;
-                        continue;
+                        else
+                                end = x - 1;
                 }
-
-                if (s[i] == '-')
-                        isMinus = true;
-                else
-                        num = num * 10 + (s[i] - '0');
+                answer += ret / k;
         }
 
-        //  cout << minNum << " " << maxNum;
-
-        return to_string(minNum) + " " + to_string(maxNum);
+        return answer;
 }
