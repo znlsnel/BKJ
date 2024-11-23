@@ -1,27 +1,31 @@
 ﻿#include <string>
 #include <vector>
-#include <algorithm>
+#include <queue>
+#include <iostream>
 
 using namespace std;
 
-int solution(vector<vector<int>> data, int col, int row_begin, int row_end) {
+int solution(int n, int k, vector<int> enemy) {
 
-        sort(data.begin(), data.end(), [&](auto& A, auto& B) {
-                if (A[col - 1] == B[col - 1])
-                        return A[0] > B[0];
-                return A[col - 1] < B[col - 1];
-                });
+        priority_queue<int> q;
 
-
-        int answer = 0;
-        for (int i = row_begin - 1; i < row_end; i++)
+        int r = 0;
+        for (; r < enemy.size(); r++)
         {
-                int S_i = 0;
-                for (int& n : data[i])
-                        S_i += n % (i + 1);
+                q.push(enemy[r]);
+                n -= enemy[r];
 
-                answer ^= S_i;
+                while (!q.empty() && n < 0 && k > 0)
+                {
+                        n += q.top();
+                        k--;
+                        q.pop();
+                }
+
+                if (n < 0)
+                        break;
         }
 
-        return answer;
+
+        return r;
 }
