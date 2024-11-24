@@ -1,31 +1,42 @@
 ﻿#include <string>
 #include <vector>
-#include <queue>
-#include <iostream>
+#include <algorithm>
 
 using namespace std;
 
-int solution(int n, int k, vector<int> enemy) {
+long long perm(int n) // n! 값 구하기
+{
+        if (n == 0) return 1;
+        return n * perm(n - 1);
+}
 
-        priority_queue<int> q;
-
-        int r = 0;
-        for (; r < enemy.size(); r++)
-        {
-                q.push(enemy[r]);
-                n -= enemy[r];
-
-                while (!q.empty() && n < 0 && k > 0)
-                {
-                        n += q.top();
-                        k--;
-                        q.pop();
-                }
-
-                if (n < 0)
-                        break;
+void func(vector<int>& v, vector<int>& answer, long long& k)
+{
+        if (v.size() == 1) {
+                answer.push_back(v[0]);
+                return;
         }
 
+        long long p = perm(v.size() - 1);
+        for (int i = 1; i <= v.size(); ++i) {
+                if (i * p >= k) {
+                        answer.push_back(v[i - 1]); // i번째기 때문에 인덱스론 i-1
+                        v.erase(v.begin() + i - 1);
+                        k = k - (i - 1) * p;
+                        func(v, answer, k);
+                }
+        }
+}
 
-        return r;
+vector<int> solution(int n, long long k)
+{
+        vector<int> answer;
+
+        vector<int> v(n);
+        for (int i = 0; i < n; ++i)
+                v[i] = i + 1;  // n=4의 경우 v = [1,2,3,4] 에서 시작
+
+        func(v, answer, k);
+
+        return answer;
 }
