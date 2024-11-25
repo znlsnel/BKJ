@@ -1,42 +1,69 @@
 ﻿#include <string>
 #include <vector>
-#include <algorithm>
+#include <iostream>
 
 using namespace std;
 
-long long perm(int n) // n! 값 구하기
+bool isProper(string s) // "올바른 괄호 문자열"인지 판별
 {
-        if (n == 0) return 1;
-        return n * perm(n - 1);
-}
+        int openCnt = 0;
 
-void func(vector<int>& v, vector<int>& answer, long long& k)
-{
-        if (v.size() == 1) {
-                answer.push_back(v[0]);
-                return;
+        for (int i = 0; i < s.length(); i++)
+        {
+                if (s[i] == '(')
+                        openCnt++;
+
+                if (s[i] == ')')
+                        openCnt--;
+
+                if (openCnt < 0)
+                        return false;
         }
 
-        long long p = perm(v.size() - 1);
-        for (int i = 1; i <= v.size(); ++i) {
-                if (i * p >= k) {
-                        answer.push_back(v[i - 1]); // i번째기 때문에 인덱스론 i-1
-                        v.erase(v.begin() + i - 1);
-                        k = k - (i - 1) * p;
-                        func(v, answer, k);
+        return openCnt == 0;
+}
+
+string removeAndReverse(string u)  // 4-4 의 과정
+{
+        u = u.substr(1, u.size() - 2);
+
+        for (char& c : u) // 괄호 방향 뒤집기
+                c = c == ')' ? '(' : ')';
+
+        return u;
+}
+
+string convert(string w)
+{
+        if (w == "") return w;  // 1. 빈 문자열인 경우 검사
+
+        int openCount = 0; int closeCount = 0;
+        int index = 0;
+        for (int i = 0; i < w.length(); i++)
+        {
+                if (w[i] == '(') openCount++;
+                if (w[i] == ')') closeCount++;
+
+                if (openCount == closeCount)
+                {
+                        index = i + 1;
+                        break;
                 }
         }
+
+        string u = w.substr(0, index);
+        string v = w.substr(index);
+
+        string result = "";
+        if (isProper(u))
+                result = u + convert(v);
+        else
+                result = "(" + convert(v) + ")" + removeAndReverse(u);
+
+        return result;
 }
 
-vector<int> solution(int n, long long k)
-{
-        vector<int> answer;
-
-        vector<int> v(n);
-        for (int i = 0; i < n; ++i)
-                v[i] = i + 1;  // n=4의 경우 v = [1,2,3,4] 에서 시작
-
-        func(v, answer, k);
-
+string solution(string p) {
+        string answer = convert(p);
         return answer;
 }
