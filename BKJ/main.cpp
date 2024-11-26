@@ -1,69 +1,58 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
-
+#include <algorithm>
 using namespace std;
 
-bool isProper(string s) // "올바른 괄호 문자열"인지 판별
-{
-        int openCnt = 0;
-
-        for (int i = 0; i < s.length(); i++)
-        {
-                if (s[i] == '(')
-                        openCnt++;
-
-                if (s[i] == ')')
-                        openCnt--;
-
-                if (openCnt < 0)
-                        return false;
-        }
-
-        return openCnt == 0;
+long long calculate(long long a, long long b, char oper) {
+        if (oper == '+')
+                return a + b;
+        else if (oper == '-')
+                return a - b;
+        else if (oper == '*')
+                return a * b;
 }
 
-string removeAndReverse(string u)  // 4-4 의 과정
-{
-        u = u.substr(1, u.size() - 2);
+long long solution(string expression) {
+        long long answer = 0;
+        vector<char> oper = { '*', '+', '-' };
+        vector<long long> num;
+        vector<char> operators;
 
-        for (char& c : u) // 괄호 방향 뒤집기
-                c = c == ')' ? '(' : ')';
+        int val = 0;
 
-        return u;
-}
+        for (int i = 0; i < expression.length(); i++) {
+                if (expression[i] >= '0' && expression[i] <= '9')
+                        val = val * 10 + (expression[i] - '0');
+                else {
+                        num.push_back(val);
+                        val = 0;
 
-string convert(string w)
-{
-        if (w == "") return w;  // 1. 빈 문자열인 경우 검사
-
-        int openCount = 0; int closeCount = 0;
-        int index = 0;
-        for (int i = 0; i < w.length(); i++)
-        {
-                if (w[i] == '(') openCount++;
-                if (w[i] == ')') closeCount++;
-
-                if (openCount == closeCount)
-                {
-                        index = i + 1;
-                        break;
+                        operators.push_back(expression[i]);
                 }
         }
 
-        string u = w.substr(0, index);
-        string v = w.substr(index);
+        num.push_back(val);
 
-        string result = "";
-        if (isProper(u))
-                result = u + convert(v);
-        else
-                result = "(" + convert(v) + ")" + removeAndReverse(u);
+        do {
+                vector<long long> temp_num = num;
+                vector<char> temp_operators = operators;
 
-        return result;
-}
+                for (int i = 0; i < 3; i++) {
+                        for (int j = 0; j < temp_operators.size(); j++) {
+                                if (temp_operators[j] == oper[i]) {
+                                        temp_num[j] = calculate(temp_num[j], temp_num[j + 1], oper[i]);
 
-string solution(string p) {
-        string answer = convert(p);
+                                        temp_num.erase(temp_num.begin() + j + 1);
+                                        temp_operators.erase(temp_operators.begin() + j);
+
+                                        j--;
+                                }
+                        }
+                }
+
+                if (abs(temp_num.front()) > answer)
+                        answer = abs(temp_num.front());
+        } while (next_permutation(oper.begin(), oper.end()));
+
         return answer;
 }
