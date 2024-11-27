@@ -1,58 +1,74 @@
 ﻿#include <string>
 #include <vector>
-#include <algorithm>
+#include <deque>
+#include <iostream>
+
 using namespace std;
 
-long long calculate(long long a, long long b, char oper) {
-        if (oper == '+')
-                return a + b;
-        else if (oper == '-')
-                return a - b;
-        else if (oper == '*')
-                return a * b;
-}
+vector<int> solution(int rows, int columns, vector<vector<int>> queries) {
+        vector<int> answer;
 
-long long solution(string expression) {
-        long long answer = 0;
-        vector<char> oper = { '*', '+', '-' };
-        vector<long long> num;
-        vector<char> operators;
+        vector<vector<int>> table(100, vector<int>(100));
+        for (int i = 0; i < 100; i++)
+                for (int j = 0; j < 100; j++)
+                        table[i][j] = i * columns + j + 1;
 
-        int val = 0;
+        for (auto& querie : queries)
+        {
+                pair<int, int> start = { querie[0] - 1, querie[1] - 1 };
+                pair<int, int> end = { querie[2] - 1, querie[3] - 1 };
 
-        for (int i = 0; i < expression.length(); i++) {
-                if (expression[i] >= '0' && expression[i] <= '9')
-                        val = val * 10 + (expression[i] - '0');
-                else {
-                        num.push_back(val);
-                        val = 0;
+                int value = 99999999;
 
-                        operators.push_back(expression[i]);
+                deque<int> dq;
+                vector<pair<int, int>> pos;
+
+                for (int i = start.second; i <= end.second; i++)
+                {
+                        dq.push_back(table[start.first][i]);
+                        pos.push_back({ start.first, i });
                 }
+
+                for (int i = start.first + 1; i <= end.first; i++)
+                {
+                        dq.push_back(table[i][end.second]);
+                        pos.push_back({ i, end.second });
+
+                }
+
+                for (int i = end.second - 1; i >= start.second; i--)
+                {
+                        dq.push_back(table[end.first][i]);
+                        pos.push_back({ end.first, i });
+                }
+
+
+                for (int i = end.first - 1; i >= start.first + 1; i--)
+                {
+                        dq.push_back(table[i][start.second]);
+                        pos.push_back({ i, start.second });
+                }
+
+                dq.push_front(dq.back());
+                dq.pop_back();
+
+
+                for (int i = 0; i < dq.size(); i++)
+                {
+                        table[pos[i].first][pos[i].second] = dq[i];
+                        //     cout << dq[i] << " ";
+                        value = min(value, dq[i]);
+                }
+                //     cout << "\n";
+                start.first++;
+                start.second++;
+
+                end.first--;
+                end.second--;
+
+                answer.push_back(value);
         }
 
-        num.push_back(val);
-
-        do {
-                vector<long long> temp_num = num;
-                vector<char> temp_operators = operators;
-
-                for (int i = 0; i < 3; i++) {
-                        for (int j = 0; j < temp_operators.size(); j++) {
-                                if (temp_operators[j] == oper[i]) {
-                                        temp_num[j] = calculate(temp_num[j], temp_num[j + 1], oper[i]);
-
-                                        temp_num.erase(temp_num.begin() + j + 1);
-                                        temp_operators.erase(temp_operators.begin() + j);
-
-                                        j--;
-                                }
-                        }
-                }
-
-                if (abs(temp_num.front()) > answer)
-                        answer = abs(temp_num.front());
-        } while (next_permutation(oper.begin(), oper.end()));
 
         return answer;
 }
