@@ -1,43 +1,63 @@
 ﻿#include <string>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
-int ttoi(string time, bool isEnd = false)
+int dy[4] = { 1, -1, 0, 0 };
+int dx[4] = { 0, 0, 1, -1 };
+
+vector<vector<int>> costs;
+
+
+void DFS(vector<string>& board, int y, int x, int cost)
 {
-        int ret = isEnd ? 9 : 0;
-        ret += time[4] - '0';
-        ret += (time[3] - '0') * 10;
-        ret += (time[1] - '0') * 60;
-        ret += (time[0] - '0') * 600;
-        return ret;
+        if (costs[y][x] <= cost)
+                return;
+        costs[y][x] = cost;
+
+        for (int i = 0; i < 4; i++)
+        {
+                int ny = y;
+                int nx = x;
+
+                while (ny + dy[i] < board.size() && ny + dy[i] >= 0 &&
+                        nx + dx[i] < board[0].size() && nx + dx[i] >= 0 &&
+                        board[ny + dy[i]][nx + dx[i]] != 'D')
+                {
+                        ny += dy[i];
+                        nx += dx[i];
+                }
+
+                if (ny != y || nx != x)
+                        DFS(board, ny, nx, cost + 1);
+        }
 }
 
-int solution(vector<vector<string>> book_time) {
-        int answer = 0;
-        vector<int> dp(9999);
+int solution(vector<string> board) {
 
-        for (auto& book : book_time)
+        int MAX = 10000000;
+        costs.resize(board.size(), vector<int>(board[0].size(), MAX));
+
+        int sy, sx, gy, gx;
+        for (int i = 0; i < board.size(); i++)
         {
-                int start = ttoi(book[0]);
-                int end = ttoi(book[1], true);
+                for (int j = 0; j < board[i].size(); j++)
+                {
+                        if (board[i][j] == 'R')
+                        {
+                                sy = i;
+                                sx = j;
+                        }
 
-                dp[start]++;
-                dp[end + 1]--;
-
-                // while (start <= end)
-                // {
-                //     dp[start]++;
-              //       answer = max(answer, dp[start]);
-               //      start++;
-               //  }
-        }
-        answer = dp[0];
-        for (int i = 1; i < 9999; i++) {
-                dp[i] = dp[i] + dp[i - 1];
-                answer = max(answer, dp[i]);
+                        if (board[i][j] == 'G')
+                        {
+                                gy = i;
+                                gx = j;
+                        }
+                }
         }
 
-
-        return answer;
+        DFS(board, sy, sx, 0);
+        return costs[gy][gx] == MAX ? -1 : costs[gy][gx];
 }
