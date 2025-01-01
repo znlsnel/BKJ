@@ -1,63 +1,61 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
+#include <queue>
+#include <algorithm>
 
 using namespace std;
 
 int dy[4] = { 1, -1, 0, 0 };
 int dx[4] = { 0, 0, 1, -1 };
 
-vector<vector<int>> costs;
-
-
-void DFS(vector<string>& board, int y, int x, int cost)
+int BFS(vector<string>& maps, vector<vector<bool>>& visited, int y, int x)
 {
-        if (costs[y][x] <= cost)
-                return;
-        costs[y][x] = cost;
+        int ret = 0;
 
-        for (int i = 0; i < 4; i++)
+        queue<pair<int, int>> q;
+        visited[y][x] = true;
+        q.push({ y, x });
+
+        while (!q.empty())
         {
-                int ny = y;
-                int nx = x;
+                auto [cy, cx] = q.front(); q.pop();
+                ret += maps[cy][cx] - '0';
 
-                while (ny + dy[i] < board.size() && ny + dy[i] >= 0 &&
-                        nx + dx[i] < board[0].size() && nx + dx[i] >= 0 &&
-                        board[ny + dy[i]][nx + dx[i]] != 'D')
+                for (int i = 0; i < 4; i++)
                 {
-                        ny += dy[i];
-                        nx += dx[i];
+                        auto [ny, nx] = make_pair(cy + dy[i], cx + dx[i]);
+                        if (ny < 0 || ny >= visited.size() || nx < 0 || nx >= visited[ny].size()
+                                || visited[ny][nx] || maps[ny][nx] == 'X')
+                                continue;
+
+                        visited[ny][nx] = true;
+                        q.push({ ny, nx });
                 }
 
-                if (ny != y || nx != x)
-                        DFS(board, ny, nx, cost + 1);
         }
+
+
+        return ret;
+
 }
 
-int solution(vector<string> board) {
+vector<int> solution(vector<string> maps) {
+        vector<int> answer;
+        vector<vector<bool>> visited(maps.size(), vector<bool>(maps[0].size()));
 
-        int MAX = 10000000;
-        costs.resize(board.size(), vector<int>(board[0].size(), MAX));
-
-        int sy, sx, gy, gx;
-        for (int i = 0; i < board.size(); i++)
+        for (int i = 0; i < maps.size(); i++)
         {
-                for (int j = 0; j < board[i].size(); j++)
+                for (int j = 0; j < maps[i].size(); j++)
                 {
-                        if (board[i][j] == 'R')
-                        {
-                                sy = i;
-                                sx = j;
-                        }
+                        if (visited[i][j] || maps[i][j] == 'X')
+                                continue;
 
-                        if (board[i][j] == 'G')
-                        {
-                                gy = i;
-                                gx = j;
-                        }
+                        answer.push_back(BFS(maps, visited, i, j));
                 }
         }
 
-        DFS(board, sy, sx, 0);
-        return costs[gy][gx] == MAX ? -1 : costs[gy][gx];
+        sort(answer.begin(), answer.end());
+        if (answer.size() == 0)
+                answer.push_back(-1);
+        return answer;
 }
