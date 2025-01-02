@@ -1,61 +1,41 @@
 ﻿#include <string>
 #include <vector>
-#include <queue>
-#include <algorithm>
+#include <stack>    
 
 using namespace std;
 
-int dy[4] = { 1, -1, 0, 0 };
-int dx[4] = { 0, 0, 1, -1 };
+vector<int> solution(vector<int> numbers) {
+        vector<int> answer(numbers.size());
+        stack<int> s;
 
-int BFS(vector<string>& maps, vector<vector<bool>>& visited, int y, int x)
-{
-        int ret = 0;
-
-        queue<pair<int, int>> q;
-        visited[y][x] = true;
-        q.push({ y, x });
-
-        while (!q.empty())
+        for (int i = numbers.size() - 1; i >= 0; i--)
         {
-                auto [cy, cx] = q.front(); q.pop();
-                ret += maps[cy][cx] - '0';
 
-                for (int i = 0; i < 4; i++)
+                while (true)
                 {
-                        auto [ny, nx] = make_pair(cy + dy[i], cx + dx[i]);
-                        if (ny < 0 || ny >= visited.size() || nx < 0 || nx >= visited[ny].size()
-                                || visited[ny][nx] || maps[ny][nx] == 'X')
-                                continue;
+                        if (s.empty()) {
+                                answer[i] = -1;
+                                break;
+                        }
 
-                        visited[ny][nx] = true;
-                        q.push({ ny, nx });
+                        else if (s.top() > numbers[i]) {
+                                answer[i] = s.top();
+                                break;
+                        }
+
+                        s.pop();
                 }
 
+
+                s.push(numbers[i]);
         }
-
-
-        return ret;
-
-}
-
-vector<int> solution(vector<string> maps) {
-        vector<int> answer;
-        vector<vector<bool>> visited(maps.size(), vector<bool>(maps[0].size()));
-
-        for (int i = 0; i < maps.size(); i++)
-        {
-                for (int j = 0; j < maps[i].size(); j++)
-                {
-                        if (visited[i][j] || maps[i][j] == 'X')
-                                continue;
-
-                        answer.push_back(BFS(maps, visited, i, j));
-                }
-        }
-
-        sort(answer.begin(), answer.end());
-        if (answer.size() == 0)
-                answer.push_back(-1);
         return answer;
 }
+
+
+//  9 1 4 3 4  6  2
+// -1 4 6 4 6 -1 -1
+
+// ->
+// 
+// 
