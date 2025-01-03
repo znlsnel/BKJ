@@ -1,41 +1,32 @@
 ﻿#include <string>
 #include <vector>
-#include <stack>    
+#include <iostream>
 
 using namespace std;
 
-vector<int> solution(vector<int> numbers) {
-        vector<int> answer(numbers.size());
-        stack<int> s;
+void DFS(vector<int>& dp, int num, int target, int n, int cost)
+{
+        if ((dp[num] != -1 && dp[num] <= cost) ||
+                num > target)
+                return;
 
-        for (int i = numbers.size() - 1; i >= 0; i--)
-        {
+        dp[num] = cost;
+        // cout << num << "\n";
 
-                while (true)
-                {
-                        if (s.empty()) {
-                                answer[i] = -1;
-                                break;
-                        }
+        if (num == target)
+                return;
 
-                        else if (s.top() > numbers[i]) {
-                                answer[i] = s.top();
-                                break;
-                        }
-
-                        s.pop();
-                }
-
-
-                s.push(numbers[i]);
-        }
-        return answer;
+        DFS(dp, num + n, target, n, cost + 1);
+        DFS(dp, num * 2, target, n, cost + 1);
+        DFS(dp, num * 3, target, n, cost + 1);
 }
 
+int solution(int x, int y, int n) {
+        int answer = 0;
+        vector<int> dp(y * 10, -1);
 
-//  9 1 4 3 4  6  2
-// -1 4 6 4 6 -1 -1
+        DFS(dp, x, y, n, 0);
 
-// ->
-// 
-// 
+
+        return dp[y];
+}
