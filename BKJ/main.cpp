@@ -1,32 +1,36 @@
 ﻿#include <string>
 #include <vector>
-#include <iostream>
 
 using namespace std;
 
-void DFS(vector<int>& dp, int num, int target, int n, int cost)
-{
-        if ((dp[num] != -1 && dp[num] <= cost) ||
-                num > target)
-                return;
+long long solution(vector<int> weights) {
+        long long answer = 0;
+        vector<long long> cnt(1001, 0); //몸무게 별 개수
 
-        dp[num] = cost;
-        // cout << num << "\n";
+        for (int i = 0; i < weights.size(); i++)
+                cnt[weights[i]]++;
 
-        if (num == target)
-                return;
+        for (int i = 0; i < weights.size(); i++) {
+                //2:3
+                if (weights[i] % 2 == 0) {
+                        long long base = (weights[i] / 2) * 3;
+                        if (base <= 1000)    answer += cnt[base];
+                }
+                //3:4
+                if (weights[i] % 3 == 0) {
+                        long long base = (weights[i] / 3) * 4;
+                        if (base <= 1000)    answer += cnt[base];
+                }
+                //1:2
+                long long base = weights[i] * 2;
+                if (base <= 1000)    answer += cnt[base];
+        }
 
-        DFS(dp, num + n, target, n, cost + 1);
-        DFS(dp, num * 2, target, n, cost + 1);
-        DFS(dp, num * 3, target, n, cost + 1);
-}
+        /* 몸무게 같은 경우 처리 */
+        for (int i = 100; i <= 1000; i++) {
+                if (cnt[i] >= 2)
+                        answer += (long long)(cnt[i] * (cnt[i] - 1)) / 2; //n개 중에 2개 뽑는 경우의 수 : n(n-1) / 2
+        }
 
-int solution(int x, int y, int n) {
-        int answer = 0;
-        vector<int> dp(y * 10, -1);
-
-        DFS(dp, x, y, n, 0);
-
-
-        return dp[y];
+        return answer;
 }
