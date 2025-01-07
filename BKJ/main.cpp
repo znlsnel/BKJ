@@ -1,40 +1,39 @@
 ﻿#include <string>
 #include <vector>
-#include <algorithm>
 #include <iostream>
-#include <map>
-
 using namespace std;
+int gcd(int a, int b)
+{
+        if (b == 0)
+                return a;
 
-int solution(int k, vector<int> tangerine) {
-
-
-        map<int, int> t;
-        for (int n : tangerine)
-                t[n]++;
-
-        vector<pair<int, int>> v;
-        for (auto p : t)
-                v.push_back(p);
-
-        sort(v.begin(), v.end(),
-                [](pair<int, int> a, pair<int, int> b) {return a.second > b.second; });
-
-        int answer = 0;
-        int total = 0;
-        for (auto p : v)
-        {
-                total += p.second;
-                answer++;
-                if (total >= k)
-                        break;
-        }
-
-        return answer;
+        return gcd(b, a % b);
 }
 
+int solution(vector<int> arrayA, vector<int> arrayB)
+{
+        int gcdA = arrayA[0];
+        int gcdB = arrayB[0];
 
-// 서로 다른 크기의 종류 최소화
-// 1 3 2 5 4 5 2 3
-// 정렬
-// 1 2 2 3 3 4 5 5
+        for (int n : arrayA)
+                gcdA = gcd(gcdA, n);
+
+        for (int n : arrayB)
+                gcdB = gcd(gcdB, n);
+
+        for (int i = 0; i < arrayA.size(); i++)
+        {
+                if (arrayA[i] % gcdB == 0)
+                        gcdB = -1;
+        }
+
+        for (int i = 0; i < arrayB.size(); i++)
+        {
+                if (arrayB[i] % gcdA == 0)
+                        gcdA = -1;
+        }
+
+        int answer = max(gcdA, gcdB);
+
+        return max(answer, 0);
+}
