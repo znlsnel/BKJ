@@ -1,29 +1,32 @@
 ﻿#include <string>
 #include <vector>
-#include <map>
+#include <stack>
 
 using namespace std;
 
-int solution(vector<int> topping) {
+int solution(vector<int> order) {
 
-        map<int, int> left, right;
-        for (int i = 0; i < topping.size(); i++)
-                right[topping[i]]++;
-
+        stack<int> s;
+        int cur = 1;
         int answer = 0;
-        for (int i = 0; i < topping.size(); i++)
+
+        for (int n : order)
         {
-                int t = topping[i];
-                left[t]++;
+                if (n >= cur)
+                {
+                        while (n > cur)
+                                s.push(cur++);
+                        cur++;
+                }
 
-                right[t]--;
-                if (right[t] <= 0)
-                        right.erase(t);
+                else if (s.top() == n)
+                        s.pop();
 
-                if (left.size() == right.size())
-                        answer++;
+                else
+                        break;
+
+                answer++;
         }
-
 
         return answer;
 }
