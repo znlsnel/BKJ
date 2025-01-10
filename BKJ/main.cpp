@@ -1,32 +1,37 @@
 ﻿#include <string>
 #include <vector>
-#include <stack>
+#include <set>
 
 using namespace std;
 
-int solution(vector<int> order) {
+int solution(vector<int> elements)
+{
+        set<int> s;
 
-        stack<int> s;
-        int cur = 1;
-        int answer = 0;
-
-        for (int n : order)
+        for (int len = 1; len <= elements.size(); len++)
         {
-                if (n >= cur)
+                for (int i = 0; i < elements.size(); i++)
                 {
-                        while (n > cur)
-                                s.push(cur++);
-                        cur++;
+                        int num = 0;
+                        int j = i;
+
+                        for (j = i; j < i + len; j++)
+                                num += elements[j % elements.size()];
+
+                        s.insert(num);
                 }
-
-                else if (s.top() == n)
-                        s.pop();
-
-                else
-                        break;
-
-                answer++;
         }
 
-        return answer;
+        for (int i = 0; i < elements.size(); i++)
+        {
+                int num = 0;
+                for (int j = i; j < i + elements.size(); j++)
+                {
+                        num += elements[j % elements.size()];
+                        s.insert(num);
+                }
+
+        }
+
+        return s.size();
 }
