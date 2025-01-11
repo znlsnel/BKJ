@@ -1,37 +1,51 @@
 ﻿#include <string>
 #include <vector>
-#include <set>
+#include <map>
 
 using namespace std;
 
-int solution(vector<int> elements)
+int solution(vector<string> want, vector<int> number, vector<string> discount)
 {
-        set<int> s;
+        int answer = 0;
+        map<string, int> w, d;
 
-        for (int len = 1; len <= elements.size(); len++)
-        {
-                for (int i = 0; i < elements.size(); i++)
-                {
-                        int num = 0;
-                        int j = i;
-
-                        for (j = i; j < i + len; j++)
-                                num += elements[j % elements.size()];
-
-                        s.insert(num);
-                }
+        for (int i = 0; i < want.size(); i++) {
+                w.insert({ want[i], number[i] });
+                d.insert({ want[i], 0 });
         }
 
-        for (int i = 0; i < elements.size(); i++)
-        {
-                int num = 0;
-                for (int j = i; j < i + elements.size(); j++)
-                {
-                        num += elements[j % elements.size()];
-                        s.insert(num);
-                }
+        int left = 0; int right = 10;
+        for (int i = 0; i < discount.size() && i < 10; i++)
+                d[discount[i]]++;
 
+
+        while (true)
+        {
+                bool find = true;
+                for (auto p : w)
+                {
+                        string name = p.first;
+                        int cnt = p.second;
+
+                        if (d[name] < cnt)
+                        {
+                                find = false;
+                                break;
+                        }
+                }
+                if (find)
+                        answer++;
+
+                if (left >= discount.size())
+                        break;
+
+
+                d[discount[left++]]--;
+                if (right < discount.size())
+                        d[discount[right++]]++;
         }
 
-        return s.size();
+
+
+        return answer;
 }
