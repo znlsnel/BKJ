@@ -3,25 +3,16 @@
 
 using namespace std;
 
-int DFS(int k, vector<vector<int>>& d, vector<bool>& visited, int cnt)
+vector<int> solution(int n, long long left, long long right)
 {
-        int ret = 0;
-
-        for (int i = 0; i < d.size(); i++)
+        vector<int> answer;
+        while (left <= right)
         {
-                if (visited[i] || k < d[i][0])
-                        continue;
-
-                visited[i] = true;
-                ret = max(ret, DFS(k - d[i][1], d, visited, cnt + 1) + 1);
-                visited[i] = false;
+                int y = left / n;
+                int x = left % n;
+                answer.push_back(max(y, x) + 1);
+                left++;
         }
 
-        return ret;
-}
-
-int solution(int k, vector<vector<int>> dungeons) {
-        vector<bool> visited(dungeons.size());
-
-        return DFS(k, dungeons, visited, 0);
+        return answer;
 }
