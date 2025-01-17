@@ -1,49 +1,74 @@
 ﻿#include <string>
 #include <vector>
 #include <iostream>
-#include <map>
+
 using namespace std;
 
-int solution(string word) {
-
-        vector<int> pow(5);
-        pow[4] = 1;
-        for (int i = 3; i >= 0; i--)
-                pow[i] = pow[i + 1] * 5 + 1;
-
-        map<char, int> idx;
-        idx.insert({ 'A', 0 });
-        idx.insert({ 'E', 1 });
-        idx.insert({ 'I', 2 });
-        idx.insert({ 'O', 3 });
-        idx.insert({ 'U', 4 });
-        idx.insert({ ' ', 0 });
-
-        int answer = word.size();
-        while (word.size() < 5)
-                word += ' ';
-
-        for (int i = 0; i < word.size(); i++)
+string itob(long long num)
+{
+        string ret = "";
+        while (num > 0)
         {
-                answer += pow[i] * idx[word[i]];
+
+                ret = to_string(num % 2) + ret;
+                num /= 2;
         }
+
+        return ret;
+}
+
+long long btoi(string num)
+{
+        long long ret = 0;
+
+        for (int i = 0; i < num.size(); i++)
+        {
+                ret *= 2;
+                ret += num[i] - '0';
+        }
+        return ret;
+
+
+}
+
+vector<long long> solution(vector<long long> numbers) {
+        vector<long long> answer;
+
+        for (auto num : numbers)
+        {
+                string bit = itob(num);
+
+                // bit중에 0이 있다면 가장 오른쪽의 0을 1로 바꾼 수 (1개 차이)
+                // bit중에 0이 없다면 가장 왼쪽의 0을 1로 바꾸고 그 다음 1을 0으로 바꿈 (2개 차이)
+
+                int idx = -1;
+                for (int i = bit.size() - 1; i >= 0; i--)
+                {
+                        if (bit[i] == '0')
+                        {
+                                idx = i;
+                                break;
+                        }
+                }
+
+                // 1개로 해결 가능
+                if (idx != -1)
+                {
+                        bit[idx] = '1';
+                        if (idx < bit.size() - 1)
+                                bit[idx + 1] = '0';
+                }
+                else
+                {
+                        bit[0] = '0';
+                        bit = "1" + bit;
+                }
+                answer.push_back(btoi(bit));
+
+
+        }
+
         return answer;
 }
-/*
-AAAAA AAAAAU -> AAAE -> AAAEA -> AAAEU -> AAAI
-
-AAAAA = 5
-AAAAE = 6 1
-AAAAI = 7 2
-AAAAO = 8 3
-AAAAU = 9 4
-
-AAAA -> 4
-AAAE = 10 6
-AAAI = 16 12
-AAAO = 22 18
-AAAU = 28 24
-
-AAA = 3
-AAE = 34 31
-AAI = 65 62 */
+//  11111
+// 101111
