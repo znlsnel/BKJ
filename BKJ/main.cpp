@@ -1,55 +1,20 @@
-﻿#include <string>
-#include <vector>
-#include <map>
-#include <iostream>
-#include <stack>
+﻿#include <vector>
 
 using namespace std;
 
-bool check(string& str)
+vector<int> solution(int brown, int red)
 {
-        stack<char> stk;
-        for (char c : str)
-        {
-                if (c == '(' || c == '[' || c == '{')
-                        stk.push(c);
-
-                else
-                {
-                        // 스택이 비어 있거나 짝이 맞지 않으면 false
-                        if (stk.empty())
-                                return false;
-
-                        char top = stk.top();
-                        if ((c == ')' && top == '(') ||
-                                (c == ']' && top == '[') ||
-                                (c == '}' && top == '{'))
-                        {
-                                stk.pop(); // 짝이 맞으면 스택에서 제거
+        vector<int> answer;
+        int sum = brown + red;
+        for (int height = 3; ; height++) {
+                if (!(sum % height)) {
+                        int weight = sum / height;
+                        if (((height - 2) * (weight - 2)) == red) {
+                                answer.push_back(weight);
+                                answer.push_back(height);
+                                break;
                         }
-
-                        else
-                                return false; // 짝이 맞지 않음
                 }
         }
-
-        // 모든 괄호가 짝지어져야 유효
-        return stk.empty();
-}
-
-int solution(string s)
-{
-        int answer = 0;
-        int cnt = s.size();
-
-        while (cnt--)
-        {
-                if (check(s))
-                        answer++;
-
-                s = s.substr(1, s.size() - 1) + s[0];
-        }
-
-
         return answer;
 }
