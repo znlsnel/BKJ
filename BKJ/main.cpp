@@ -1,20 +1,28 @@
-﻿#include <vector>
+﻿#include <string>
+#include <vector>
+#include <iostream>
+#include <algorithm>
 
 using namespace std;
 
-vector<int> solution(int brown, int red)
+
+int solution(vector<int> people, int limit)
 {
-        vector<int> answer;
-        int sum = brown + red;
-        for (int height = 3; ; height++) {
-                if (!(sum % height)) {
-                        int weight = sum / height;
-                        if (((height - 2) * (weight - 2)) == red) {
-                                answer.push_back(weight);
-                                answer.push_back(height);
-                                break;
-                        }
-                }
+        sort(people.begin(), people.end());
+        int answer = 0;
+        int idx = 0;
+
+
+        while (idx < people.size())
+        {
+                int back = people.back();
+                people.pop_back();
+
+                if (back + people[idx] <= limit)
+                        idx++;
+
+                answer++;
         }
+
         return answer;
 }
