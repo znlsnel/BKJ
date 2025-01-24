@@ -1,14 +1,24 @@
 ﻿public class Solution {
-        public int solution(int n) {
-                int answer = 0;
-                int[] dp = new int[n + 1];
 
-                dp[0] = 0;
-                dp[1] = 1;
+        int gcd(int a, int b)
+        {
+                if (b == 0)
+                        return a;
 
-                for (int i = 2; i <= n; i++)
-                        dp[i] = (dp[i - 1] + dp[i - 2]) % 1234567;
+                return gcd(b, a % b);
+        }
 
-                return dp[n];
+        int lcm(int a, int b)
+        {
+                return a * b / gcd(a, b); // 절댓값 처리
+        }
+
+        public int solution(int[] arr) {
+
+                int answer = 1;
+                for (int i = 0; i < arr.Length; i++)
+                        answer = lcm(answer, arr[i]);
+
+                return answer;
         }
 }
