@@ -1,23 +1,36 @@
-﻿public class Solution {
+﻿using System;
+using System.Collections.Generic;
 
-        int gcd(int a, int b)
-        {
-                if (b == 0)
-                        return a;
+public class Solution {
+        public int solution(string skill, string[] skill_trees) {
+                int answer = 0;
 
-                return gcd(b, a % b);
-        }
+                HashSet<char> d = new HashSet<char>();
+                foreach(char c in skill)
+                        d.Add(c);
 
-        int lcm(int a, int b)
-        {
-                return a * b / gcd(a, b); // 절댓값 처리
-        }
+                foreach(string tree in skill_trees)
+                {
+                        List<char> list = new List<char>();
+                        foreach(char c in tree)
+                        {
+                                if (d.Contains(c))
+                                        list.Add(c);
+                        }
 
-        public int solution(int[] arr) {
+                        bool flag = true;
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                                if (list[i] != skill[i])
+                                {
+                                        flag = false;
+                                        break;
+                                }
+                        }
+                        if (flag)
+                                answer++;
 
-                int answer = 1;
-                for (int i = 0; i < arr.Length; i++)
-                        answer = lcm(answer, arr[i]);
+                }
 
                 return answer;
         }
