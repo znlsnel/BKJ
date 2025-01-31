@@ -1,51 +1,34 @@
 ﻿#include <string>
-#include <set>
-#include <iostream>
+#include <vector>
 
 using namespace std;
 
-int clamp(int t, int a, int b)
-{
-        if (t < a)
-                t = a;
-        else if (t > b)
-                t = b;
-
-        return t;
-}
-int solution(string dirs) {
+int solution(vector<int> cookie) {
         int answer = 0;
 
-        set<pair<int, int>> roads;
-        int cy = 0, cx = 0;
-
-        for (char dir : dirs)
+        for (int i = 0; i < cookie.size() - 1; i++)
         {
-                auto [ny, nx] = make_pair(cy, cx);
+                int l = i;
+                int r = l + 1;
+                int lsum = cookie[l];
+                int rsum = cookie[r];
 
-                if (dir == 'U')
-                        ny += 1;
-                else if (dir == 'D')
-                        ny -= 1;
-                else if (dir == 'R')
-                        nx += 1;
-                else if (dir == 'L')
-                        nx -= 1;
+                while (true)
+                {
+                        if (lsum == rsum)
+                                answer = max(lsum, answer);
 
-                ny = clamp(ny, -5, 5);
-                nx = clamp(nx, -5, 5);
+                        if (0 < l && lsum <= rsum)
+                                lsum += cookie[--l];
 
-                int idxC = cy * 11 + cx;
-                int idxN = ny * 11 + nx;
+                        else if (r < cookie.size() - 1 && lsum >= rsum)
+                                rsum += cookie[++r];
 
-                if (idxC != idxN)
-                        roads.insert({ min(idxC, idxN), max(idxC, idxN) });
+                        else
+                                break;
 
-                cy = ny;
-                cx = nx;
+                }
         }
 
-
-
-        return roads.size();
+        return answer;
 }
