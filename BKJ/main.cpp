@@ -1,34 +1,24 @@
-﻿#include <string>
-#include <vector>
+﻿using System;
 
-using namespace std;
-
-int solution(vector<int> cookie) {
-        int answer = 0;
-
-        for (int i = 0; i < cookie.size() - 1; i++)
+public class Solution
+{
+        int Function(int openCnt, int n)
         {
-                int l = i;
-                int r = l + 1;
-                int lsum = cookie[l];
-                int rsum = cookie[r];
+                if (openCnt < 0)
+                        return 0;
 
-                while (true)
-                {
-                        if (lsum == rsum)
-                                answer = max(lsum, answer);
+                if (n == 0)
+                        return openCnt == 0 ? 1 : 0;
 
-                        if (0 < l && lsum <= rsum)
-                                lsum += cookie[--l];
+                int ret = Function(openCnt + 1, n - 1);
+                ret += Function(openCnt - 1, n - 1);
 
-                        else if (r < cookie.size() - 1 && lsum >= rsum)
-                                rsum += cookie[++r];
-
-                        else
-                                break;
-
-                }
+                return ret;
         }
 
-        return answer;
+        public int solution(int n)
+        {
+                int answer = 0;
+                return Function(0, n * 2);
+        }
 }
