@@ -1,24 +1,44 @@
-﻿using System;
+﻿#include <string>
+#include <vector>
+#include <algorithm>
+#include <iostream>
 
-public class Solution
-{
-        int Function(int openCnt, int n)
+using namespace std;
+
+
+int solution(int distance, vector<int> rocks, int n) {
+
+        sort(rocks.begin(), rocks.end());
+
+        int left = 0;
+        int right = distance;
+        int answer = 0;
+
+        while (left <= right)
         {
-                if (openCnt < 0)
-                        return 0;
+                int mid = (left + right) / 2;
+                int prev = 0;
+                int remove_cnt = 0;
 
-                if (n == 0)
-                        return openCnt == 0 ? 1 : 0;
+                for (int rock : rocks)
+                {
+                        if (rock - prev < mid)
+                                remove_cnt++;
+                        else
+                                prev = rock;
+                }
+                if (distance - prev < mid)
+                        remove_cnt++;
 
-                int ret = Function(openCnt + 1, n - 1);
-                ret += Function(openCnt - 1, n - 1);
+                if (remove_cnt <= n)
+                {
+                        answer = mid;
+                        left = mid + 1;
+                }
+                else
+                        right = mid - 1;
 
-                return ret;
         }
 
-        public int solution(int n)
-        {
-                int answer = 0;
-                return Function(0, n * 2);
-        }
+        return answer;
 }
