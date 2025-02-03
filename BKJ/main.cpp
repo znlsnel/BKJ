@@ -1,44 +1,45 @@
-﻿#include <string>
-#include <vector>
-#include <algorithm>
-#include <iostream>
-
-using namespace std;
-
-
-int solution(int distance, vector<int> rocks, int n) {
-
-        sort(rocks.begin(), rocks.end());
-
-        int left = 0;
-        int right = distance;
-        int answer = 0;
-
-        while (left <= right)
+﻿public class Solution {
+        public int LargestRectangleArea(int[] heights)
         {
-                int mid = (left + right) / 2;
-                int prev = 0;
-                int remove_cnt = 0;
 
-                for (int rock : rocks)
+                Stack<int> stack = new Stack<int>();
+                int maxArea = 0;
+                int n = heights.Length;
+
+                for (int i = 0; i < n; i++)
                 {
-                        if (rock - prev < mid)
-                                remove_cnt++;
+                        while (stack.Count > 0 && heights[i] < heights[stack.Peek()])
+                        {
+                                int h = stack.Pop();
+                                int width;
+
+                                if (stack.Count == 0)
+                                        width = i;
+                                else
+                                        width = i - stack.Peek() - 1;
+
+                                int area = heights[h] * width;
+                                maxArea = Math.Max(maxArea, area);
+                        }
+                        stack.Push(i);
+                }
+
+                while (stack.Count > 0)
+                {
+                        int h = stack.Pop();
+                        int width;
+
+                        if (stack.Count == 0)
+                                width = n;
                         else
-                                prev = rock;
-                }
-                if (distance - prev < mid)
-                        remove_cnt++;
+                                width = n - stack.Peek() - 1;
 
-                if (remove_cnt <= n)
-                {
-                        answer = mid;
-                        left = mid + 1;
-                }
-                else
-                        right = mid - 1;
+                        int area = heights[h] * width;
+                        maxArea = Math.Max(maxArea, area);
 
+                }
+
+
+                return maxArea;
         }
-
-        return answer;
 }
