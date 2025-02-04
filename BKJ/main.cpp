@@ -1,45 +1,23 @@
 ﻿public class Solution {
-        public int LargestRectangleArea(int[] heights)
+        public int LengthOfLIS(int[] nums)
         {
+                int n = nums.Length;
+                int[] dp = new int[n];
+                Array.Fill(dp, 1); // 최소 길이는 1 (각 원소 자체만 고려)
 
-                Stack<int> stack = new Stack<int>();
-                int maxArea = 0;
-                int n = heights.Length;
+                int maxLen = 1;
 
                 for (int i = 0; i < n; i++)
                 {
-                        while (stack.Count > 0 && heights[i] < heights[stack.Peek()])
+                        for (int j = i + 1; j < n; j++)
                         {
-                                int h = stack.Pop();
-                                int width;
-
-                                if (stack.Count == 0)
-                                        width = i;
-                                else
-                                        width = i - stack.Peek() - 1;
-
-                                int area = heights[h] * width;
-                                maxArea = Math.Max(maxArea, area);
+                                if (nums[j] > nums[i]) {
+                                        dp[j] = Math.Max(dp[j], dp[i] + 1);
+                                        maxLen = Math.Max(maxLen, dp[j]);
+                                }
                         }
-                        stack.Push(i);
                 }
 
-                while (stack.Count > 0)
-                {
-                        int h = stack.Pop();
-                        int width;
-
-                        if (stack.Count == 0)
-                                width = n;
-                        else
-                                width = n - stack.Peek() - 1;
-
-                        int area = heights[h] * width;
-                        maxArea = Math.Max(maxArea, area);
-
-                }
-
-
-                return maxArea;
+                return maxLen;
         }
 }
