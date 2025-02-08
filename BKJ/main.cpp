@@ -1,65 +1,52 @@
-﻿#include <vector>
-#include <algorithm>
-#include <climits>
+﻿#include <string>
+#include <vector>
+#include <iostream>
+#include <unordered_map>
 
 using namespace std;
-typedef long long ll;
+unordered_map<int, vector<int>> trees;
+unordered_map<int, vector<int>> tree_length;
+bool visit[250002];
+int max_step = -1;
 
-vector<ll> heights;
-ll P, Q;
-vector<ll> prefixSum;
+void find_path(int vtx, int step)
+{
+        visit[vtx] = true;
+        if (max_step <= step)
+        {
+                max_step = step;
+                tree_length[max_step].push_back(vtx);
+        }
 
-// 특정 높이 h로 평탄화할 때의 비용 계산 (누적합 이용)
-ll getCost(ll h) {
-        int idx = lower_bound(heights.begin(), heights.end(), h) - heights.begin();
+        for (int idx : trees[vtx])
+        {
+                if (!visit[idx])
+                        find_path(idx, step + 1);
+        }
 
-        ll lowerSum = prefixSum[idx];  // h 이하인 모든 블록의 총합
-        ll upperSum = prefixSum.back() - lowerSum;  // h 초과 블록의 총합
-
-        ll lowerCost = h * idx - lowerSum;  // h 이하 블록 올리는 비용
-        ll upperCost = upperSum - h * (heights.size() - idx);  // h 초과 블록 내리는 비용
-
-        return lowerCost * P + upperCost * Q;
+        visit[vtx] = false;
 }
 
-// 삼분 탐색으로 최소 비용 찾기
-ll ternarySearch(ll left, ll right) {
-        while (right - left > 2) {  // 삼분 탐색 진행
-                ll mid1 = left + (right - left) / 3;
-                ll mid2 = right - (right - left) / 3;
+int solution(int n, vector<vector<int>> edges) {
 
-                ll cost1 = getCost(mid1);
-                ll cost2 = getCost(mid2);
-
-                if (cost1 < cost2) right = mid2;
-                else left = mid1;
+        int answer = 0;
+        for (auto& edge : edges) {
+                trees[edge[0]].push_back(edge[1]);
+                trees[edge[1]].push_back(edge[0]);
         }
 
-        ll minCost = LLONG_MAX;
-        for (ll h = left; h <= right; h++) {
-                minCost = min(minCost, getCost(h));
-        }
-        return minCost;
-}
+        find_path(1, 0);
+        for (int i = 0; i < 2; i++)
+        {
+                int nxt = tree_length[max_step][0];
+                max_step = -1;
+                tree_length.clear();
+                find_path(nxt, 0);
 
-long long solution(vector<vector<int>> land, int p, int q) {
-        P = p, Q = q;
-
-        // 1. 높이 배열 만들기
-        for (const auto& row : land) {
-                for (int h : row) {
-                        heights.push_back(h);
-                }
+                if (tree_length[max_step].size() > 1)
+                        return max_step;
         }
 
-        // 2. 높이 정렬 후 누적합 계산
-        sort(heights.begin(), heights.end());
-        prefixSum.resize(heights.size() + 1, 0);
 
-        for (size_t i = 0; i < heights.size(); i++) {
-                prefixSum[i + 1] = prefixSum[i] + heights[i];
-        }
-
-        // 3. 삼분 탐색으로 최소 비용 구하기
-        return ternarySearch(heights.front(), heights.back());
+        return max_step - 1;
 }
