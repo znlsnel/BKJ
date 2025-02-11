@@ -1,52 +1,74 @@
-﻿#include <string>
-#include <vector>
-#include <iostream>
-#include <unordered_map>
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
-using namespace std;
-unordered_map<int, vector<int>> trees;
-unordered_map<int, vector<int>> tree_length;
-bool visit[250002];
-int max_step = -1;
+public class Solution {
+        HashSet<int> trap = new HashSet<int>();
+        List<(int, int)>[] road;
+        int[] dists;
 
-void find_path(int vtx, int step)
-{
-        visit[vtx] = true;
-        if (max_step <= step)
+        void OnTrap(int num)
         {
-                max_step = step;
-                tree_length[max_step].push_back(vtx);
+
+
         }
 
-        for (int idx : trees[vtx])
+        void Dijkstra(int start, int end)
         {
-                if (!visit[idx])
-                        find_path(idx, step + 1);
+                // 노드, 비용
+                SortedSet<(int, int)> pq = new SortedSet<(int, int)>();
+                pq.Add((start, 0));
+                dists[start] = 0;
+
+                while (pq.Count > 0)
+                {
+                        var(cur, cost) = pq.First();
+                        pq.Remove((cur, cost));
+
+                        for (int i = 0; i < road[cur].Count; i++)
+                        {
+                                int nxt = road[cur][i].Item1;
+                                int nCost = road[cur][i].Item2;
+
+                                if (dists[nxt] <= cost + nCost)
+                                        continue;
+
+                                dists[nxt] = cost + nCost;
+                                pq.Add((nxt, nCost));
+
+                        }
+                }
+
         }
+        int MAXVALUE = 10000000;
 
-        visit[vtx] = false;
-}
 
-int solution(int n, vector<vector<int>> edges) {
+        public int solution(int n, int start, int end, int[, ] roads, int[] traps) {
 
-        int answer = 0;
-        for (auto& edge : edges) {
-                trees[edge[0]].push_back(edge[1]);
-                trees[edge[1]].push_back(edge[0]);
+
+                dists = new int[n + 1];
+                Array.Fill(dists, MAXVALUE);
+                road = new List<(int, int)>[n + 1];
+
+                foreach(int a in traps)
+                        trap.Add(a);
+
+                for (int i = 1; i <= n; i++)
+                        road[i] = new List<(int, int)>();
+
+
+                for (int i = 0; i < roads.GetLength(0); i++)
+                {
+                        int s = roads[i, 0];
+                        int e = roads[i, 1];
+                        int c = roads[i, 2];
+
+
+                        road[s].Add((e, c));
+                }
+
+                Dijkstra(start, end);
+
+                return dists[end] == MAXVALUE ? -1 : dists[end];
         }
-
-        find_path(1, 0);
-        for (int i = 0; i < 2; i++)
-        {
-                int nxt = tree_length[max_step][0];
-                max_step = -1;
-                tree_length.clear();
-                find_path(nxt, 0);
-
-                if (tree_length[max_step].size() > 1)
-                        return max_step;
-        }
-
-
-        return max_step - 1;
 }
