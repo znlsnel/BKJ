@@ -1,74 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
-public class Solution {
-        HashSet<int> trap = new HashSet<int>();
-        List<(int, int)>[] road;
-        int[] dists;
-
-        void OnTrap(int num)
+class Solution
+{
+        public int solution(int n, int a, int b)
         {
+                int answer = 1;
 
-
-        }
-
-        void Dijkstra(int start, int end)
-        {
-                // 노드, 비용
-                SortedSet<(int, int)> pq = new SortedSet<(int, int)>();
-                pq.Add((start, 0));
-                dists[start] = 0;
-
-                while (pq.Count > 0)
+                while (true)
                 {
-                        var(cur, cost) = pq.First();
-                        pq.Remove((cur, cost));
+                        if (a % 2 == 0 && b + 1 == a)
+                                break;
+                        if (b % 2 == 0 && a + 1 == b)
+                                break;
 
-                        for (int i = 0; i < road[cur].Count; i++)
-                        {
-                                int nxt = road[cur][i].Item1;
-                                int nCost = road[cur][i].Item2;
+                        a = (a + 1) / 2;
+                        b = (b + 1) / 2;
 
-                                if (dists[nxt] <= cost + nCost)
-                                        continue;
-
-                                dists[nxt] = cost + nCost;
-                                pq.Add((nxt, nCost));
-
-                        }
+                        answer++;
                 }
 
-        }
-        int MAXVALUE = 10000000;
-
-
-        public int solution(int n, int start, int end, int[, ] roads, int[] traps) {
-
-
-                dists = new int[n + 1];
-                Array.Fill(dists, MAXVALUE);
-                road = new List<(int, int)>[n + 1];
-
-                foreach(int a in traps)
-                        trap.Add(a);
-
-                for (int i = 1; i <= n; i++)
-                        road[i] = new List<(int, int)>();
-
-
-                for (int i = 0; i < roads.GetLength(0); i++)
-                {
-                        int s = roads[i, 0];
-                        int e = roads[i, 1];
-                        int c = roads[i, 2];
-
-
-                        road[s].Add((e, c));
-                }
-
-                Dijkstra(start, end);
-
-                return dists[end] == MAXVALUE ? -1 : dists[end];
+                return answer;
         }
 }
+
+// 1 2 3 4 5 6 7 8
+// 1 2 3 4
+// 1 2
