@@ -1,28 +1,14 @@
-﻿using System;
+﻿public class Solution {
+        public long solution(int n) {
+                int MOD = 1234567;
+                int[] count = new int[n + 1];
+                count[0] = 1;
+                count[1] = 1;
 
-class Solution
-{
-        public int solution(int n, int a, int b)
-        {
-                int answer = 1;
 
-                while (true)
-                {
-                        if (a % 2 == 0 && b + 1 == a)
-                                break;
-                        if (b % 2 == 0 && a + 1 == b)
-                                break;
+                for (int i = 2; i <= n; i++)
+                        count[i] = (count[i - 1] + count[i - 2]) % MOD;
 
-                        a = (a + 1) / 2;
-                        b = (b + 1) / 2;
-
-                        answer++;
-                }
-
-                return answer;
+                return count[n];
         }
 }
-
-// 1 2 3 4 5 6 7 8
-// 1 2 3 4
-// 1 2

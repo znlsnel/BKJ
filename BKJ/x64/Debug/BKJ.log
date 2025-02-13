@@ -1,2 +1,5 @@
-﻿MSVCRTD.lib(exe_main.obj) : error LNK2019: main"int __cdecl invoke_main(void)" (?invoke_main@@YAHXZ) 함수에서 참조되는 확인할 수 없는 외부 기호
-D:\PROJECTS\Git\BKJ\x64\Debug\BKJ.exe : fatal error LNK1120: 1개의 확인할 수 없는 외부 참조입니다.
+﻿  main.cpp
+D:\PROJECTS\Git\BKJ\BKJ\main.cpp(1,14): error C3381: 'Solution': 어셈블리 액세스 지정자는 /clr 옵션으로 컴파일한 코드에서만 사용할 수 있습니다.
+D:\PROJECTS\Git\BKJ\BKJ\main.cpp(2,16): error C2062: 예기치 않은 'long' 형식입니다.
+D:\PROJECTS\Git\BKJ\BKJ\main.cpp(2,37): error C2334: '{' 앞에 예기치 않은 토큰이 있습니다. 명백한 함수 본문을 건너뜁니다.
+D:\PROJECTS\Git\BKJ\BKJ\main.cpp(15,1): fatal  error C1004: 예기치 않은 파일의 끝이 나타났습니다.
